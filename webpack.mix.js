@@ -16,9 +16,9 @@ mix.sass(
 });
 
 // Copy file statis
-mix.copy("_keenthemes/src/js/**/*", "public/assets/js")
-    .copy("_keenthemes/src/plugins/**/*", "public/assets/plugins")
-    .copy("_keenthemes/src/media/**/*", "public/assets/media");
+mix.copyDirectory("_keenthemes/src/js", "public/assets/js")
+    .copyDirectory("_keenthemes/src/plugins", "public/assets/plugins")
+    .copyDirectory("_keenthemes/src/media", "public/assets/media");
 
 // Aktifkan sourcemaps untuk development
 if (!mix.inProduction()) {
