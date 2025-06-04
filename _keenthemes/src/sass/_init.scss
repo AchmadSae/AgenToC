@@ -2,7 +2,6 @@
 // Main init file of global bootstrap and theme functions, mixins, variables and config
 //
 
-
 // Custom functions & mixins
 @import "base/functions";
 @import "base/mixins";
@@ -14,6 +13,7 @@
 @import "components/variables";
 @import "components/variables-dark";
 @import "components/variables.override";
+@import "_var";
 
 // Bootstrap initializaton
 @import "../../../tools/node_modules/bootstrap/scss/functions";
@@ -29,4 +29,3 @@
 
 // Custom layout variables
 @import "layout/variables";
-

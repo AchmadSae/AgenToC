@@ -15,10 +15,11 @@ mix.sass(
     postCss: [require("autoprefixer")],
 });
 
-// Copy file statis
-mix.copyDirectory("_keenthemes/src/js", "public/assets/js")
-    .copyDirectory("_keenthemes/src/plugins", "public/assets/plugins")
-    .copyDirectory("_keenthemes/src/media", "public/assets/media");
+// Copy file statis Please uncomment to compile the assets
+mix.copyDirectory("_keenthemes/src/js/custom", "public/assets/js/custom");
+mix.copy("_keenthemes/src/js/**/*.js", "public/assets/js");
+// .copyDirectory("_keenthemes/src/plugins", "public/assets/plugins")
+// .copyDirectory("_keenthemes/src/media", "public/assets/media");
 
 // Aktifkan sourcemaps untuk development
 if (!mix.inProduction()) {

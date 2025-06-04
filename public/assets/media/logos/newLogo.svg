@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 685.90476 499.99999">
+  <defs>
+    <style>
+      .cls-1 {
+        fill: #2c2e33;
+        font-family: Lato-Regular, 'Lato Regular';
+        font-size: 20.32553px;
+      }
+
+      .cls-2 {
+        fill: #434a5b;
+      }
+
+      .cls-2, .cls-3, .cls-4 {
+        stroke-width: 0px;
+      }
+
+      .cls-5 {
+        letter-spacing: -.01318em;
+      }
+
+      .cls-5, .cls-6 {
+        fill: #3b4051;
+        font-size: 65.33205px;
+        stroke: #000;
+        stroke-miterlimit: 10;
+        stroke-width: 2px;
+      }
+
+      .cls-7 {
+        font-family: SegoeUIHistoric, 'Segoe UI Historic';
+      }
+
+      .cls-8 {
+        letter-spacing: .15404em;
+      }
+
+      .cls-9 {
+        letter-spacing: .16401em;
+      }
+
+      .cls-10 {
+        fill: #bd442c;
+        font-size: 86.15726px;
+        letter-spacing: 0em;
+        opacity: .81;
+      }
+
+      .cls-11 {
+        letter-spacing: .22801em;
+      }
+
+      .cls-3 {
+        fill: #ff2424;
+      }
+
+      .cls-12 {
+        letter-spacing: .20298em;
+      }
+
+      .cls-4 {
+        fill: #991a5a;
+      }
+
+      .cls-13 {
+        letter-spacing: .19998em;
+      }
+
+      .cls-6 {
+        letter-spacing: .00001em;
+      }
+
+      .cls-14 {
+        letter-spacing: .20002em;
+      }
+    </style>
+  </defs>
+  <g id="OBJECTS">
+    <g>
+      <polygon class="cls-3" points="81.7389 305.71049 147.94179 181.0318 164.00459 211.10159 113.8178 305.71049 81.7389 305.71049"/>
+      <path class="cls-3" d="m180.04679,180.9338c11.16-21.6545,33.6535-35.8509,58.8129-35.8509,17.71381,0,34.9801,7.2821,47.3713,19.979l4.6513,4.7659,14.008-26.2231-2.8393-2.5532c-17.3929-15.6438-39.8341-24.2588-63.1913-24.2588-17.947,0-35.4209,5.0778-50.5334,14.6845-8.9567,5.694-16.8425,12.8184-23.3834,21.0378l15.1039,28.4188Z"/>
+      <polygon class="cls-4" points="121.45069 230.92199 137.46579 200.76079 153.48569 230.93109 137.47819 261.10709 121.45069 230.92199"/>
+      <path class="cls-2" d="m238.85969,305.71049c-31.2819,0-60.9004-15.9037-78.3771-41.7917,0,0-5.7515-9.6701-6.8198-11.8952l-43.0038-80.9865-71.5597,134.6734H7.1204L110.6604,110.7165l71.0894,133.8813c11.8676,20.2503,33.7413,32.8234,57.1099,32.8234,18.2889,0,35.9379-7.6819,48.4225-21.0768l4.65131-4.9911,14.10129,26.4002-2.7412,2.5565c-17.5672,16.3798-40.4502,25.4005-64.4339,25.4005Z"/>
+    </g>
+  </g>
+  <g id="TEXTS">
+    <g>
+      <text class="cls-7" transform="translate(344.77694 217.41539) scale(1.42637 1)"><tspan class="cls-5" x="0" y="0">A</tspan><tspan class="cls-6" x="41.27887" y="0">GEN</tspan><tspan class="cls-10" x="168.01974" y="0">C</tspan></text>
+      <text class="cls-1" transform="translate(325.94784 244.4525) scale(1.42637 1)"><tspan class="cls-14" x="0" y="0">B</tspan><tspan class="cls-12" x="15.08145" y="0">E</tspan><tspan class="cls-9" x="29.20713" y="0">Y</tspan><tspan class="cls-14" x="43.53615" y="0">ON</tspan><tspan class="cls-8" x="79.0448" y="0"> </tspan><tspan class="cls-9" x="86.48419" y="0">Y</tspan><tspan class="cls-13" x="100.81321" y="0">OUR ABILI</tspan><tspan class="cls-11" x="222.56163" y="0">T</tspan><tspan class="cls-13" x="237.29802" y="0">Y</tspan></text>
+    </g>
+  </g>
+</svg>

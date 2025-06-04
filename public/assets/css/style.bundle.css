@@ -48508,7 +48508,7 @@ body {
 .header-bg {
   background-size: cover;
   background-repeat: no-repeat;
-  background-image: url("../media/misc/header-bg.png");
+  background-color: #7f8caa !important;
 }
 
 .page-bg {

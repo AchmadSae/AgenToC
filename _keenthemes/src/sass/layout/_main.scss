@@ -1,81 +1,85 @@
 //
 // Main
 //
-
+//BASE COLOR
+$header_primary_color: #7f8caa;
+$secondary_color: #b8cfce;
+$white_body_color: #dddddd;
+$dark_body_color: #000000;
+$footer-color: #333446;
 
 // Body
 body {
-	background-color: var(--#{$prefix}page-bg);
+    background-color: var(--#{$prefix}page-bg);
 }
 
 // Font color from Content background color
 .text-page-bg {
-	color: $page-bg;
+    color: $page-bg;
 }
 
 .app-blank {
-	background-color: var(--#{$prefix}app-blank-bg) !important;
+    background-color: var(--#{$prefix}app-blank-bg) !important;
 }
 
 // Header background
-.header-bg {	
-	background-size: cover;
-	background-repeat: no-repeat;
-	background-image: url('../media/misc/header-bg.png');
+.header-bg {
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-color: $header_primary_color !important;
 }
 
 // Page background
-.page-bg {	
-	background-size: cover;
-	background-attachment: fixed;
-	background-repeat: no-repeat;
-	background-position: center;
-	background-image: url('../media/misc/page-bg.jpg');
+.page-bg {
+    background-size: cover;
+    background-attachment: fixed;
+    background-repeat: no-repeat;
+    background-position: center;
+    background-image: url("../media/misc/page-bg.jpg");
 }
 
 @if $enable-rounded {
-	// Fullscreen modals
-	.modal-fullscreen .modal-content {
-		border-radius: 24px;
+    // Fullscreen modals
+    .modal-fullscreen .modal-content {
+        border-radius: 24px;
 
-		.modal-header {
-			border-top-left-radius: 23px;
-			border-top-right-radius: 23px;
-		}
-	}
+        .modal-header {
+            border-top-left-radius: 23px;
+            border-top-right-radius: 23px;
+        }
+    }
 }
-
 
 // Desktop Mode
 @include media-breakpoint-up(lg) {
-	// Containers
-	.container,
-	.container-fluid {
-		padding: 0 get($content-spacing, desktop);
-	}
+    // Containers
+    .container,
+    .container-fluid {
+        padding: 0 get($content-spacing, desktop);
+    }
 
-	// Wrapper
-	.wrapper {
-		transition: padding-left get($aside-config, transition-speed) ease;
-		padding-top: get($header-config, height, desktop);
-		padding-left: get($aside-config, width) + get($content-spacing, desktop);
-	}
+    // Wrapper
+    .wrapper {
+        transition: padding-left get($aside-config, transition-speed) ease;
+        padding-top: get($header-config, height, desktop);
+        padding-left: get($aside-config, width) + get($content-spacing, desktop);
+    }
 }
 
 // Tablet & mobile modes
 @include media-breakpoint-down(lg) {
-	// Containers
-	.container,
-	.container-fluid {
-		max-width: none;
-		padding: 0 get($content-spacing, tablet-and-mobile);
-	}
+    // Containers
+    .container,
+    .container-fluid {
+        max-width: none;
+        padding: 0 get($content-spacing, tablet-and-mobile);
+    }
 
-	// Wrapper
-	.wrapper {
-		// Fixed header mode
-		.header-tablet-and-mobile-fixed & {
-			padding-top: get($header-config, height, tablet-and-mobile);
-		}
-	}
+    // Wrapper
+    .wrapper {
+        // Fixed header mode
+        .header-tablet-and-mobile-fixed & {
+            padding-top: get($header-config, height, tablet-and-mobile);
+        }
+    }
 }
