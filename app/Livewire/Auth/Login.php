@@ -40,15 +40,20 @@ class Login extends Component
             ]);
         }
 
-        $user = Auth::user();
-        $roleId = $user->role_id;
+        // $query = DB::query(
+        //     'SELECT role_name, name, FROM users
+        //     JOIN user_details ON users.user_detail_id = user_details.id
+        //     JOIN roles ON user_details.role_id = roles.id
+        //     WHERE users.id = ?',
+        //     [Auth::user()->id]
+        // );
 
-        if ($roleId == 1) {
-            RateLimiter::clear($this->throttleKey());
-            Session::regenerate();
+        // if ($roleId == 1) {
+        //     RateLimiter::clear($this->throttleKey());
+        //     Session::regenerate();
 
-            $this->redirectIntended(default: route('users_dashboard', absolute: false), navigate: true);
-        }
+        //     $this->redirectIntended(default: route('users_dashboard', absolute: false), navigate: true);
+        // }
 
         RateLimiter::clear($this->throttleKey());
         Session::regenerate();

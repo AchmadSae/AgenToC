@@ -37,6 +37,7 @@ class User extends Authenticatable
      * @var array<int, string>
      */
     protected $hidden = [
+        'user_detail_id',
         'password',
         'remember_token',
         'two_factor_recovery_codes',
@@ -63,5 +64,45 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
         ];
+    }
+
+
+    public function user_detail()
+    {
+        return $this->belongsTo(UserDetailModel::class, 'user_detail_id', 'id');
+    }
+
+
+    /**
+     * Get the user_detail record associated with the user
+     **/
+    public function getAllUsers()
+    {
+        return $this->with('user', 'user_detail')->get();
+    }
+    /**
+     * Find User by email
+     **/
+    public function findUserByEmail($email)
+    {
+        return $this->where('email', $email)->first();
+    }
+
+
+    /**
+     *  Find corresponding users 
+     **/
+    public function findUser($anything)
+    {
+        $columns = Schema::getColumnListing('users');
+        $query = static::query();
+
+        $query->where(function ($q) use ($anything, $columns) {
+            foreach ($columns as $column) {
+                $q->orWhere($column, 'like', '%' . $anything . '%');
+            }
+        });
+
+        return $query->get();
     }
 }
