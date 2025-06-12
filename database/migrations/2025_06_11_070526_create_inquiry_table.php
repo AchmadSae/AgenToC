@@ -31,20 +31,20 @@ return new class extends Migration
             $table->timestamps();
         });
 
-        Schema::table('kanban', function (Blueprint $table) {
-            $table->foreignId("client_id")->constrained(
-                "users",
-                indexName: "user_detail_id"
-            );
-            $table->foreignId("worker_id")->constrained(
-                "users",
-                indexName: "user_detail_id"
-            );
-            $table->foreignId("detail_task_id")->constrained(
-                "task_detail",
-                indexName: "id"
-            );
-        });
+        // Schema::table('inquiry', function (Blueprint $table) {
+        //     $table->foreignId("client_id")->constrained(
+        //         "users",
+        //         indexName: "user_detail_id"
+        //     );
+        //     $table->foreignId("worker_id")->constrained(
+        //         "users",
+        //         indexName: "user_detail_id"
+        //     );
+        //     $table->foreignId("detail_task_id")->constrained(
+        //         "task_detail",
+        //         indexName: "id"
+        //     );
+        // });
     }
 
     /**

@@ -13,7 +13,8 @@ return new class extends Migration
     {
         Schema::create('user_detail', function (Blueprint $table) {
             $table->string("id")->primary();
-            $table->string("role");
+            $table->string('profile_photo_path', 2048)->nullable();
+            $table->string("role_id");
             $table->string("address_detail")->nullable();
             $table->string("phone_number")->nullable();
             $table->bigInteger("postal_code")->nullable();
@@ -23,13 +24,20 @@ return new class extends Migration
             $table->timestamps();
         });
 
-        Schema::table('user_detail', function (Blueprint $table) {
-            $table->foreignId("id")->constrained(
-                "users",
-                indexName: "user_detail_id"
-            );
+
+        Schema::create('roles', function (Blueprint $table) {
+            $table->id();
+            $table->string("role_id");
+            $table->string("role_name");
+            $table->boolean("is_active");
+            $table->timestamps();
         });
+
+        // Schema::table('roles', function (Blueprint $table) {
+        //     $table->foreign('role_id')->references('role_id')->on('user_detail');
+        // });
     }
+
 
     /**
      * Reverse the migrations.
@@ -37,5 +45,6 @@ return new class extends Migration
     public function down(): void
     {
         Schema::dropIfExists('user_detail');
+        Schema::dropIfExists('roles');
     }
 };

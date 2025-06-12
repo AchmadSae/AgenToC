@@ -22,10 +22,10 @@ return new class extends Migration
             $table->timestamps();
         });
 
-        Schema::table('payment', function (Blueprint $table) {
-            $table->foreign('user_id')->references('id')->on('users');
-            $table->foreign('inquiry_id')->references('id')->on('inquiry');
-        });
+        // Schema::table('payment', function (Blueprint $table) {
+        //     $table->foreign('user_id')->references('id')->on('users');
+        //     $table->foreign('inquiry_id')->references('id')->on('inquiry');
+        // });
     }
 
     /**
