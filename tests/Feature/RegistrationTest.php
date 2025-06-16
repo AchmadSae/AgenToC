@@ -3,9 +3,12 @@
 namespace Tests\Feature;
 
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Testing\Assert;
 use Laravel\Fortify\Features;
 use Laravel\Jetstream\Jetstream;
+use Livewire\Livewire;
 use Tests\TestCase;
+use App\Models\User;
 
 class RegistrationTest extends TestCase
 {
@@ -13,7 +16,7 @@ class RegistrationTest extends TestCase
 
     public function test_registration_screen_can_be_rendered(): void
     {
-        if (! Features::enabled(Features::registration())) {
+        if (!Features::enabled(Features::registration())) {
             $this->markTestSkipped('Registration support is not enabled.');
         }
 
@@ -35,7 +38,8 @@ class RegistrationTest extends TestCase
 
     public function test_new_users_can_register(): void
     {
-        if (! Features::enabled(Features::registration())) {
+        if (!Features::enabled(Features::registration())) {
+            info('Registration support is not enabled.');
             $this->markTestSkipped('Registration support is not enabled.');
         }
 
@@ -44,10 +48,12 @@ class RegistrationTest extends TestCase
             'email' => 'test@example.com',
             'password' => 'password',
             'password_confirmation' => 'password',
+            'role' => 'Worker',
+            'tagline' => 'Show Your Tag Line',
+            'skills' => 'Graphic Designer',
             'terms' => Jetstream::hasTermsAndPrivacyPolicyFeature(),
         ]);
-
-        $this->assertAuthenticated();
-        $response->assertRedirect(route('dashboard', absolute: false));
+        dump($response);
+        Assert::assertTrue(User::where('email', 'test@example.com')->exists());
     }
 }

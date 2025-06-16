@@ -1,35 +1,56 @@
 <?php
 
-use App\Livewire\Settings\Appearance;
-use App\Livewire\Settings\Password;
-use App\Livewire\Settings\Profile;
+use App\Http\Controllers\AdminController;
+use App\Http\Controllers\WorkerController;
+use App\Http\Controllers\CustomerController;
 use Illuminate\Support\Facades\Route;
 
-// Route::post(
-//     '/login',
-//     [AuthenticationController::class, 'login']
-// );
 
-// Route::post(
-//     '/logout',
-//     [AuthenticationController::class, 'logout']
-// );
-
-// begin root route
+/**
+ * begin root route
+ **/
 Route::get('/', function () {
-    return view('about');
+    return view('landing');
 })->name('home');
-// end root route
-
-Route::view('dashboard', 'dashboard')
-    ->middleware(['auth', 'verified'])
-    ->name('dashboard');
+Route::get('/join', function () {
+    return view('auth.register')->with('isWorkerView', true);
+})->name('join');
+/**
+ * end root route
+ **/
 
 Route::middleware(['auth'])->group(function () {
-    Route::redirect('settings', 'settings/profile');
+    /**
+     * begin rout group for admin
+     **/
+    Route::prefix('admin')->middleware('admin')->group(function () {
 
-    Route::get('settings/profile', Profile::class)->name('settings.profile');
-    Route::get('settings/password', Password::class)->name('settings.password');
-    Route::get('settings/appearance', Appearance::class)->name('settings.appearance');
+        Route::get('/dashboard', [AdminController::class, 'index'])->name('admin_dashboard');
+
+    });
+    /**
+     * end rout group for admin
+     **/
+
+    /**
+     * begin root group for worker
+     **/
+    Route::prefix('worker')->middleware('worker')->group(function () {
+        Route::get('/dashboard', [WorkerController::class, 'index'])->name('worker_dashboard')->name('worker_dashboard');
+    });
+    /**
+     * end root group for worker
+     **/
+
+    /**
+     * begin root group for customer
+     **/
+    Route::prefix('customer')->middleware('users')->group(function () {
+        Route::get('/dashboard', [CustomerController::class, 'index'])->name('customer_dashboard')->name('customer_dashboard');
+    });
+    /**
+     * end root group for customer
+     **/
 });
+
 

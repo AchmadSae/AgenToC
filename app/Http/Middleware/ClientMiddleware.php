@@ -3,12 +3,11 @@
 namespace App\Http\Middleware;
 
 use Closure;
-use DB;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
-use App\Models\User;
+use Illuminate\Support\Facades\DB;
 
-class AdminMiddleware
+class ClientMiddleware
 {
     /**
      * Handle an incoming request.
@@ -25,10 +24,9 @@ class AdminMiddleware
             ->get();
 
         $user = $query->pluck('role_name');
-        if (!$user->contains('Admin')) {
+        if (!$user->contains('Users')) {
             return redirect('/')->with('error', 'Unauthorized Page');
         }
-
         return $next($request);
     }
 }

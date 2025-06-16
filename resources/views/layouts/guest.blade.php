@@ -1,10 +1,11 @@
 <!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+@props(['title' => ''])
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>{{ $title }}</title>
 
     <link rel="canonical" href="http://preview.keenthemes.comindex.html" />
     <link rel="shortcut icon" href="assets/media/logos/favicon.ico" />
@@ -20,42 +21,21 @@
     <!--end::Global Stylesheets Bundle-->
 </head>
 
-<body id="kt_body" class="auth-bg">
+<body id="kt_body" class="
+    @if (Route::currentRouteName() === 'login' or Route::currentRouteName() === 'register')
+        auth-bg
+    @endif
+    bg-body position-relative
+    " data-bs-spy="scroll" data-bs-target="#kt_landing_menu">
     <!--begin::Root-->
     <div class="d-flex flex-column flex-root">
-        <!--begin::Page-->
-        <div class=" d-flex 
-                @if(Route::currentRouteName() === 'home')
-                    flex-center w-lg-50 page
-                @elseif(Route::currentRouteName() === 'login'))
-                    flex-column flex-lg-row
-                @endif
-                flex-column-fluid ">
-            <!--begin::Wrapper-->
-            <div class="d-flex justify-content-between  flex-column 
-                    @if(Route::currentRouteName() === 'home')
-                        w-100 mw-450px flex-column-fluid
-                    @elseif(Route::currentRouteName() === 'login' or Route::currentRouteName() === 'register')
-                        flex-column w-lg-50 p-10
-                    @endif
-                ">
-                <!-- Page Content -->
-                <main>
-                    {{ $slot }}
-                </main>
+        <!-- Page Content -->
+        {{ $slot }}
+        <!-- end Page Content -->
+    </div>
+    </div>
 
-            </div>
-
-            <!--end::Wrapper-->
-            @if (Route::currentRouteName() === 'login' or Route::currentRouteName() === 'register')
-                <!--begin::Body-->
-                <div class="d-none d-lg-flex flex-lg-row-fluid w-40 bgi-size-cover bgi-position-y-center bgi-position-x-start bgi-no-repeat"
-                    style='background-image: url("{{ url("assets/media/auth/bg11.png") }}")'>
-                </div>
-            @endif
-        </div>
-
-        @stack('modals')
+    @stack('modals')
 
     </div>
     <script>var hostUrl = " assets/";</script>
