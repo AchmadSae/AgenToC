@@ -1657,7 +1657,8 @@
                 </div>
                 <!--end::Content-->
                 <!--begin::Link-->
-                <a href="/join" class="btn btn-lg btn-outline border-2 btn-outline-white flex-shrink-0 my-2">Create
+                <a href="{{ route('signin', ['flag' => 'worker']) }}"
+                    class="btn btn-lg btn-outline border-2 btn-outline-white flex-shrink-0 my-2">Create
                     Accounts</a>
                 <!--end::Link-->
             </div>

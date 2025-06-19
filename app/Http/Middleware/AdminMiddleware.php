@@ -6,7 +6,8 @@ use Closure;
 use DB;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
-use App\Models\User;
+use RealRashid\SweetAlert\Facades\Alert;
+use Illuminate\Support\Facades\Auth;
 
 class AdminMiddleware
 {
@@ -17,16 +18,18 @@ class AdminMiddleware
      */
     public function handle(Request $request, Closure $next): Response
     {
-        $query = DB::table('user_detail')
-            ->join('users', 'users.user_detail_id', '=', 'user_detail.id')
-            ->join('roles', 'roles.role_id', '=', 'user_detail.role_id')
-            ->where('users.user_detail_id', auth()->user()->user_detail_id)
-            ->select('users.name', 'roles.role_name')
-            ->get();
+        $user = Auth::user();
 
-        $user = $query->pluck('role_name');
-        if (!$user->contains('Admin')) {
-            return redirect('/')->with('error', 'Unauthorized Page');
+        $hasAdminRole = DB::table('user_detail_roles')
+            ->join('roles', 'roles.role_id', '=', 'user_detail_roles.role_id')
+            ->where('user_detail_roles.user_detail_id', $user->user_detail_id)
+            ->where('roles.role_name', 'admin')
+            ->where('user_detail_roles.is_active', true)
+            ->exists();
+
+        if (!$hasAdminRole) {
+            Alert::error('Error', 'Unauthorized Page');
+            return redirect('/');
         }
 
         return $next($request);

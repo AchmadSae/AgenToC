@@ -12,7 +12,6 @@ return new class extends Migration {
     {
         Schema::create('user_detail', function (Blueprint $table) {
             $table->string("id")->primary();
-            $table->string("role_id");
             $table->string("skills")->nullable();
             $table->string("tag_line")->nullable();
             $table->string("address_detail")->nullable();
@@ -23,27 +22,31 @@ return new class extends Migration {
             $table->timestamps();
         });
 
-
         Schema::create('roles', function (Blueprint $table) {
             $table->id();
-            $table->string("role_id");
+            $table->string("role_id")->unique();
             $table->string("role_name");
-            $table->boolean("is_active");
             $table->timestamps();
         });
 
-        // Schema::table('roles', function (Blueprint $table) {
-        //     $table->foreign('role_id')->references('role_id')->on('user_detail');
-        // });
+        Schema::create('user_detail_roles', function (Blueprint $table) {
+            $table->id();
+            $table->string('user_detail_id');
+            $table->string('role_id');
+            $table->foreign('user_detail_id')->references('id')->on('user_detail')->onDelete('cascade');
+            $table->foreign('role_id')->references('role_id')->on('roles')->onDelete('cascade');
+            $table->boolean("is_active")->default(false);
+            $table->timestamps();
+        });
     }
-
 
     /**
      * Reverse the migrations.
      */
     public function down(): void
     {
-        Schema::dropIfExists('user_detail');
+        Schema::dropIfExists('user_detail_roles');
         Schema::dropIfExists('roles');
+        Schema::dropIfExists('user_detail');
     }
 };

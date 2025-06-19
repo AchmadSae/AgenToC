@@ -857,13 +857,16 @@
                         <!--begin::Menu item-->
                         <div class="menu-item px-5">
 
-                            <form method="POST" action="{{ route('logout') }}">
+                            <form id="logout-form" method="POST" action="{{ route('logout') }}" class="d-none">
                                 @csrf
-                                <a href="{{ route('logout') }}" class="menu-link px-5"
-                                    onclick="event.preventDefault(); this.closest('form').submit();">
-                                    {{ __('Log Out') }}
-                                </a>
                             </form>
+
+                            <a href="#" class="menu-link px-5"
+                                onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
+                                {{ __('Log Out') }}
+                            </a>
+
+
                         </div>
 
 

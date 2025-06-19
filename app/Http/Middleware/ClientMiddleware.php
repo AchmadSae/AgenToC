@@ -4,8 +4,10 @@ namespace App\Http\Middleware;
 
 use Closure;
 use Illuminate\Http\Request;
+use RealRashid\SweetAlert\Facades\Alert;
 use Symfony\Component\HttpFoundation\Response;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Auth;
 
 class ClientMiddleware
 {
@@ -16,16 +18,18 @@ class ClientMiddleware
      */
     public function handle(Request $request, Closure $next): Response
     {
-        $query = DB::table('user_detail')
-            ->join('users', 'users.user_detail_id', '=', 'user_detail.id')
-            ->join('roles', 'roles.role_id', '=', 'user_detail.role_id')
-            ->where('users.user_detail_id', auth()->user()->user_detail_id)
-            ->select('users.name', 'roles.role_name')
-            ->get();
+        $user = Auth::user();
 
-        $user = $query->pluck('role_name');
-        if (!$user->contains('Users')) {
-            return redirect('/')->with('error', 'Unauthorized Page');
+        $hasUserRole = DB::table('user_detail_roles')
+            ->join('roles', 'roles.role_id', '=', 'user_detail_roles.role_id')
+            ->where('user_detail_roles.user_detail_id', $user->user_detail_id)
+            ->where('roles.role_name', 'user')
+            ->where('user_detail_roles.is_active', true)
+            ->exists();
+
+        if (!$hasUserRole) {
+            Alert::error('Error', 'Unauthorized Page=' . $hasUserRole . 'user_detail_id=' . $user->user_detail_id . 'role_name=' . $user->role_name);
+            return redirect('/');
         }
         return $next($request);
     }

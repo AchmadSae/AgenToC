@@ -4,7 +4,25 @@ use App\Http\Controllers\AdminController;
 use App\Http\Controllers\WorkerController;
 use App\Http\Controllers\CustomerController;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\AuthController;
 
+/**
+ * begin::root auth
+ **/
+
+// Auth routes
+Route::get('signin/{flag}', [AuthController::class, 'showLoginForm'])->name('signin');
+Route::post('login', [AuthController::class, 'login'])->name('login');
+Route::post('logout', [AuthController::class, 'logout'])->name('logout');
+Route::get('signup/{flag}', [AuthController::class, 'showRegistrationForm'])->name('signup');
+Route::post('register', [AuthController::class, 'register'])->name('register');
+// Email verification
+Route::get('email/verify/{id}/{hash}', [AuthController::class, 'verifyEmail'])->name('verification.verify');
+Route::post('email/resend', [AuthController::class, 'resendVerification'])->name('verification.resend');
+
+/**
+ * end::root auth
+ **/
 
 /**
  * begin root route
@@ -12,14 +30,19 @@ use Illuminate\Support\Facades\Route;
 Route::get('/', function () {
     return view('landing');
 })->name('home');
-Route::get('/join', function () {
-    return view('auth.register')->with('isWorkerView', true);
-})->name('join');
 /**
  * end root route
  **/
 
+
+
 Route::middleware(['auth'])->group(function () {
+    // Password reset
+    Route::get('password/reset', [AuthController::class, 'showLinkRequestForm'])->name('password.request');
+    Route::post('password/email', [AuthController::class, 'sendResetLinkEmail'])->name('password.email');
+    Route::get('password/reset/{token}', [AuthController::class, 'showResetForm'])->name('password.reset');
+    Route::post('password/reset', [AuthController::class, 'reset'])->name('password.update');
+
     /**
      * begin rout group for admin
      **/
@@ -36,7 +59,7 @@ Route::middleware(['auth'])->group(function () {
      * begin root group for worker
      **/
     Route::prefix('worker')->middleware('worker')->group(function () {
-        Route::get('/dashboard', [WorkerController::class, 'index'])->name('worker_dashboard')->name('worker_dashboard');
+        Route::get('/dashboard', [WorkerController::class, 'index'])->name('worker_dashboard');
     });
     /**
      * end root group for worker
@@ -46,7 +69,7 @@ Route::middleware(['auth'])->group(function () {
      * begin root group for customer
      **/
     Route::prefix('customer')->middleware('users')->group(function () {
-        Route::get('/dashboard', [CustomerController::class, 'index'])->name('customer_dashboard')->name('customer_dashboard');
+        Route::get('/dashboard', [CustomerController::class, 'index'])->name('customer_dashboard');
     });
     /**
      * end root group for customer

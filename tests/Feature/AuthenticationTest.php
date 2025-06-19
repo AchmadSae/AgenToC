@@ -5,11 +5,12 @@ namespace Tests\Feature;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
+use Database\Seeders\UserSeeder;
+use Illuminate\Support\Facades\DB;
 
 class AuthenticationTest extends TestCase
 {
     use RefreshDatabase;
-
     public function test_login_screen_can_be_rendered(): void
     {
         $response = $this->get('/login');
@@ -19,16 +20,25 @@ class AuthenticationTest extends TestCase
 
     public function test_users_can_authenticate_using_the_login_screen(): void
     {
-        $user = User::factory()->create();
+        $this->seed(UserSeeder::class);
 
-        $response = $this->post('/login', [
+        $user = User::where('email', 'dylan@gmail.com')->first();
+        $this->post('/login', [
             'email' => $user->email,
-            'password' => 'password',
+            'password' => 'samplepassword',
+            'role' => 'User',
         ]);
+        dump(DB::connection()->getDatabaseName());
+
 
         $this->assertAuthenticated();
-        $response->assertRedirect(route('dashboard', absolute: false));
+
+        $dashboardResponse = $this->get(route('mapping', absolute: false));
+
+        $dashboardResponse->assertOk();
+        $dashboardResponse->assertSee('Customer Dashboard');
     }
+
 
     public function test_users_can_not_authenticate_with_invalid_password(): void
     {

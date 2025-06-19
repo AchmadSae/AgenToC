@@ -1,15 +1,4 @@
 @if ($errors->any())
-    <!-- <div {{ $attributes }}>
-                    <div class="font-medium text-red-600">{{ __('Whoops! Something went wrong.') }}</div>
-
-                    <ul class="mt-3 list-disc list-inside text-sm text-red-600">
-                        @foreach ($errors->all() as $error)
-                            <li>{{ $error }}</li>
-                        @endforeach
-                    </ul>
-                </div> -->
-
-    <!--begin::Alert-->
     <div class="alert alert-dismissible bg-warning d-flex flex-column flex-sm-row p-5 mb-10">
         <!--begin::Icon-->
         <i class="ki-duotone ki-shield-search fs-2hx text-light me-4 mb-5 mb-sm-0"><span class="path1"></span><span
