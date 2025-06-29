@@ -19,6 +19,10 @@ class WorkerMiddleware
     public function handle(Request $request, Closure $next): Response
     {
         $user = Auth::user();
+        if (!$user) {
+            Alert::info('Error', 'You are not logged in');
+            return $next($request);
+        }
 
         $hasWorkerRole = DB::table('user_detail_roles')
             ->join('roles', 'roles.role_id', '=', 'user_detail_roles.role_id')
@@ -32,6 +36,7 @@ class WorkerMiddleware
             Alert::error('Error', 'Unauthorized Page =' . $hasWorkerRole);
             return redirect('/');
         }
+        session()->put('currentRole', 'worker');
 
         return $next($request);
     }

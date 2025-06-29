@@ -11,10 +11,10 @@ use App\Http\Controllers\AuthController;
  **/
 
 // Auth routes
-Route::get('signin/{flag}', [AuthController::class, 'showLoginForm'])->name('signin');
+Route::get('signin/{flag}', [AuthController::class, 'showLoginForm'])->name('sign-in');
 Route::post('login', [AuthController::class, 'login'])->name('login');
 Route::post('logout', [AuthController::class, 'logout'])->name('logout');
-Route::get('signup/{flag}', [AuthController::class, 'showRegistrationForm'])->name('signup');
+Route::get('signup/{flag}', [AuthController::class, 'showRegistrationForm'])->name('sign-up');
 Route::post('register', [AuthController::class, 'register'])->name('register');
 // Email verification
 Route::get('email/verify/{id}/{hash}', [AuthController::class, 'verifyEmail'])->name('verification.verify');
@@ -36,7 +36,9 @@ Route::get('/', function () {
 
 
 
-Route::middleware(['auth'])->group(function () {
+Route::middleware(['oAuth'])->group(function () {
+
+
     // Password reset
     Route::get('password/reset', [AuthController::class, 'showLinkRequestForm'])->name('password.request');
     Route::post('password/email', [AuthController::class, 'sendResetLinkEmail'])->name('password.email');
@@ -68,8 +70,12 @@ Route::middleware(['auth'])->group(function () {
     /**
      * begin root group for customer
      **/
-    Route::prefix('customer')->middleware('users')->group(function () {
-        Route::get('/dashboard', [CustomerController::class, 'index'])->name('customer_dashboard');
+    Route::prefix('client')->middleware('users')->group(function () {
+
+
+        Route::get('/dashboard', [CustomerController::class, 'index'])->name('client_dashboard');
+        Route::post('task/{id}', [CustomerController::class, 'task'])->name('postTask');
+
     });
     /**
      * end root group for customer

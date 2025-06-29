@@ -26,7 +26,7 @@
 @endphp
 
 <body class="
-    {{ in_array($routeName, ['signin', 'signup']) ? 'auth-bg' : 'bg-body position-relative' }}
+    {{ in_array($routeName, ['sign-in', 'sign-up']) ? 'auth-bg' : 'bg-body position-relative' }}
 " data-bs-spy="scroll" data-bs-target="#kt_landing_menu">
     <!--begin::Root-->
     <div class="d-flex flex-column flex-root">
@@ -45,15 +45,7 @@
     <script src="{{  asset('assets/js/scripts.bundle.js') }}"></script>
     <!--end::Global Javascript Bundle-->
     <!--begin::Custom Javascript(used for this page only)-->
-    <script src="{{ asset('assets/js/custom/utilities/modals/create-project/type.js') }}"></script>
-    <script src="{{ asset('assets/js/custom/utilities/modals/create-project/budget.js') }}"></script>
-    <script src="{{ asset('assets/js/custom/utilities/modals/create-project/settings.js') }}"></script>
-    <script src="{{ asset('assets/js/custom/utilities/modals/create-project/team.js') }}"></script>
-    <script src="{{ asset('assets/js/custom/utilities/modals/create-project/targets.js') }}"></script>
-    <script src="{{ asset('assets/js/custom/utilities/modals/create-project/files.js') }}"></script>
-    <script src="{{ asset('assets/js/custom/utilities/modals/create-project/complete.js') }}"></script>
-    <script src="{{ asset('assets/js/custom/utilities/modals/create-project/main.js') }}"></script>
-    <script src=" {{ asset('assets/js/custom/utilities/modals/create-account.js') }}"></script>
+
     <!--end::Custom Javascript-->
     <!--end::Javascript-->
 </body>

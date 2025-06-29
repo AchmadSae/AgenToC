@@ -19,6 +19,10 @@ class AdminMiddleware
     public function handle(Request $request, Closure $next): Response
     {
         $user = Auth::user();
+        if (!$user) {
+            Alert::info('Error', 'You are not logged in');
+            return $next($request);
+        }
 
         $hasAdminRole = DB::table('user_detail_roles')
             ->join('roles', 'roles.role_id', '=', 'user_detail_roles.role_id')
@@ -31,6 +35,7 @@ class AdminMiddleware
             Alert::error('Error', 'Unauthorized Page');
             return redirect('/');
         }
+        session()->put('currentRole', 'Admin');
 
         return $next($request);
     }

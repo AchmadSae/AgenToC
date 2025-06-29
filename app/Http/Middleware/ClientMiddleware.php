@@ -20,6 +20,12 @@ class ClientMiddleware
     {
         $user = Auth::user();
 
+    
+        if (!$user) {
+            Alert::info('Error', 'You are not logged in');
+            return $next($request);
+        }
+
         $hasUserRole = DB::table('user_detail_roles')
             ->join('roles', 'roles.role_id', '=', 'user_detail_roles.role_id')
             ->where('user_detail_roles.user_detail_id', $user->user_detail_id)
@@ -27,10 +33,12 @@ class ClientMiddleware
             ->where('user_detail_roles.is_active', true)
             ->exists();
 
+
         if (!$hasUserRole) {
             Alert::error('Error', 'Unauthorized Page=' . $hasUserRole . 'user_detail_id=' . $user->user_detail_id . 'role_name=' . $user->role_name);
             return redirect('/');
         }
+        session()->put('currentRole', 'client');
         return $next($request);
     }
 }

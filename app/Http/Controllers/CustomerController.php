@@ -6,9 +6,20 @@ use Illuminate\Http\Request;
 
 class CustomerController extends Controller
 {
+    /**
+     * All task posted by customer
+     * 
+     **/
     public function index()
     {
-        return view('customers.dashboard');
+
+
+
+
+
+        return view('client.dashboard');
+
+
 
     }
 }

@@ -27,15 +27,27 @@
         <!--end::Link-->
     </div>
     <!--end::Heading-->
+    @if($form == 'sign-in')
+    <!-- begin::Input group Role -->
+    <div class="fv-row mb-10">
+        <select class="form-select form-control-lg form-control-solid" aria-label="role" style="cursor: pointer;" name="role_name">
+            <option value="user">User</option>
+            <option value="worker">Worker</option>
+        </select>
+    </div>
+    @endif
+    @if($typeRegister == 'user' && $form == 'sign-up')  
+    <input type="text" name="role_name" value="{{ $typeRegister }}" hidden>
+    @endif
+    <!-- end::Input group Role -->
     <!--begin::Input group-->
-    @if($form == 'sign_up' )
+    @if($form == 'sign-up' )
     <div class="fv-row mb-10">
         <input class="form-control form-control-lg form-control-solid" type="text" placeholder="Username" name="name"
             autocomplete="off" data-kt-translate="{{ $form }}-input-first-name" />
     </div>
     <!--end::Input group-->
     @endif
-    <input type="text" name="role_name" value="{{ $typeRegister }}" hidden class="form-control">
     <!--begin::Input group-->
     
     <div class="fv-row mb-10">
@@ -43,7 +55,7 @@
             autocomplete="off" data-kt-translate="{{ $form }}-input-email" />
     </div>
     <!--end::Input group-->
-    @if($form == 'sign_up' && $typeRegister == 'worker')
+    @if($form == 'sign-up' && $typeRegister == 'worker')
     <!--begin::Input group-->
     <div class="fv-row mb-10">
         <input class="form-control form-control-lg form-control-solid" type="text" placeholder="Skills Focus" name="skill"
@@ -71,6 +83,8 @@
                     <i class="ki-duotone ki-eye fs-2 d-none"></i>
                 </span>
             </div>
+        @if($form == 'sign-up')
+
             <!--end::Input wrapper-->
             <!--begin::Meter-->
             <div class="d-flex align-items-center mb-3" data-kt-password-meter-control="highlight">
@@ -80,17 +94,21 @@
                 <div class="flex-grow-1 bg-secondary bg-active-success rounded h-5px"></div>
             </div>
             <!--end::Meter-->
+        @endif
         </div>
         <!--end::Wrapper-->
         <!--begin::Hint-->
+        @if($form == 'sign-up')
         <div class="text-muted" data-kt-translate="{{ $form }}-hint">Use 8 or more characters with a mix
             of
             letters,
             numbers & symbols.</div>
-        <!--end::Hint-->
+            <!--end::Hint-->
+        @endif
     </div>
     <!--end::Input group=-->
-    @if(!$typeRegister == 'user')
+    
+    @if($form == 'sign-up')
     <!--begin::Input group-->
     <div class="fv-row mb-10">
         <input class="form-control form-control-lg form-control-solid" type="password" placeholder="Confirm Password"
@@ -101,7 +119,7 @@
     <!--begin::Actions-->
     <div class="d-flex flex-stack">
         <!--begin::Submit-->
-        <button id="kt_sign_up_submit" class="btn btn-primary" data-kt-translate="{{ $form }}-submit">
+        <button id="kt_sign-up_submit" class="btn btn-primary" data-kt-translate="{{ $form }}-submit">
             <!--begin::Indicator label-->
             <span class="indicator-label">Submit</span>
             <!--end::Indicator label-->

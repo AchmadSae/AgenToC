@@ -1657,7 +1657,7 @@
                 </div>
                 <!--end::Content-->
                 <!--begin::Link-->
-                <a href="{{ route('signin', ['flag' => 'worker']) }}"
+                <a href="{{ route('sign-up', ['flag' => 'worker']) }}"
                     class="btn btn-lg btn-outline border-2 btn-outline-white flex-shrink-0 my-2">Create
                     Accounts</a>
                 <!--end::Link-->

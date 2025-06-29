@@ -7,11 +7,11 @@
                 <div class="p-10">
                     <!--begin::Form-->
                     @if($flag == 'user')
-                        <x-form :form="'sign_up'" :directUrl="'home'" :title="'Join our partnership'" :description="'Be our partners for your freelance business'" :id="'kt_sign_up_form'" :action="'register'">
+                        <x-form :form="'sign-up'" :directUrl="'home'" :title="'Join our partnership As User'" :description="'Get FLexibility and Easy Management Business'" :id="'kt_sign_up_form'" :action="'register'">
                         </x-form>
                     @endif
                     @if($flag == 'worker')
-                        <x-form :form="'sign_up'" :directUrl="'home'" :title="'Join our partnership'" :description="'Be our partners for your freelance business'" :id="'kt_sign_up_form'" :action="'register'"
+                        <x-form :form="'sign-up'" :directUrl="'home'" :title="'Join our partnership As Worker'" :description="'Be our partners for your freelance business'" :id="'kt_sign_up_form'" :action="'register'"
                             :typeRegister="'worker'">
                         </x-form>
                     @endif

@@ -1,5 +1,4 @@
-<!--begin::Wrapper-->
-<div class="wrapper d-flex flex-column flex-row-fluid" id="kt_wrapper">
+
     <!--begin::Header-->
     <div id="kt_header" class="header header-bg">
         <!--begin::Container-->
@@ -19,8 +18,10 @@
                 <!--end::Aside toggle-->
                 <!--begin::Logo-->
                 <a href="index.html">
-                    <img alt="Logo" src="assets/media/logos/newLogo.svg" class="h-30px h-lg-100px d-none d-md-block" />
-                    <img alt="Logo" src="assets/media/logos/newLogo.svg" class="h-25px d-block d-md-none" />
+                    <img alt="Logo" src="{{ asset('assets/media/logos/newLogo.svg') }}"
+                        class="h-30px h-lg-100px d-none d-md-block" />
+                    <img alt="Logo" src="{{ asset('assets/media/logos/newLogo.svg') }}"
+                        class="h-25px d-block d-md-none" />
                 </a>
                 <!--end::Logo-->
             </div>
@@ -963,5 +964,3 @@
     </div>
     <!--end::Header-->
 
-</div>
-<!--end::Wrapper-->

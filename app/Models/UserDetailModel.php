@@ -13,9 +13,8 @@ class UserDetailModel extends Model
 
     protected $fillable = [
         'id',
-        'profile_photo_path',
-        'role_id',
         'skills',
+        'tag_line',
         'address_detail',
         'phone_number',
         'postal_code',

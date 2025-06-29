@@ -48,12 +48,11 @@ class AuthController extends Controller
                     ->where('roles.role_name', $request->role_name)
                     ->where('user_detail_roles.is_active', true)
                     ->exists();
-
-                if (!$hasRole) {
+                $hasVerified = $user->hasVerifiedEmail();
+                if (!$hasRole && !$hasVerified) {
                     Auth::logout();
                     throw ValidationException::withMessages([
-                        'role' => 'You do not have access to this role value is =' .
-                            $hasRole . 'role = ' . $user->role_name . 'user_detail_id = ' . $user->user_detail_id,
+                        'role' => 'You do not have access to this role or account is not verified.',
                     ]);
                 }
             } catch (QueryException $e) {
@@ -65,7 +64,7 @@ class AuthController extends Controller
             // dd($request->role_name);
             return match ($request->role_name) {
                 'admin' => redirect()->route('admin_dashboard'),
-                'user' => redirect()->route('customer_dashboard'),
+                'user' => redirect()->route('client_dashboard'),
                 'worker' => redirect()->route('worker_dashboard'),
                 default => redirect()->route('home'),
             };
@@ -124,19 +123,19 @@ class AuthController extends Controller
                 'user_detail_id' => $user_detail->id,
                 'name' => $request->name,
                 'email' => $request->email,
-                'password' => Hash::make($request->password),
-                'role_name' => $role_id,
+                'password' => Hash::make($request->password)
             ]);
 
             DB::table('user_detail_roles')->insert([
                 'user_detail_id' => $user_detail->id,
                 'role_id' => $role_id,
             ]);
+            $user->sendEmailVerificationNotification();
             SweetAlert::success('success', 'Successfully registered! Confirm email to activate your account.');
-            return redirect('/login');
+            return redirect()->route('sign-in', ['flag' => $request->role_name]);
         } catch (\Throwable $th) {
             return back()->withErrors([
-                'info' => "Ups, something went wrong. Please try again." . $th->getMessage(),
+                'info' => "Error! Please notify admin." . $th->getMessage(),
             ]);
         }
     }
@@ -146,6 +145,7 @@ class AuthController extends Controller
         Auth::logout();
         $request->session()->invalidate();
         $request->session()->regenerateToken();
+        $request->session()->flush();
 
         SweetAlert::success('success', 'Successfully logged out!');
         return redirect('/');
@@ -161,24 +161,24 @@ class AuthController extends Controller
         }
 
         if ($user->hasVerifiedEmail()) {
-            return redirect('/dashboard')->with('status', 'Email sudah diverifikasi.');
+            SweetAlert::info('info', 'Email already verified!');
+            return redirect()->route('sign-in', ['flag' => 'user']);
         }
 
         $user->markEmailAsVerified();
         event(new Verified($user));
-
-        return redirect('/dashboard')->with('status', 'Email berhasil diverifikasi!');
+        SweetAlert::success('success', 'Successfully verified!');
+        return redirect('/');
     }
 
     public function resendVerification(Request $request)
     {
         if ($request->user()->hasVerifiedEmail()) {
-            return redirect('/dashboard');
+            return redirect('/');
         }
-
         $request->user()->sendEmailVerificationNotification();
-
-        return back()->with('status', 'Link verifikasi telah dikirim!');
+        SweetAlert::success('info', 'Verification link sent!');
+        return back();
     }
 
     // Password reset

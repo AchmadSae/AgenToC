@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Middleware\AuthMiddleware;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -18,7 +19,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'admin' => AdminMiddleware::class,
             'worker' => WorkerMiddleware::class,
             'users' => ClientMiddleware::class,
-            'auth' => \Illuminate\Auth\Middleware\Authenticate::class
+            'oAuth' => AuthMiddleware::class
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {
