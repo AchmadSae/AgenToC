@@ -51,7 +51,6 @@ Route::middleware(['oAuth'])->group(function () {
     Route::prefix('admin')->middleware('admin')->group(function () {
 
         Route::get('/dashboard', [AdminController::class, 'index'])->name('admin_dashboard');
-
     });
     /**
      * end rout group for admin
@@ -74,12 +73,9 @@ Route::middleware(['oAuth'])->group(function () {
 
 
         Route::get('/dashboard', [CustomerController::class, 'index'])->name('client_dashboard');
-        Route::post('task/{id}', [CustomerController::class, 'task'])->name('postTask');
-
+        Route::get('/task', [CustomerController::class, 'index'])->name('view_task');
     });
     /**
      * end root group for customer
      **/
 });
-
-

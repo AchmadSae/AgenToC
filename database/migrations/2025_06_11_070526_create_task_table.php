@@ -11,11 +11,11 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('inquiry', function (Blueprint $table) {
+        Schema::create('tasks', function (Blueprint $table) {
             $table->string('id')->primary();
             $table->string('client_id');
             $table->string('worker_id')->nullable();
-            $table->string('detail_task_id')->nullable();
+            $table->string('detail_task_id');
             $table->string('status')->default('pending');
             $table->dateTime('deadline')->nullable();
             $table->boolean('is_approved')->nullable();
@@ -23,28 +23,16 @@ return new class extends Migration
         });
 
         Schema::create('task_detail', function (Blueprint $table) {
+
             $table->id();
             $table->string('title');
             $table->text('description');
-            $table->binary('going_file')->nullable();
-            $table->binary('done_file')->nullable();
+            $table->text('task_contract');
+            $table->integer('price');
+            $table->text('required_skills');
+            $table->binary('attachment')->nullable();
             $table->timestamps();
         });
-
-        // Schema::table('inquiry', function (Blueprint $table) {
-        //     $table->foreignId("client_id")->constrained(
-        //         "users",
-        //         indexName: "user_detail_id"
-        //     );
-        //     $table->foreignId("worker_id")->constrained(
-        //         "users",
-        //         indexName: "user_detail_id"
-        //     );
-        //     $table->foreignId("detail_task_id")->constrained(
-        //         "task_detail",
-        //         indexName: "id"
-        //     );
-        // });
     }
 
     /**
