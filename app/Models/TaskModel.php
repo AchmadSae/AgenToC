@@ -11,6 +11,7 @@ class TaskModel extends Model
     protected $primaryKey = 'id';
 
     protected $fillable = [
+        'kanban_id',
         'client_id',
         'worker_id',
         'detail_task_id',
@@ -23,9 +24,23 @@ class TaskModel extends Model
     {
         return $this->belongsTo(DetailTaskModel::class, 'detail_task_id', 'id');
     }
+    public function kanban()
+    {
+        return $this->hasMany(KanbanModel::class, 'task_id');
+    }
 
     public function getTask($id)
     {
         return $this->belongsTo(DetailTaskModel::class, 'detail_task_id', 'id')->where('id', $id)->first();
+    }
+
+
+    /**
+     * search by any field and value
+     **/
+
+    public function searchAny($field, $value)
+    {
+        return $this->where($field, 'like', '%' . $value . '%')->get();
     }
 }

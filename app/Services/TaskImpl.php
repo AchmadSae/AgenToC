@@ -42,7 +42,7 @@ class TaskImpl implements TaskInterface
      * @param object $data
      * @return array
      **/
-    public function postTask($data): array
+    public function stored($data): array
     {
         $user = UserDetailModel::where('user_detail_id', $data->user_detail_id)->first();
         $isValidate = $data->validate($this->validationRule);

@@ -9,7 +9,8 @@ use Illuminate\Support\Facades\Http;
 
 interface TaskInterface
 {
-    public function postTask($data): array;
+
+    public function stored($data): array;
     public function approval($id): bool;
     public function bindTask($id, $workerId): bool;
     public function deleteTask($id);

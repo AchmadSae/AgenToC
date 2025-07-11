@@ -14,7 +14,8 @@ return new class extends Migration
         Schema::create('tasks', function (Blueprint $table) {
             $table->string('id')->primary();
             $table->string('client_id');
-            $table->string('worker_id')->nullable();
+            $table->string('worker_id');
+            $table->string('kanban_id');
             $table->string('detail_task_id');
             $table->string('status')->default('pending');
             $table->dateTime('deadline')->nullable();
