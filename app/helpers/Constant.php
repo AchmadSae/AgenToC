@@ -12,4 +12,6 @@ class Constant
     public const TASK_INQUIRY = 'inquiry';
     public const ID_TASK = 'TSK';
     public const ID_TASK_DETAIL = 'TSKDTL';
+    public const TRANS_DEPOSIT = 'coins';
+    public const TRANS_PRODUCT = 'product';
 }

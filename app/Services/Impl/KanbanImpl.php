@@ -31,7 +31,7 @@ class KanbanImpl implements KanbanInterface
 
     public function storedDefult($data): array
     {
-        $item = KanbanModel::where('status', $role)->first();
+        $item = KanbanModel::where('status', $this->role)->first();
         return $item->toArray();
     }
 

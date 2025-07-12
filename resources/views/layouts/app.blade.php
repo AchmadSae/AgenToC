@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
-@props(['title' => ''])
 
 <head>
     <meta charset="UTF-8">
