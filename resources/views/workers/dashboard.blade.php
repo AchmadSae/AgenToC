@@ -1,5 +1,8 @@
-<x-app-layout :title="__('Worker Dashboard')">
-    <!-- begin content  -->
+<x-app-layout>
+    <x-slot:title>
+        Worker Dashboard
+        </x-slot>
+        <!-- begin content  -->
 
-    <!-- end content  -->
+        <!-- end content  -->
 </x-app-layout>

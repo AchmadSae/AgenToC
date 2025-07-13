@@ -1,11 +1,11 @@
 <?php
 
-namespace App\Services;
+namespace App\Services\Impl;
 
 use App\Helpers\Constant;
 use App\Models\DetailTaskModel;
 use App\Models\TaskModel;
-use App\Repositories\TaskInterface;
+use App\Services\TaskInterface;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use App\Helpers\GenerateId;
@@ -16,20 +16,10 @@ use Symfony\Component\HttpFoundation\Exception\BadRequestException;
 
 class TaskImpl implements TaskInterface
 {
-    private $validationRule;
     private $localDate;
 
     public function __construct()
     {
-        $this->validationRule = [
-            'title' => 'required|unique:tasks|max:255',
-            'description' => 'required',
-            'user_id' => 'required',
-            'deadline' => 'required|date',
-            'task_contract' => 'required',
-            'required_skills' => 'required',
-            'attachment' => 'required|file|mimes:pdf,doc,docx,jpg,jpeg,png|max:2048',
-        ];
         $t = Carbon::now();
         $this->localDate = Carbon::parse($t)
             ->setTimezone('Asia/Jakarta')
@@ -45,12 +35,7 @@ class TaskImpl implements TaskInterface
     public function stored($data): array
     {
         $user = UserDetailModel::where('user_detail_id', $data->user_detail_id)->first();
-        $isValidate = $data->validate($this->validationRule);
         $typeTask = $data->task_type;
-
-        if (!$isValidate) {
-            throw new BadRequestException('Bad Request');
-        }
         #prepare data 
         $task = [
             'id' => GenerateId::generateWithDate(Constant::ID_TASK),
@@ -116,19 +101,28 @@ class TaskImpl implements TaskInterface
 
     public function bindTask($id, $workerId): bool
     {
-        DB::transaction(function () use ($id, $workerId) {
+        $rs = DB::transaction(function () use ($id, $workerId) {
             $task = TaskModel::where('id', $id)->lockForUpdate()->first();
             $task->worker_id = $workerId;
             $task->save();
         }, 2);
+        if ($rs == null) {
+            return false;
+        }
         return true;
     }
 
     public function deleteTask($id): bool
     {
         $detailTaskId = TaskModel::where('id', $id)->first()->detail_task_id;
-        TaskModel::where('id', $id)->delete();
-        DetailTaskModel::where('id', $detailTaskId)->delete();
+        $rs = DB::transaction(function () use ($id, $detailTaskId) {
+            TaskModel::where('id', $id)->delete();
+            DetailTaskModel::where('id', $detailTaskId)->delete();
+        });
+
+        if ($rs == null) {
+            return false;
+        }
 
         return true;
     }

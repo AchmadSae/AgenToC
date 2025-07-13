@@ -1,11 +1,7 @@
 <?php
 
-namespace App\Repositories;
+namespace App\Services;
 
-use App\Models\TaskModel;
-use Illuminate\Http\RedirectResponse;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Http;
 
 interface TaskInterface
 {

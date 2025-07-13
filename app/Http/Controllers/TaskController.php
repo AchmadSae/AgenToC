@@ -13,7 +13,6 @@ use Illuminate\Support\Facades\DB;
 class TaskController extends Controller
 {
     private $role;
-    private $validatonRule;
     private $localDate;
     protected $taskService;
 
