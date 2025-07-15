@@ -13,11 +13,23 @@ class GenerateId
      * @param string $prefix
      */
 
-    public static function generateWithDate(string $prefix = ''): string
+    public static function generateId(string $prefix = '', bool $isDate): string
     {
-        $random = strtoupper(Str::random(4));
+        $random = rand(1000, 9999);
+        if (!$isDate) {
+            return $prefix . '-' . $random;
+        }
         $date = Carbon::now()->format('dm');
 
         return $prefix . '-' . $random . '-' . $date;
+    }
+
+    /**
+     * ID with with "-" for slug
+     **/
+
+    public static function generateSlug(string $title): string
+    {
+        return Str::slug($title, '-');
     }
 }

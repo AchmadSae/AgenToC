@@ -9,7 +9,7 @@ use App\Models\UserDetailModel;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 
-class UserSeeder extends Seeder
+class PrepareDbSeeder extends Seeder
 {
     public function run(): void
     {
@@ -18,6 +18,12 @@ class UserSeeder extends Seeder
             ['role_id' => 'RADMIN', 'role_name' => 'admin', 'created_at' => now(), 'updated_at' => now()],
             ['role_id' => 'RUSER', 'role_name' => 'user', 'created_at' => now(), 'updated_at' => now()],
             ['role_id' => 'RWORKER', 'role_name' => 'worker', 'created_at' => now(), 'updated_at' => now()],
+        ]);
+
+        DB::table('global_parameter')->insert([
+            ['code' => 'GAS_FEE_USER', 'value' => '2', 'description' => 'Amount Coins for Task Inquiry'],
+            ['code' => 'GAS_FEE_WORKER', 'value' => '1', 'description' => 'Amount Coins for Task Inquiry'],
+            ['code' => 'COINS_PRICE', 'value' => '80000', 'description' => 'Coins Price'],
         ]);
 
         // // Insert user_detail

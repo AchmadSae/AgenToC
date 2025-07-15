@@ -14,4 +14,11 @@ class Constant
     public const ID_TASK_DETAIL = 'TSKDTL';
     public const TRANS_DEPOSIT = 'coins';
     public const TRANS_PRODUCT = 'product';
+    public const TASK_PENDING = 'pending';
+    public const TASK_APPROVED = 'approved';
+    public const TASK_REJECTED = 'rejected';
+    public const TASK_COMPLETED = 'completed';
+    public const TASK_CANCELLED = 'cancelled';
+    public const GAS_USER = 'GAS_FEE_USER';
+    public const GAS_WORKER = 'GAS_FEE_WORKER';
 }

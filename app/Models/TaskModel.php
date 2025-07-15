@@ -11,6 +11,7 @@ class TaskModel extends Model
     protected $primaryKey = 'id';
 
     protected $fillable = [
+        'id',
         'kanban_id',
         'client_id',
         'worker_id',

@@ -37,8 +37,6 @@ Route::get('/', function () {
 
 
 Route::middleware(['oAuth'])->group(function () {
-
-
     // Password reset
     Route::get('password/reset', [AuthController::class, 'showLinkRequestForm'])->name('password.request');
     Route::post('password/email', [AuthController::class, 'sendResetLinkEmail'])->name('password.email');
@@ -49,7 +47,6 @@ Route::middleware(['oAuth'])->group(function () {
      * begin rout group for admin
      **/
     Route::prefix('admin')->middleware('admin')->group(function () {
-
         Route::get('/dashboard', [AdminController::class, 'index'])->name('admin_dashboard');
     });
     /**
@@ -70,10 +67,9 @@ Route::middleware(['oAuth'])->group(function () {
      * begin root group for customer
      **/
     Route::prefix('client')->middleware('users')->group(function () {
-
-
         Route::get('/dashboard', [CustomerController::class, 'index'])->name('client_dashboard');
         Route::get('/task', [CustomerController::class, 'index'])->name('view_task');
+        Route::post('/task/post', [CustomerController::class, 'postTask'])->name('post_task');
     });
     /**
      * end root group for customer

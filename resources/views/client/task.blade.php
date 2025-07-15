@@ -1,3 +1,15 @@
+
+<x-app-layout>
+    <x-slot:title>
+        Client Dashboard
+        </x-slot>
+
+        <!--begin::Content-->
+        <div class="content d-flex flex-column flex-column-fluid" id="kt_content">
+            <!--begin::Post-->
+            <div class="post d-flex flex-column-fluid" id="kt_post">
+                <!--begin::Container-->
+                <div id="kt_content_container" class="container-xxl">
 <!--begin::Card-->
 <div class="card">
     <!--begin::Card body-->
@@ -27,8 +39,10 @@
     <!--end::Card body-->
 </div>
 <!--end::Card-->
-
-@push('modals')
+                    </div>
+                <!--end::Post-->
+            </div>
+            @push('modals')
     <!--begin::Modal - Create App-->
     <div class="modal fade" id="kt_modal_create_app" tabindex="-1" aria-hidden="true">
         <!--begin::Modal dialog-->
@@ -823,4 +837,11 @@
         <!--end::Modal dialog-->
     </div>
     <!--end::Modal - Create App-->
-@endpush
+            @endpush
+            @include('template/footer')
+            <!-- end::wrapper -->
+        </div>
+
+
+</x-app-layout>
+

@@ -1,4 +1,7 @@
-<x-guest-layout :title="__('Landing Page')">
+<x-guest-layout>
+    <x-slot:title>
+        Landing Page
+        </x-slot>
     <!--begin::Header Section-->
     <div class="mb-0" id="home">
         <!--begin::Wrapper-->

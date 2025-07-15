@@ -1,5 +1,16 @@
+<x-app-layout>
+    <x-slot:title>
+        Overview Dashboard
+        </x-slot>
+
+        <!--begin::Content-->
+        <div class="content d-flex flex-column flex-column-fluid" id="kt_content">
+            <!--begin::Post-->
+            <div class="post d-flex flex-column-fluid" id="kt_post">
+                <!--begin::Container-->
+                <div id="kt_content_container" class="container-xxl">
 <!--begin::Row-->
-<div class="row g-5 g-xl-10 mb-5 mb-xl-10">
+                    <div class="row g-5 g-xl-10 mb-5 mb-xl-10">
     <!--begin::Col-->
     <div class="col-xxl-6">
         <!--begin::Card widget 18-->
@@ -253,3 +264,13 @@
     <!--end::Col-->
 </div>
 <!--end::Row-->
+                </div>
+                <!--end::Post-->
+            </div>
+            @include('template/footer')
+            <!-- end::wrapper -->
+        </div>
+
+</x-app-layout>
+
+

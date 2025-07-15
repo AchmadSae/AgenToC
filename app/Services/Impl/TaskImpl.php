@@ -7,11 +7,13 @@ use App\Models\DetailTaskModel;
 use App\Models\TaskModel;
 use App\Services\TaskInterface;
 use Carbon\Carbon;
+use App\Models\User;
 use Illuminate\Support\Facades\DB;
 use App\Helpers\GenerateId;
 use App\Models\GlobalParam;
 use App\Models\UserDetailModel;
 use Symfony\Component\CssSelector\Exception\InternalErrorException;
+use Symfony\Component\Finder\Glob;
 use Symfony\Component\HttpFoundation\Exception\BadRequestException;
 
 class TaskImpl implements TaskInterface
@@ -27,6 +29,28 @@ class TaskImpl implements TaskInterface
     }
 
     /**
+     * @pram string $workerId
+     * @param string $userId
+     * @return void
+     **/
+    public function coinsBalanceByApproved($workerId = null, $userId = null): void
+    {
+        $costUser = GlobalParam::Where('code', Constant::GAS_USER);
+        $costWorker = GlobalParam::Where('code', Constant::GAS_WORKER);
+        DB::transaction(function () use ($workerId, $userId, $costUser, $costWorker) {
+            $worker = UserDetailModel::where('user_detail_id', $workerId)->lockForUpdate()->first();
+            $client = UserDetailModel::where('user_detail_id', $userId)->lockForUpdate()->first();
+
+            // Assuming you want to increase the worker's balance by a certain amount
+            $worker->balance_coins -= GlobalParam::where('code', $costUser)->first()->value;
+            $client->balance_coins -= GlobalParam::where('code', $costWorker)->first()->value;
+
+            $worker->save();
+            $client->save();
+        }, 2);
+    }
+
+    /**
      * create task
      * 
      * @param object $data
@@ -38,8 +62,9 @@ class TaskImpl implements TaskInterface
         $typeTask = $data->task_type;
         #prepare data 
         $task = [
-            'id' => GenerateId::generateWithDate(Constant::ID_TASK),
-            'detail_task_id' => GenerateId::generateWithDate(Constant::ID_TASK_DETAIL),
+            'id' => GenerateId::generateId(Constant::ID_TASK, false),
+            'slug' => GenerateId::generateSlug($data->title),
+            'detail_task_id' => GenerateId::generateId(Constant::ID_TASK_DETAIL, true),
             'title' => $data->title,
             'user_id' => $data->email,
             'deadline' => $data->deadline,
@@ -56,23 +81,8 @@ class TaskImpl implements TaskInterface
             'task_type' => $typeTask,
         ];
 
-        try {
-            //code...
-            TaskModel::create($task);
-            DetailTaskModel::create($detailTask);
-
-            if ($typeTask == Constant::TASK_INQUIRY) {
-                $cost = GlobalParam::find(Constant::TASK_INQUIRY)->value;
-                DB::transaction(function () use ($user, $cost) {
-                    $userBalance = UserDetailModel::where('user_detail_id', $user->id)->lockforupdate()->first();
-                    $coins = $userBalance->balance_coins - $cost;
-                    $user->balance_coins = $coins;
-                    $user->save();
-                }, 2);
-            }
-        } catch (\Throwable $th) {
-            throw new InternalErrorException('Request Failed Check Balance or Request: ' . $th, http_response_code(500));
-        }
+        TaskModel::create($task);
+        DetailTaskModel::create($detailTask);
         $response = [
             'id' => $task['id'],
             'detail_task_id' => $detailTask['id'],
@@ -82,6 +92,35 @@ class TaskImpl implements TaskInterface
         ];
 
         return $response;
+    }
+
+
+
+    public function editTask($id, $data): bool
+    {
+
+        $task = TaskModel::find($id);
+        if (!$task) {
+            throw new BadRequestException('Task not found');
+        }
+
+        $task->title = $data['title'] ?? $task->title;
+        $task->deadline = $data['deadline'] ?? $task->deadline;
+        $task->save();
+
+        $detailTask = DetailTaskModel::find($task->detail_task_id);
+        if (!$detailTask) {
+            throw new InternalErrorException('Detail task not found');
+        }
+
+        $detailTask->description = $data['description'] ?? $detailTask->description;
+        $detailTask->task_contract = $data['task_contract'] ?? $detailTask->task_contract;
+        $detailTask->price = $data['price'] ?? $detailTask->price;
+        $detailTask->required_skills = $data['required_skills'] ?? $detailTask->required_skills;
+        if (isset($data['attachment'])) {
+            $detailTask->attachment = $data['attachment'];
+        }
+        return $detailTask->save();
     }
 
     /**
@@ -94,8 +133,15 @@ class TaskImpl implements TaskInterface
     public function approval($id): bool
     {
         $task = TaskModel::find($id);
+        $client = User::where('email', $task->user_id)->user_detail_id->first();
+        $worker = User::where('id', $task->worker_id)->user_detail_id->first();
+
+        if (!$task || !$client || !$worker) {
+            throw new BadRequestException('Task or User not found');
+        }
         $task->status = true;
         $task->save();
+        $this->coinsBalanceByApproved($worker, $client);
         return true;
     }
 
