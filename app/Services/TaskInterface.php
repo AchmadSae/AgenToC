@@ -10,4 +10,5 @@ interface TaskInterface
     public function editTask($id, $data): bool;
     public function bindTask($id, $workerId): bool;
     public function deleteTask($id);
+    public function revision($data): array;
 }

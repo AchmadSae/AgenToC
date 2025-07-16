@@ -30,10 +30,17 @@ class TaskModel extends Model
         return $this->hasMany(KanbanModel::class, 'task_id');
     }
 
+    public function revisionHistory()
+    {
+        return $this->hasMany(RevisionHistoryModel::class, 'task_id');
+    }
+
     public function getTask($id)
     {
         return $this->belongsTo(DetailTaskModel::class, 'detail_task_id', 'id')->where('id', $id)->first();
     }
+
+
 
 
     /**

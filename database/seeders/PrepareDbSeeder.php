@@ -20,12 +20,16 @@ class PrepareDbSeeder extends Seeder
             ['role_id' => 'RWORKER', 'role_name' => 'worker', 'created_at' => now(), 'updated_at' => now()],
         ]);
 
-        DB::table('global_parameter')->insert([
-            ['code' => 'GAS_FEE_USER', 'value' => '2', 'description' => 'Amount Coins for Task Inquiry'],
-            ['code' => 'GAS_FEE_WORKER', 'value' => '1', 'description' => 'Amount Coins for Task Inquiry'],
+        DB::table('gas_fees')->insert([
+            ['code' => 'GAS_FEE_USER', 'value' => '0.2', 'description' => 'Amount Coins for Task Inquiry'],
+            ['code' => 'GAS_FEE_WORKER', 'value' => '0.1', 'description' => 'Amount Coins for Task Inquiry'],
             ['code' => 'COINS_PRICE', 'value' => '80000', 'description' => 'Coins Price'],
         ]);
-
+        // Insert task types
+        DB::table('product_type')->insert([
+            ['code' => 'CW', 'name' => 'Content Writing', 'value' => '10', 'description' => 'All the social media content writing'],
+            ['code' => 'GD', 'name' => 'Graphics Design', 'value' => '8', 'description' => 'An custom disgn with specific target'],
+        ]);
         // // Insert user_detail
         // $user_detail1 = UserDetailModel::create([
         //     'id' => GenerateId::generateWithDate('UD'),

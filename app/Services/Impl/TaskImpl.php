@@ -8,12 +8,13 @@ use App\Models\TaskModel;
 use App\Services\TaskInterface;
 use Carbon\Carbon;
 use App\Models\User;
+use App\Models\RevisionHistory;
 use Illuminate\Support\Facades\DB;
 use App\Helpers\GenerateId;
 use App\Models\GlobalParam;
+use App\Models\RevisionHistoryModel;
 use App\Models\UserDetailModel;
 use Symfony\Component\CssSelector\Exception\InternalErrorException;
-use Symfony\Component\Finder\Glob;
 use Symfony\Component\HttpFoundation\Exception\BadRequestException;
 
 class TaskImpl implements TaskInterface
@@ -171,5 +172,24 @@ class TaskImpl implements TaskInterface
         }
 
         return true;
+    }
+
+    public function revision($data): array
+    {
+        $revision = [
+            'task_id' => $data['task_id'],
+            'changes' => $data['changes'],
+            'changed_by' => $data['changed_by'],
+            'attachment' => $data['attachment'] ?? null,
+        ];
+
+        $revisionHistory = RevisionHistoryModel::create($revision);
+        return [
+            'id' => $revisionHistory->id,
+            'task_id' => $revisionHistory->task_id,
+            'changes' => $revisionHistory->changes,
+            'changed_by' => $revisionHistory->changed_by,
+            'attachment' => $revisionHistory->attachment,
+        ];
     }
 }
