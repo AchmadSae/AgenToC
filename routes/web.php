@@ -33,6 +33,9 @@ Route::get('/', function () {
 /**
  * end root route
  **/
+Route::get('/test', function () {
+    return view('test');
+})->name('test');
 
 
 

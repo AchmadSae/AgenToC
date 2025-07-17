@@ -7,13 +7,14 @@ use App\Services\AuthInterface;
 use App\Models\User;
 use App\Models\UserDetailModel;
 use App\Helpers\GenerateId;
+use App\Helpers\Log;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Auth\Events\PasswordReset;
 use Illuminate\Support\Facades\Password;
 use Illuminate\Validation\ValidationException;
 use Illuminate\Support\Str;
-#please check function ratelimiter
+use illuminate\http\request;
 use Illuminate\Cache\RateLimiter;
 use Illuminate\Auth\Events\Lockout;
 
@@ -24,9 +25,18 @@ class AuthImpl implements AuthInterface
 {
 
 
-    public function __construct()
-    {
+    public function __construct() {}
 
+    public function hasVerifiedEmail($email): bool
+    {
+        $response = false;
+        $isExistVerified = User::where('email', $email)
+            ->whereNotNull('email_verified_at')
+            ->exists();
+        if ($isExistVerified) {
+            $response = true;
+        }
+        return $response;
     }
 
     public function login($data): bool
@@ -37,7 +47,9 @@ class AuthImpl implements AuthInterface
             ->where('roles.role_name', $data->role_name)
             ->where('user_detail_roles.is_active', true)
             ->exists();
-        $hasVerified = $data->hasVerifiedEmail();
+        Log::browser($data, 'Service Login User');
+
+        $hasVerified = $this->hasVerifiedEmail($data->email);
         if (!$hasRole && !$hasVerified) {
             return false;
         }
@@ -47,13 +59,15 @@ class AuthImpl implements AuthInterface
     public function register($data): array
     {
         #local $user_Detail_id for prevent duplicate id
-        $user_detail_id = GenerateId::generateWithDate('UD');
+        $user_detail_id = GenerateId::generateId('UD', true);
         $registeredUser = [];
         $role_id = match ($data->role) {
             'admin' => Constant::ROLE_ADMIN,
             'worker' => Constant::ROLE_WORKER,
             default => Constant::ROLE_CLIENT,
         };
+        #debug
+        Log::browser($data, 'Register User role: ' . $role_id);
         #check email isUnique
         $user = User::where('email', $data->email)->first();
         if ($user) {
@@ -82,7 +96,6 @@ class AuthImpl implements AuthInterface
             ]);
             $registeredUser->sendEmailVerificationNotification();
             return $registeredUser;
-
         }, 5);
         return [
             'flag' => $data->flag,
@@ -117,13 +130,12 @@ class AuthImpl implements AuthInterface
     #on test
     public function ensureIsNotRateLimited($data)
     {
-        if (!RateLimiter::tooManyAttempts($this->throttleKey($data->email), 5)) {
-            return;
+        $limiter = app(RateLimiter::class);
+        $key = $this->throttleKey($data->email);
+        if ($limiter->tooManyAttempts($key, Constant::MAX_ATTEMPTS)) {
+            $seconds = $limiter->availableIn($key);
+            event(new Lockout($data));
         }
-
-        event(new Lockout(request()));
-
-        $seconds = RateLimiter::availableIn($this->throttleKey($data->email));
 
         throw ValidationException::withMessages([
             'email' => __('auth.throttle', [

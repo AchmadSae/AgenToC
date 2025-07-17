@@ -7,20 +7,20 @@
                     <!--begin::Back link-->
                     <div class="me-2"></div>
                     @if($flag == 'user')
-                        <div class="m-0">
-                            <span class="text-gray-500 fw-bold fs-5 me-2" data-kt-translate="sign-in-head-desc">Not a Member
-                                yet?</span>
-                            <a href="{{ route('sign-up', ['flag' => 'user']) }}" class="link-primary fw-bold fs-5"
-                                data-kt-translate="sign-in-head-link">Sign Up</a>
-                        </div>
+                    <div class="m-0">
+                        <span class="text-gray-500 fw-bold fs-5 me-2" data-kt-translate="sign-in-head-desc">Not a Member
+                            yet?</span>
+                        <a href="{{ route('sign-up', ['flag' => 'user']) }}" class="link-primary fw-bold fs-5"
+                            data-kt-translate="sign-in-head-link">Sign Up</a>
+                    </div>
                     @endif
                     @if($flag == 'worker')
-                        <div class="m-0">
-                            <span class="text-gray-500 fw-bold fs-5 me-2" data-kt-translate="sign-in-head-desc">Not a Member
-                                yet?</span>
-                            <a href="{{ route('sign-up', ['flag' => 'worker']) }}" class="link-primary fw-bold fs-5"
-                                data-kt-translate="sign-in-head-link">Sign Up</a>
-                        </div>
+                    <div class="m-0">
+                        <span class="text-gray-500 fw-bold fs-5 me-2" data-kt-translate="sign-in-head-desc">Not a Member
+                            yet?</span>
+                        <a href="{{ route('sign-up', ['flag' => 'worker']) }}" class="link-primary fw-bold fs-5"
+                            data-kt-translate="sign-in-head-link">Sign Up</a>
+                    </div>
                     @endif
                     <!--end::Sign Up link=-->
                 </div>
@@ -28,13 +28,16 @@
                 <div class="p-20">
                     <!--begin::Form-->
                     @if($flag == 'user')
-                        <x-form :form="'sign-in'" :directUrl="'home'" :title="'Sign In'" :description="'Get our flexibility and easy management business'" :id="'kt_sign_in_form'" :action="'login'">
-                        </x-form>
+                    <x-form :form="'sign-in'" :directUrl="'test'" :title="'Sign In'"
+                        :description="'Get our flexibility and easy management business'" :id="'kt_sign_in_form'"
+                        :action="'login'">
+                    </x-form>
                     @endif
                     @if($flag == 'worker')
-                        <x-form :form="'sign-in'" :directUrl="'home'" :title="'Sign In'" :description="'Get our flexibility and easy management business'" :id="'kt_sign_in_form'" :action="'login'"
-                            :typeRegister="'worker'">
-                        </x-form>
+                    <x-form :form="'sign-in'" :directUrl="'home'" :title="'Sign In'"
+                        :description="'Get our flexibility and easy management business'" :id="'kt_sign_in_form'"
+                        :action="'login'" :typeRegister="'worker'">
+                    </x-form>
                     @endif
                     <!--end::Form-->
                 </div>

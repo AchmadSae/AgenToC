@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Helpers\Log;
 use App\Models\User;
 use Illuminate\Auth\Events\Verified;
 use Illuminate\Database\QueryException;
@@ -37,13 +38,12 @@ class AuthController extends Controller
             'email' => ['required', 'email'],
             'password' => ['required'],
         ]);
+
         if (Auth::attempt($credentials, $request->boolean('remember'))) {
             $request->session()->regenerate();
-
             try {
                 #call the service
                 $response = $this->authInterface->login($request);
-
             } catch (QueryException $e) {
                 return back()->withErrors([
                     'error' => 'Ups! something went wrong!' . $e->getMessage(),
@@ -51,20 +51,19 @@ class AuthController extends Controller
             }
 
             if (!$response) {
-                return back()->withErrors([
-                    'error' => 'Role Access Denied!',
-                ]);
+                SweetAlert::error('error', 'Ups! you are not allowed to login'); // If the login attempt was unsuccessful, redirect back with an error message
+                return back();
             }
-            return match ($request->role_name) {
+            return match ($request->role) {
                 'admin' => redirect()->route('admin_dashboard'),
                 'user' => redirect()->route('client_dashboard'),
                 'worker' => redirect()->route('worker_dashboard'),
                 default => redirect()->route('home'),
             };
         }
-        return back()->withErrors([
-            'email' => 'Email or password is incorrect.',
-        ])->onlyInput('email');
+
+        SweetAlert::error('error', 'Ups! password or email is incorrect'); // If the login attempt was unsuccessful, redirect back with an error message
+        return back();
     }
     public function showRegistrationForm($flag)
     {
@@ -78,17 +77,16 @@ class AuthController extends Controller
     public function register(Request $request)
     {
         $response = [];
-        $data = $request->validate([
+        log::browser($request, 'Register User');
+        $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
             'password' => ['required', 'confirmed'],
-            'skill' => ['string'],
-            'tagline' => ['string'],
             'role' => ['required'],
         ]);
         try {
             //code...
-            $response = $this->authInterface->register($data);
+            $response = $this->authInterface->register($request);
             SweetAlert::success('success', $response['message']);
             return redirect()->route('sign-in', ['flag' => $response['flag']]);
         } catch (InternalErrorException $th) {
@@ -183,5 +181,4 @@ class AuthController extends Controller
             ? redirect()->route('login')->with('status', __($response))
             : back()->withErrors(['email' => [__($response)]]);
     }
-
 }

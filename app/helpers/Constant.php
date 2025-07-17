@@ -21,4 +21,5 @@ class Constant
     public const TASK_CANCELLED = 'cancelled';
     public const GAS_USER = 'GAS_FEE_USER';
     public const GAS_WORKER = 'GAS_FEE_WORKER';
+    public const MAX_ATTEMPTS = 5;
 }

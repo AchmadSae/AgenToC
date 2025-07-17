@@ -1,17 +1,17 @@
 @props([
-    'method' => 'POST',
-    'id' => 'kt_sign_up_form',
-    'directUrl' => 'login',
-    'action',
-    'title'=> 'Sign Up to our platform',
-    'description' => '',
-    'form',
-    'typeRegister' => 'user'
+'method' => 'POST',
+'id' => 'kt_sign_up_form',
+'directUrl' => 'login',
+'action',
+'title'=> 'Sign Up to our platform',
+'description' => '',
+'form',
+'typeRegister' => 'user'
 ])
 <form method="{{ $method }}" class="form w-100" novalidate="novalidate" id="{{ $id }}"
     data-kt-redirect-url="{{ route($directUrl) }}" action="{{ route($action) }}">
     @csrf
-                            <!--begin::Heading-->
+    <!--begin::Heading-->
     <div class="text-start mb-10">
         <x-validation-errors />
     </div>
@@ -19,10 +19,10 @@
         <!--begin::Title-->
         <h1 class="text-gray-900 mb-3 fs-3x" data-kt-translate="{{ $form }}-title">{{ $title }}
         </h1>
-    <!--end::Title-->
+        <!--end::Title-->
         <!--begin::Text-->
         <div class="text-gray-500 fw-semibold fs-6" data-kt-translate="general-desc">
-            {{ $description }}    
+            {{ $description }}
         </div>
         <!--end::Link-->
     </div>
@@ -30,14 +30,15 @@
     @if($form == 'sign-in')
     <!-- begin::Input group Role -->
     <div class="fv-row mb-10">
-        <select class="form-select form-control-lg form-control-solid" aria-label="role" style="cursor: pointer;" name="role_name">
+        <select class="form-select form-control-lg form-control-solid" aria-label="role" style="cursor: pointer;"
+            name="role">
             <option value="user">User</option>
             <option value="worker">Worker</option>
         </select>
     </div>
     @endif
-    @if($typeRegister == 'user' && $form == 'sign-up')  
-    <input type="text" name="role_name" value="{{ $typeRegister }}" hidden>
+    @if($typeRegister == 'user' && $form == 'sign-up')
+    <input type="text" name="role" value="{{ $typeRegister }}" hidden>
     @endif
     <!-- end::Input group Role -->
     <!--begin::Input group-->
@@ -49,7 +50,7 @@
     <!--end::Input group-->
     @endif
     <!--begin::Input group-->
-    
+
     <div class="fv-row mb-10">
         <input class="form-control form-control-lg form-control-solid" type="email" placeholder="Email" name="email"
             autocomplete="off" data-kt-translate="{{ $form }}-input-email" />
@@ -58,14 +59,14 @@
     @if($form == 'sign-up' && $typeRegister == 'worker')
     <!--begin::Input group-->
     <div class="fv-row mb-10">
-        <input class="form-control form-control-lg form-control-solid" type="text" placeholder="Skills Focus" name="skill"
-            autocomplete="off" />
+        <input class="form-control form-control-lg form-control-solid" type="text" placeholder="Skills Focus"
+            name="skill" autocomplete="off" />
     </div>
     <!--end::Input group-->
     <!--begin::Input group-->
     <div class="fv-row mb-10">
-        <input class="form-control form-control-lg form-control-solid" type="text" placeholder="Show Your Tag Line" name="tagline"
-            autocomplete="off" />
+        <input class="form-control form-control-lg form-control-solid" type="text" placeholder="Show Your Tag Line"
+            name="tagline" autocomplete="off" />
     </div>
     @endif
     <!--end::Input group-->
@@ -83,7 +84,7 @@
                     <i class="ki-duotone ki-eye fs-2 d-none"></i>
                 </span>
             </div>
-        @if($form == 'sign-up')
+            @if($form == 'sign-up')
 
             <!--end::Input wrapper-->
             <!--begin::Meter-->
@@ -94,7 +95,7 @@
                 <div class="flex-grow-1 bg-secondary bg-active-success rounded h-5px"></div>
             </div>
             <!--end::Meter-->
-        @endif
+            @endif
         </div>
         <!--end::Wrapper-->
         <!--begin::Hint-->
@@ -103,11 +104,11 @@
             of
             letters,
             numbers & symbols.</div>
-            <!--end::Hint-->
+        <!--end::Hint-->
         @endif
     </div>
     <!--end::Input group=-->
-    
+
     @if($form == 'sign-up')
     <!--begin::Input group-->
     <div class="fv-row mb-10">
@@ -144,8 +145,10 @@
             <!--end::Symbol-->
             <!--begin::Symbol-->
             <a href="#" class="symbol symbol-circle symbol-45px w-45px bg-light">
-                <img alt="Logo" src="{{ asset('assets/media/svg/brand-logos/apple-black.svg') }}" class="theme-light-show p-4" />
-                <img alt="Logo" src="{{ asset('assets/media/svg/brand-logos/apple-white.svg') }}" class="theme-dark-show p-4" />
+                <img alt="Logo" src="{{ asset('assets/media/svg/brand-logos/apple-black.svg') }}"
+                    class="theme-light-show p-4" />
+                <img alt="Logo" src="{{ asset('assets/media/svg/brand-logos/apple-white.svg') }}"
+                    class="theme-dark-show p-4" />
             </a>
             <!--end::Symbol-->
         </div>
