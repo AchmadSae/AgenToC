@@ -15,6 +15,7 @@ use Illuminate\Support\Facades\Password;
 use Illuminate\Validation\ValidationException;
 use Illuminate\Support\Str;
 use illuminate\http\request;
+use App\Models\GlobalParam;
 use Illuminate\Cache\RateLimiter;
 use Illuminate\Auth\Events\Lockout;
 
@@ -23,15 +24,18 @@ use Illuminate\Auth\Events\Lockout;
 
 class AuthImpl implements AuthInterface
 {
+    protected $globalDBattempts;
 
 
-    public function __construct() {}
+    public function __construct()
+    {
+        $this->globalDBattempts = GlobalParam::get('DB_ATTEMPTS')->value;
+    }
 
     public function hasVerifiedEmail($email): bool
     {
         $response = false;
         $isExistVerified = User::where('email', $email)
-            ->whereNotNull('email_verified_at')
             ->exists();
         if ($isExistVerified) {
             $response = true;
@@ -56,7 +60,7 @@ class AuthImpl implements AuthInterface
         return true;
     }
 
-    public function register($data): array
+    public function register($data, $isTransaction = false): array
     {
         #local $user_Detail_id for prevent duplicate id
         $user_detail_id = GenerateId::generateId('UD', true);
@@ -76,7 +80,7 @@ class AuthImpl implements AuthInterface
             ];
         }
 
-        DB::transaction(function () use ($user_detail_id, $role_id, $data, &$registeredUser) {
+        $response = DB::transaction(function () use ($user_detail_id, $role_id, $data, &$registeredUser, $isTransaction) {
             //code...
             $user_detail = UserDetailModel::create([
                 'id' => $user_detail_id,
@@ -94,12 +98,16 @@ class AuthImpl implements AuthInterface
                 'user_detail_id' => $user_detail->id,
                 'role_id' => $role_id,
             ]);
-            $registeredUser->sendEmailVerificationNotification();
+            #check isFromTransaction
+            if (!$isTransaction) {
+                # code...
+                $registeredUser->sendEmailVerificationNotification();
+            }
             return $registeredUser;
-        }, 5);
+        }, $this->globalDBattempts);
         return [
-            'flag' => $data->flag,
-            'user' => $registeredUser,
+            'flag' => $data->role,
+            'user' => $response,
             'message' => 'Successfully registered! Confirm email to activate your account.',
         ];
     }

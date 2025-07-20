@@ -11,15 +11,18 @@ use Illuminate\Database\QueryException;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use App\Models\GlobalParam;
 
 class TaskController extends Controller
 {
-    private $role;
-    private $localDate;
+    protected $globalDBattempts;
+    protected $role;
+    protected $localDate;
     protected $taskService;
     protected $validationRule;
     public function __construct(TaskImpl $taskImpl)
     {
+        $this->globalDBattempts = GlobalParam::get('DB_ATTEMPTS')->value;
         $this->taskService = $taskImpl;
         $this->validationRule = [
             'client_id' => 'required',
@@ -96,7 +99,7 @@ class TaskController extends Controller
         DB::transaction(function () use ($id) {
             $task = TaskModel::where('id', $id)->lockForUpdate()->first();
             $task->worker_id = Auth::user()->email;
-        }, 2);
+        }, $this->globalDBattempts);
         return true;
     }
 
@@ -111,7 +114,7 @@ class TaskController extends Controller
         DB::transaction(function () use ($id) {
             $task = TaskModel::where('id', $id)->lockForUpdate()->first();
             $task->delete();
-        }, 2);
+        }, $this->globalDBattempts);
         return view('worker.task')->with('success', 'Task has been deleted');
     }
 }

@@ -11,20 +11,11 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('gas_fees', function (Blueprint $table) {
+        Schema::create('Global_Parameter', function (Blueprint $table) {
             $table->id();
             $table->string('code')->unique();
             $table->string('value');
             $table->string('description')->nullable();
-            $table->timestamps();
-        });
-
-        Schema::create('product_type', function (Blueprint $table) {
-            $table->id();
-            $table->string('code')->unique();
-            $table->string('name');
-            $table->string('value');
-            $table->text('description')->nullable();
             $table->timestamps();
         });
     }

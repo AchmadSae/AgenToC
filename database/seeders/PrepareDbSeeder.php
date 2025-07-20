@@ -20,15 +20,14 @@ class PrepareDbSeeder extends Seeder
             ['role_id' => 'RWORKER', 'role_name' => 'worker', 'created_at' => now(), 'updated_at' => now()],
         ]);
 
-        DB::table('gas_fees')->insert([
+        DB::table('global_param')->insert([
+            ['code' => 'DEFAULT_PASS', 'value' => 'uniq123', 'description' => 'Default password for user registry'],
+            ['code' => 'CW', 'name' => 'Content Writing', 'value' => '10', 'description' => 'All the social media content writing'],
+            ['code' => 'GD', 'name' => 'Graphics Design', 'value' => '8', 'description' => 'An custom disgn with specific target'],
             ['code' => 'GAS_FEE_USER', 'value' => '0.2', 'description' => 'Amount Coins for Task Inquiry'],
             ['code' => 'GAS_FEE_WORKER', 'value' => '0.1', 'description' => 'Amount Coins for Task Inquiry'],
             ['code' => 'COINS_PRICE', 'value' => '80000', 'description' => 'Coins Price'],
-        ]);
-        // Insert task types
-        DB::table('product_type')->insert([
-            ['code' => 'CW', 'name' => 'Content Writing', 'value' => '10', 'description' => 'All the social media content writing'],
-            ['code' => 'GD', 'name' => 'Graphics Design', 'value' => '8', 'description' => 'An custom disgn with specific target'],
+            ['code' => 'DB_ATTEMPTS', 'value' => '5', 'description' => 'DB Transaction Attempts'],
         ]);
         // // Insert user_detail
         // $user_detail1 = UserDetailModel::create([

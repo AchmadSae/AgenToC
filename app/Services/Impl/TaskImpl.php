@@ -9,6 +9,7 @@ use App\Services\TaskInterface;
 use Carbon\Carbon;
 use App\Models\User;
 use App\Models\RevisionHistory;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\DB;
 use App\Helpers\GenerateId;
 use App\Models\GlobalParam;
@@ -19,10 +20,15 @@ use Symfony\Component\HttpFoundation\Exception\BadRequestException;
 
 class TaskImpl implements TaskInterface
 {
-    private $localDate;
+    protected $localDate;
+
+    protected $timeDateLine;
+    protected $globalDBattempts;
 
     public function __construct()
     {
+        $this->globalDBattempts = GlobalParam::get('DB_ATTEMPTS')->value;
+
         $t = Carbon::now();
         $this->localDate = Carbon::parse($t)
             ->setTimezone('Asia/Jakarta')
@@ -48,7 +54,7 @@ class TaskImpl implements TaskInterface
 
             $worker->save();
             $client->save();
-        }, 2);
+        }, $this->globalDBattempts);
     }
 
     /**
@@ -152,7 +158,7 @@ class TaskImpl implements TaskInterface
             $task = TaskModel::where('id', $id)->lockForUpdate()->first();
             $task->worker_id = $workerId;
             $task->save();
-        }, 2);
+        }, $this->globalDBattempts);
         if ($rs == null) {
             return false;
         }
@@ -165,13 +171,29 @@ class TaskImpl implements TaskInterface
         $rs = DB::transaction(function () use ($id, $detailTaskId) {
             TaskModel::where('id', $id)->delete();
             DetailTaskModel::where('id', $detailTaskId)->delete();
-        });
+        }, $this->globalDBattempts);
 
         if ($rs == null) {
             return false;
         }
 
         return true;
+    }
+
+    public function getAllTask($status = 'done', $isDeadline = false): Collection
+    {
+        $task = [];
+        if ($status == 'in-progress' && $isDeadline) {
+            $now = Carbon::parse($this->localDate);
+            $tomorrow = $now->copy()->addDay();
+
+            $task = TaskModel::where('status', $status)
+                ->whereBetween('deadline', [$now, $tomorrow])
+                ->get();
+        }
+
+        $task = TaskModel::where('status', $status)->get();
+        return $task;
     }
 
     public function revision($data): array

@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use App\Models\UserDetailRolesModel;
 
 class User extends Authenticatable implements MustVerifyEmail
 {
@@ -27,4 +28,14 @@ class User extends Authenticatable implements MustVerifyEmail
     protected $casts = [
         'email_verified_at' => 'datetime',
     ];
+
+    public function userDetail()
+    {
+        return $this->belongsTo(UserDetailModel::class);
+    }
+
+    public function userDetailRole()
+    {
+        return $this->hasMany(UserDetailRolesModel::class);
+    }
 }

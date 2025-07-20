@@ -9,7 +9,7 @@ use Illuminate\Database\QueryException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Password;
-use RealRashid\SweetAlert\Facades\Alert as SweetAlert;
+use RealRashid\SweetAlert\Facades\Alert;
 use App\Services\AuthInterface;
 use Symfony\Component\CssSelector\Exception\InternalErrorException;
 
@@ -51,7 +51,7 @@ class AuthController extends Controller
             }
 
             if (!$response) {
-                SweetAlert::error('error', 'Ups! you are not allowed to login'); // If the login attempt was unsuccessful, redirect back with an error message
+                Alert::error('error', 'Ups! you are not allowed to login'); // If the login attempt was unsuccessful, redirect back with an error message
                 return back();
             }
             return match ($request->role) {
@@ -62,7 +62,7 @@ class AuthController extends Controller
             };
         }
 
-        SweetAlert::error('error', 'Ups! password or email is incorrect'); // If the login attempt was unsuccessful, redirect back with an error message
+        Alert::error('error', 'Ups! password or email is incorrect'); // If the login attempt was unsuccessful, redirect back with an error message
         return back();
     }
     public function showRegistrationForm($flag)
@@ -87,7 +87,7 @@ class AuthController extends Controller
         try {
             //code...
             $response = $this->authInterface->register($request);
-            SweetAlert::success('success', $response['message']);
+            Alert::success('success', $response['message']);
             return redirect()->route('sign-in', ['flag' => $response['flag']]);
         } catch (InternalErrorException $th) {
             return back()->withErrors([
@@ -103,7 +103,7 @@ class AuthController extends Controller
         $request->session()->regenerateToken();
         $request->session()->flush();
 
-        SweetAlert::success('success', 'Successfully logged out!');
+        Alert::success('success', 'Successfully logged out!');
         return redirect('/');
     }
 
@@ -117,13 +117,13 @@ class AuthController extends Controller
         }
 
         if ($user->hasVerifiedEmail()) {
-            SweetAlert::info('info', 'Email already verified!');
+            Alert::info('info', 'Email already verified!');
             return redirect()->route('sign-in', ['flag' => 'user']);
         }
 
         $user->markEmailAsVerified();
         event(new Verified($user));
-        SweetAlert::success('success', 'Successfully verified!');
+        Alert::success('success', 'Successfully verified!');
         return redirect('/');
     }
 
@@ -133,7 +133,7 @@ class AuthController extends Controller
             return redirect('/');
         }
         $request->user()->sendEmailVerificationNotification();
-        SweetAlert::success('info', 'Verification link sent!');
+        Alert::success('info', 'Verification link sent!');
         return back();
     }
 

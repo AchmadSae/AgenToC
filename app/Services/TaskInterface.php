@@ -2,6 +2,8 @@
 
 namespace App\Services;
 
+use Illuminate\Database\Eloquent\Collection;
+
 
 interface TaskInterface
 {
@@ -11,4 +13,5 @@ interface TaskInterface
     public function bindTask($id, $workerId): bool;
     public function deleteTask($id);
     public function revision($data): array;
+    public function getAllTask($status = 'done', $isDeadline = false): Collection;
 }

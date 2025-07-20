@@ -10,5 +10,6 @@ class GlobalParam extends Model
     protected $fillabel = [
         'code',
         'value',
+        'description'
     ];
 }

@@ -12,6 +12,7 @@ class TransactionsModel extends Model
     protected $fillable = [
         'user_id',
         'product_id',
+        'task_id',
         'product_type',
         'payment_method',
         'quantity',
@@ -22,5 +23,10 @@ class TransactionsModel extends Model
     public function user()
     {
         return $this->belongsTo(User::class, 'email');
+    }
+
+    public function task()
+    {
+        return $this->belongsTo(TaskModel::class, 'task_id');
     }
 }

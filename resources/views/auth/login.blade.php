@@ -1,4 +1,7 @@
-<x-guest-layout :title="__('Login')">
+<x-guest-lay>
+    <x-slot:title>
+        Login
+    </x-slot>
     <div class="d-flex flex-column flex-lg-row flex-column-fluid">
         <!--begin::Wrapper-->
         <div class="d-flex flex-column flex-column-fluid flex-center w-lg-50 p-10">
@@ -122,4 +125,4 @@
             style="background-image: url({{ asset('assets/media/auth/bg11.png') }})"></div>
         <!--begin::Body-->
     </div>
-</x-guest-layout>
+</x-guest-lay>

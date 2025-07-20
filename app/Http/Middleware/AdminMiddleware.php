@@ -3,7 +3,7 @@
 namespace App\Http\Middleware;
 
 use Closure;
-use DB;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 use RealRashid\SweetAlert\Facades\Alert;
