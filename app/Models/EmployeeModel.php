@@ -2,7 +2,10 @@
 
 namespace App\Models;
 
-class EmployeeModel extends BaseModel
+use Illuminate\Database\Eloquent\Model;
+use App\Models\DepartmentsModel;
+
+class EmployeeModel extends Model
 {
     protected $table = 'employees';
     protected $primaryKey = 'employee_id';
@@ -13,12 +16,11 @@ class EmployeeModel extends BaseModel
         'email',
         'phone',
         'position',
-        'salary',
-        'department_id',
+        'is_active',
     ];
 
     public function department()
     {
-        return $this->belongsTo(DepartmentModel::class, 'department_id', 'department_id');
+        return $this->belongsTo(DepartmentsModel::class, 'department_id', 'department_id');
     }
 }

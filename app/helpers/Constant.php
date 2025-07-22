@@ -23,4 +23,7 @@ class Constant
     public const GAS_WORKER = 'GAS_FEE_WORKER';
     public const MAX_ATTEMPTS = 5;
     public const PAYMENT_BANK = 'transfer_bank';
+    public const ADMIN_CEO_LEVEL = 'ceo';
+    public const ADMIN_MANAGER_LEVEL = 'manager';
+    public const ADMIN_REGULAR_LEVEL = 'regular';
 }

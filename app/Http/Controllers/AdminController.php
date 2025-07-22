@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Helpers\Constant;
 use App\Models\TransactionsModel;
 use App\Services\TaskInterface;
 use App\Services\TransactionsInterface;
@@ -13,24 +14,24 @@ use App\Models\TaskModel;
 use App\Services\FeedBackInterface;
 use Illuminate\Support\Facades\Auth;
 use RealRashid\SweetAlert\Facades\Alert;
-use App\Services\PublicMethodeService;
-
+use App\Services\publicMethodService;
+use App\Models\EmployeeModel;
 class AdminController extends Controller
 {
     protected $transactionsService;
     protected $userService;
     protected $taskService;
-    protected $publicMethodeService;
+    protected $publicMethodService;
     protected $feedbackService;
 
     public function __construct(
         TransactionsInterface $transactionsInterface,
         UserInterface $userInterface,
         TaskInterface $taskInterface,
-        PublicMethodeService $publicMethodeService,
+        publicMethodService $publicMethodService,
         FeedBackInterface $feedbackService
     ) {
-        $this->publicMethodeService = $publicMethodeService;
+        $this->publicMethodService = $publicMethodService;
         $this->transactionsService = $transactionsInterface;
         $this->userService = $userInterface;
         $this->taskService = $taskInterface;
@@ -199,7 +200,7 @@ class AdminController extends Controller
         $data = [];
         try {
             //code...
-            $userData = $this->publicMethodeService->getRoleNameAndUsername(Auth::user());
+            $userData = $this->publicMethodService->getRoleNameAndUsername(Auth::user());
             $data = GlobalParam::find($id);
             $data->value = $request->value;
             $data->code = $request->code;
@@ -332,7 +333,7 @@ class AdminController extends Controller
 
     #begin assets
     /**
-     * view all the assets (asstest of employees)
+     * view all the assets (assets of employees)
      * reference apps/user-management/users/list.html
      * @return \Illuminate\Contracts\View\Factory|\Illuminate\Contracts\View\View|\Illuminate\Http\RedirectResponse
      * @throws \Throwable
@@ -341,10 +342,72 @@ class AdminController extends Controller
     {
         $data = [];
         try {
-            EmployeeModel::orderBy('created_at', 'desc')->paginate(10);
+            $data = EmployeeModel::orderBy('created_at', 'desc')->paginate(10);
         } catch (\Throwable $th) {
             //throw $th;
+            Alert::error('error', $th->getMessage());
         }
+        return view('admin.employees', compact('data'));
+    }
+
+    public function addEmployee(Request $request)
+    {
+        $email = Auth::user()->email;
+        $request->validate([
+            'name' => 'required',
+            'email' => 'required|email',
+            'phone' => 'required',
+            'password' => 'required',
+            'position' => 'required',
+        ]);
+
+        try {
+            $flag = $this->publicMethodService->isPermissionExist($email, Constant::ADMIN_CEO_LEVEL);
+            if (!$flag) {
+                Alert::error('error', 'You do not have permission to add an employee');
+            }
+
+            $data = new EmployeeModel();
+            $data->name = $request->name;
+            $data->email = $request->email;
+            $data->phone = $request->phone;
+            $data->status = $request->position;
+            $data->save();
+            Alert::success('success', 'Employee added successfully');
+
+        } catch (\Throwable $th) {
+            Alert::error('error', $th->getMessage());
+        }
+
+        Alert::success('success', 'Employee ' . $request->name . ' added successfully');
+        return redirect()->route('employees');
+    }
+
+    public function updateEmployee(Request $request, $id)
+    {
+        $request->validate([
+            'email' => 'required|email',
+            'phone' => 'required',
+            'position' => 'required',
+        ]);
+        try {
+            $flag = $this->publicMethodService->isPermissionExist($email, Constant::ADMIN_CEO_LEVEL);
+            if (!$flag) {
+                Alert::error('error', 'You do not have permission to add an employee');
+            }
+
+            $data = EmployeeModel::find($id);
+            $data->name = $request->name;
+            $data->email = $request->email;
+            $data->phone = $request->phone;
+            $data->status = $request->position;
+            $data->is_active = $request->is_active;
+            $data->save();
+            Alert::success('success', 'Employee ' . $request->name . ' updated successfully');
+        } catch (\Throwable $th) {
+            Alert::error('error', $th->getMessage());
+        }
+        return redirect()->route('employees');
     }
     #end assets
 }

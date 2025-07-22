@@ -74,8 +74,7 @@ Route::middleware(['oAuth'])->controller(AuthController::class)->group(function 
             Route::get('/employees', 'employees')->name('employees');
             Route::post('/employees/add', 'addEmployee')->name('add-employee');
             Route::post('/employees/update/{id}', 'updateEmployee')->name('update-employee');
-            Route::get('/customers', 'customers')->name('customers');
-
+ 
             #financial
             Route::get('/equity', 'equity')->name('equity');
             Route::post('/equity/add', 'addEquity')->name('add-equity');
