@@ -16,6 +16,7 @@ return new class extends Migration
             $table->string('code')->unique();
             $table->string('value');
             $table->string('description')->nullable();
+            $table->string('updated_by')->nullable();
             $table->timestamps();
         });
     }

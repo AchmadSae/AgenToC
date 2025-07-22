@@ -214,4 +214,15 @@ class TaskImpl implements TaskInterface
             'attachment' => $revisionHistory->attachment,
         ];
     }
+
+    public function isRevisionExist($taskId): bool
+    {
+        $revision = RevisionHistoryModel::where('task_id', $taskId)
+            ->orderBy('created_at', 'desc')
+            ->first();
+        if ($revision == null || !$revision->exists()) {
+            throw new BadRequestException('Revision not found for task: ' . $taskId);
+        }
+        return true;
+    }
 }

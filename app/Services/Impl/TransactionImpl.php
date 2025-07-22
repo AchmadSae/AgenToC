@@ -124,9 +124,15 @@ class TransactionImpl implements TransactionsInterface
 
     public function approvedPayment($id): array
     {
-        $transaction = TransactionsModel::find($id);
-        $transaction->status = true;
-        $transaction->save();
+        $transaction = new TransactionsModel();
+        DB::transaction(function () use ($id) {
+            $this->user_detail_id = UserDetailModel::where('user_id', $this->id_user)->lockForUpdate()->first()->id;
+            UserDetailModel::where('id', $this->user_detail_id)->lockForUpdate()->first();
+            $transaction = TransactionsModel::find($id);
+            $transaction->status = true;
+            $transaction->save();
+            return $transaction;
+        }, $this->globalDBattempts);
         $this->sendAccountAndReceiptByMail($transaction->toArray());
         #those email will include link email account verification to active
         return [

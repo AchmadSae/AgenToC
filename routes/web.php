@@ -52,8 +52,8 @@ Route::middleware(['oAuth'])->controller(AuthController::class)->group(function 
         Route::get('/global-param', 'GlobalParam')->name('global-param');
         Route::post('/global-param/add', 'addGlobalParam')->name('add-global-param');
         Route::post('/global-param/update/{id}', 'updateGlobalParam')->name('update-global-param');
-        Route::get('feedback', 'reviewers')->name('feedback');
-        Route::post('/feedback/{id}', 'feedbackReviewer')->name('feedback-reviewer');
+        Route::get('/feedback', 'reviewers')->name('feedback');
+        Route::post('/feedback/{id}', 'replyFeedback')->name('reply-feedback');
 
         #task (show all the task on going and can see the detail complain revision)
         Route::prefix('task')->controller(AdminController::class)->group(function () {
@@ -127,14 +127,14 @@ Route::middleware(['oAuth'])->controller(AuthController::class)->group(function 
             Route::get('/({id})', 'complains')->name('complains');
             Route::get('/update/{id}', 'updateComplain')->name('update-complain');
         });
-        Route::prefix('kanban-board')->controller(KanbanController::class)->group(function () {
-            Route::view('/', 'KanbanBoard.Index')->name('kanban-board');
-            Route::get('get-all', 'getItems')->name('get-all-items');
-            Route::post('store', 'store')->name('store');
-            Route::post('update', 'update'->name('update-kanban'));
-            Route::post('reorder', 'reorder')->name('reorder-kanban');
-            Route::post('delete', 'destroy')->name('delete-kanban');
-        });
+        // Route::prefix('kanban-board')->controller(KanbanController::class)->group(function () {
+        //     Route::view('/', 'KanbanBoard.Index')->name('kanban-board');
+        //     Route::get('get-all', 'getItems')->name('get-all-items');
+        //     Route::post('store', 'store')->name('store');
+        //     Route::post('update', 'update'->name('update-kanban'));
+        //     Route::post('reorder', 'reorder')->name('reorder-kanban');
+        //     Route::post('delete', 'destroy')->name('delete-kanban');
+        // });
     });
     /**
      * end root group for worker

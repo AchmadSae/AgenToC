@@ -42,6 +42,16 @@ return new class extends Migration {
             $table->binary('attachment')->nullable();
             $table->timestamps();
         });
+
+        Schema::create('feedback', function (Blueprint $table) {
+            $table->id();
+            $table->string('task_id')->nullable();
+            $table->string('user_id')->default('guest');
+            $table->text('comment');
+            $table->text('message')->nullable();
+            $table->integer('rating')->default(0);
+            $table->timestamps();
+        });
     }
 
     /**
@@ -50,5 +60,7 @@ return new class extends Migration {
     public function down(): void
     {
         Schema::dropIfExists('inquiry');
+        Schema::dropIfExists('task_detail');
+        Schema::dropIfExists('revision_history');
     }
 };
