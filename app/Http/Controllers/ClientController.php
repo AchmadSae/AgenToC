@@ -7,16 +7,19 @@ use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\Request;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
-use App\Models\TaskModel;
 use Symfony\Component\CssSelector\Exception\InternalErrorException;
+use App\Services\MethodServiceUtil;
 
-class CustomerController extends Controller
+use function PHPUnit\Framework\isEmpty;
+
+class ClientController extends Controller
 {
     private $isValidTask;
-    private $taskInterface;
+    private $taskService;
+    private $methodServiceUtil;
 
 
-    public function __construct(TaskInterface $taskInterface)
+    public function __construct(TaskInterface $taskInterface, MethodServiceUtil $methodServiceUtil)
     {
         $this->isValidTask = [
             'title' => 'required|unique:tasks|max:255',
@@ -28,17 +31,41 @@ class CustomerController extends Controller
             'attachment' => 'required|file|mimes:pdf,doc,docx,jpg,jpeg,png|max:2048',
         ];
 
-        $this->taskInterface = $taskInterface;
+        $this->taskService = $taskInterface;
+        $this->methodServiceUtil = $methodServiceUtil;
     }
     /**
-     * All task posted by customer
+     * view current product or task in-progress(can chat the worker(no attachment)
+     * -> this view simmilar like detail task from list of task)
+     * calender set about due date off all task
      * @return mixed
      **/
     public function index()
     {
-        $user = Auth::user()->email;
-        $data = TaskModel::findOrFail($user)->get();
-        return view('client.dashboard', ['data' => $data]);
+        $taskChat = [];
+        $task = [];
+        $taskByUserNeadDeadline = [];
+        $user = Auth::user()->user_detail_id;
+        try {
+            $task = $this->taskService->getAllTask('in-progress', false);
+            if (isEmpty($task)) {
+                throw new ModelNotFoundException("Task not found", 404);
+            }
+            #if task deadline have more than one result get only one near the deadline
+            if (count($task) > 1) {
+                $taskByUserNeadDeadline = $task->where('user_detail_id', $user)->sortBy('deadline')->first();
+            } else {
+                $taskByUserNeadDeadline = $task->where('user_detail_id', $user)->first();
+            }
+
+            #get chat message based
+            $taskChat = $this->methodServiceUtil->fetchMassageByTaskId($taskByUserNeadDeadline->task_id);
+        } catch (ModelNotFoundException $e) {
+            return redirect()->back()->with('error', $e->getMessage());
+        } catch (\Throwable $th) {
+            return redirect()->back()->with('error', 'Ups! something went wrong: ' . $th->getMessage());
+        }
+        return view('client.dashboard', ['taskByUser' => $taskByUserNeadDeadline, 'chatHistory' => $taskChat]);
     }
 
 
@@ -95,5 +122,4 @@ class CustomerController extends Controller
         }
         return redirect()->back()->with('success', 'Post Task has been deleted');
     }
-
 }

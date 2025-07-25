@@ -30,6 +30,11 @@ class TaskModel extends Model
         return $this->hasMany(KanbanModel::class, 'task_id');
     }
 
+    public function chats()
+    {
+        return $this->hasMany(MessageModel::class, 'task_id');
+    }
+
     public function revisionHistory()
     {
         return $this->hasMany(RevisionHistoryModel::class, 'task_id');

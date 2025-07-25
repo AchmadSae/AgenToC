@@ -5,7 +5,9 @@ namespace App\Models;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
-use App\Models\UserDetailRolesModel;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use App\models\MessageModel;
+
 
 class User extends Authenticatable implements MustVerifyEmail
 {
@@ -34,8 +36,8 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->belongsTo(UserDetailModel::class);
     }
 
-    public function userDetailRole()
+    public function messages(): hasMany
     {
-        return $this->hasMany(UserDetailRolesModel::class);
+        return $this->hasMany(MessageModel::class);
     }
 }

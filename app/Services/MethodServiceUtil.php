@@ -2,13 +2,14 @@
 
 namespace App\Services;
 
+use App\Events\TaskMessageSent;
 use App\Helpers\Constant;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
+use App\Models\MessageModel;
+use Illuminate\Support\Facades\Broadcast;
 
-
-
-class PublicMethodService
+class MethodServiceUtil
 {
     public function getRoleNameAndUsername($user): array
     {
@@ -25,8 +26,8 @@ class PublicMethodService
         $role_name = $response;
 
         return [
-            'role_name' => $name,
-            'username' => $role_name
+            'role_name' => $role_name,
+            'username' => $name
         ];
     }
 
@@ -57,5 +58,25 @@ class PublicMethodService
                 break;
         }
         return $flag;
+    }
+
+    public function fetchMassageByTaskId($taskId)
+    {
+        return MessageModel::where('task_id', $taskId)
+            ->with('user')
+            ->get();
+    }
+
+    public function sendMessage($data)
+    {
+        $message = MessageModel::create([
+            'task_id' => $data['task_id'],
+            'user_id' => $data['user_id'],
+            'message' => $data['message']
+        ]);
+
+        broadcast(new TaskMessageSent($message))->toOthers();
+
+        return $message;
     }
 }

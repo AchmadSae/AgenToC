@@ -3,7 +3,7 @@
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\WorkerController;
-use App\Http\Controllers\CustomerController;
+use App\Http\Controllers\ClientController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\TransactionsController;
@@ -74,8 +74,8 @@ Route::middleware(['oAuth'])->controller(AuthController::class)->group(function 
             Route::get('/employees', 'employees')->name('employees');
             Route::post('/employees/add', 'addEmployee')->name('add-employee');
             Route::post('/employees/update/{id}', 'updateEmployee')->name('update-employee');
- 
-            #financial
+
+            #financial (coming soon)
             Route::get('/equity', 'equity')->name('equity');
             Route::post('/equity/add', 'addEquity')->name('add-equity');
             Route::post('/equity/update/{id}', 'updateEquity')->name('update-equity');
@@ -91,11 +91,11 @@ Route::middleware(['oAuth'])->controller(AuthController::class)->group(function 
      **/
     Route::prefix('client')->middleware('users')->group(function () {
         #index in dashboard wil be show current post product / task has been order
-        Route::get('/dashboard', [CustomerController::class, 'index'])->name('client_dashboard');
-        Route::get('/profile', [CustomerController::class, 'profile'])->name('client_profile');
-        Route::post('/profile/update({id})', [CustomerController::class, 'updateProfile'])->name('update-profile');
-        Route::get('history', [CustomerController::class, 'history'])->name('history');
-        Route::prefix('task')->controller(CustomerController::class)->group(function () {
+        Route::get('/dashboard', [ClientController::class, 'index'])->name('client_dashboard');
+        Route::get('/profile', [ClientController::class, 'profile'])->name('client_profile');
+        Route::post('/profile/update({id})', [ClientController::class, 'updateProfile'])->name('update-profile');
+        Route::get('history', [ClientController::class, 'history'])->name('history');
+        Route::prefix('task')->controller(ClientController::class)->group(function () {
             #this will be included the chat and kanban status off project
             Route::get('/detail/{id}', 'detailTask')->name('detail_task');
             Route::post('/chat/{id}', 'postTask')->name('post_task');

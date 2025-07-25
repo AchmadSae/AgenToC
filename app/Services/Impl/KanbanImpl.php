@@ -3,7 +3,7 @@
 namespace App\Services\Impl;
 
 use App\Models\KanbanModel;
-use App\Repositories\KanbanInterface;
+use App\Services\KanbanInterface;
 use App\Models\TaskModel;
 use Illuminate\Database\Eloquent\Collection;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;

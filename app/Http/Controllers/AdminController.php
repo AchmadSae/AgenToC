@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Helpers\Constant;
+use App\Models\Assets;
 use App\Models\TransactionsModel;
 use App\Services\TaskInterface;
 use App\Services\TransactionsInterface;
@@ -14,8 +15,9 @@ use App\Models\TaskModel;
 use App\Services\FeedBackInterface;
 use Illuminate\Support\Facades\Auth;
 use RealRashid\SweetAlert\Facades\Alert;
-use App\Services\publicMethodService;
 use App\Models\EmployeeModel;
+use App\Services\MethodServiceUtil;
+
 class AdminController extends Controller
 {
     protected $transactionsService;
@@ -28,7 +30,7 @@ class AdminController extends Controller
         TransactionsInterface $transactionsInterface,
         UserInterface $userInterface,
         TaskInterface $taskInterface,
-        publicMethodService $publicMethodService,
+        MethodServiceUtil $publicMethodService,
         FeedBackInterface $feedbackService
     ) {
         $this->publicMethodService = $publicMethodService;
@@ -362,9 +364,10 @@ class AdminController extends Controller
         ]);
 
         try {
-            $flag = $this->publicMethodService->isPermissionExist($email, Constant::ADMIN_CEO_LEVEL);
+            $flag = $this->publicMethodService->isPermissionExist($request['email'], Constant::ADMIN_CEO_LEVEL);
             if (!$flag) {
-                Alert::error('error', 'You do not have permission to add an employee');
+                Alert::error('error', 'You do not have permission to edit an employee');
+                return redirect()->route('employees');
             }
 
             $data = new EmployeeModel();
@@ -374,7 +377,6 @@ class AdminController extends Controller
             $data->status = $request->position;
             $data->save();
             Alert::success('success', 'Employee added successfully');
-
         } catch (\Throwable $th) {
             Alert::error('error', $th->getMessage());
         }
@@ -391,9 +393,10 @@ class AdminController extends Controller
             'position' => 'required',
         ]);
         try {
-            $flag = $this->publicMethodService->isPermissionExist($email, Constant::ADMIN_CEO_LEVEL);
+            $flag = $this->publicMethodService->isPermissionExist($request['email'], Constant::ADMIN_CEO_LEVEL);
             if (!$flag) {
-                Alert::error('error', 'You do not have permission to add an employee');
+                Alert::error('error', 'You do not have permission to edit an employee');
+                return redirect()->route('employees');
             }
 
             $data = EmployeeModel::find($id);
@@ -408,6 +411,79 @@ class AdminController extends Controller
             Alert::error('error', $th->getMessage());
         }
         return redirect()->route('employees');
+    }
+
+    /**
+     * view all the equity (included asstes of company)
+     * reference /widgets/tables.html <!--begin::Tables Widget 13-->
+     * @return \Illuminate\Contracts\View\Factory|\Illuminate\Contracts\View\View|\Illuminate\Http\RedirectResponse
+     * @throws \Throwable
+     **/
+    public function equity()
+    {
+        $data = [];
+        try {
+            $data = Assets::orderBy('created_at', 'desc')->paginate(10);
+        } catch (\Throwable $th) {
+            Alert::error('error', $th->getMessage());
+        }
+        return view('admin.equity', compact('data'));
+    }
+
+    public function addEquity(Request $request)
+    {
+        $request->validate([
+            'name' => 'required',
+            'type' => 'required',
+            'path' => 'required',
+        ]);
+        try {
+            $flag = $this->publicMethodService->isPermissionExist($request['email'], Constant::ADMIN_CEO_LEVEL);
+            if (!$flag) {
+                Alert::error('error', 'You do not have permission to edit an employee');
+                return redirect()->route('assets');
+            }
+
+            $data = new Assets();
+            $data->name = $request->name;
+            $data->type = $request->type;
+            $data->path = $request->path;
+            $data->save();
+            Alert::success('success', 'Asset added successfully');
+        } catch (\Throwable $th) {
+            Alert::error('error', $th->getMessage());
+        }
+        return redirect()->route('equity');
+    }
+
+    public function updateEquity(Request $request, $id)
+    {
+        $request->validate([
+            'name' => 'required',
+            'type' => 'required',
+            'path' => 'required',
+        ]);
+        try {
+            $flag = $this->publicMethodService->isPermissionExist($request['email'], Constant::ADMIN_CEO_LEVEL);
+            if (!$flag) {
+                Alert::error('error', 'You do not have permission to edit an employee');
+                return redirect()->route('assets');
+            }
+
+            $data = Assets::find($id);
+            if ($data) {
+                $data->name = $request->name;
+                $data->type = $request->type;
+                $data->path = $request->path;
+                $data->save();
+                Alert::success('success', 'Asset updated successfully');
+            } else {
+                Alert::error('error', 'Asset not found');
+            }
+        } catch (\Throwable $th) {
+            Alert::error('error', $th->getMessage());
+        }
+        return redirect()->route('equity');
     }
     #end assets
 }
