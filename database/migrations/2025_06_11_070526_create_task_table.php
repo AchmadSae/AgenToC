@@ -43,6 +43,15 @@ return new class extends Migration {
             $table->timestamps();
         });
 
+        Schema::create('ticket_revisions', function (Blueprint $table) {
+              $table->string('id')->primary();
+              $table->string('task_id');
+              $table->string('title');
+              $table->text('description');
+              $table->string('status')->default('pending');
+              $table->binary('attachment')->nullable();
+        });
+
         Schema::create('feedback', function (Blueprint $table) {
             $table->id();
             $table->string('task_id')->nullable();

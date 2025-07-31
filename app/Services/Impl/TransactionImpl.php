@@ -15,6 +15,7 @@ use Illuminate\Support\Facades\Mail;
 use Midtrans\Config;
 use Midtrans\Snap;
 use Illuminate\Support\Facades\DB;
+use App\Events\NotificationTrigger;
 use Symfony\Component\CssSelector\Exception\InternalErrorException;
 use Illuminate\Database\Eloquent\Collection;
 
@@ -135,6 +136,8 @@ class TransactionImpl implements TransactionsInterface
         }, $this->globalDBattempts);
         $this->sendAccountAndReceiptByMail($transaction->toArray());
         #those email will include link email account verification to active
+
+        event(new NotificationTrigger($transaction->user_id, 'Checkout Approved', 'Your Transaction with id ' . $transaction->id . ' has been Checkout Approved'));
         return [
             'transaction' => $transaction
         ];

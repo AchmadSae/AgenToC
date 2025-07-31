@@ -1,7 +1,7 @@
 <?php
 
 use App\Http\Controllers\AdminController;
-use App\Http\Controllers\Controller;
+use App\Http\Controllers\CommandController;
 use App\Http\Controllers\WorkerController;
 use App\Http\Controllers\ClientController;
 use Illuminate\Support\Facades\Route;
@@ -37,12 +37,28 @@ Route::controller(AuthController::class)->group(function () {
  **/
 
 
-Route::middleware(['oAuth'])->controller(AuthController::class)->group(function () {
-    // Password reset
-    Route::get('password/reset', 'showLinkRequestForm')->name('password.request');
-    Route::post('password/email', 'sendResetLinkEmail')->name('password.email');
-    Route::get('password/reset/{token}', 'showResetForm')->name('password.reset');
-    Route::post('password/reset', 'reset')->name('password.update');
+Route::middleware(['oAuth'])->group(function () {
+    #Password reset
+    Route::get('password/reset', [AuthController::class, 'showLinkRequestForm'])->name('password.request');
+    Route::post('password/email', [AuthController::class, 'sendResetLink'])->name('password.email');
+    Route::get('password/reset/{token}', [AuthController::class, 'showResetForm'])->name('password.reset');
+    Route::post('password/reset', [AuthController::class, 'reset'])->name('password.update');
+
+    #begin rout broadcast
+    Broadcast::channel('task.{taskId}', function ($user, $taskId) {
+        return $user->tasks()->where('tasks.id', $taskId)->exists();
+    });
+
+    Broadcast::channel('user.{userId}', function ($user, $userId) {
+        return (int) $user->id === (int) $userId;
+    });
+
+    Route::post('/chat/{id}', [CommandController::class, 'sendChat'])->name('send-chat');
+    Rout::get('/notification', [CommandController::class, 'fetchNotifications'])->name('notification');
+    Rout::post('/notification/{id}/read', [CommandController::class, 'markAsRead'])->name('mark-as-read');
+    #end rout broadcast
+
+
 
     /**
      * begin rout group for admin
@@ -92,16 +108,16 @@ Route::middleware(['oAuth'])->controller(AuthController::class)->group(function 
     Route::prefix('client')->middleware('users')->group(function () {
         #index in dashboard wil be show current post product / task has been order
         Route::get('/dashboard', [ClientController::class, 'index'])->name('client_dashboard');
-        Route::get('/profile', [ClientController::class, 'profile'])->name('client_profile');
+        Route::get('/profile', [ClientController::class, 'clientProfile'])->name('client_profile');
         Route::post('/profile/update({id})', [ClientController::class, 'updateProfile'])->name('update-profile');
         Route::get('history', [ClientController::class, 'history'])->name('history');
         Route::prefix('task')->controller(ClientController::class)->group(function () {
-            #this will be included the chat and kanban status off project
+            #this will be included the chat and kanban status off project when click the detail of project
+            Route::get('/', 'tasksClient')->name('tasks_client');
             Route::get('/detail/{id}', 'detailTask')->name('detail_task');
-            Route::post('/chat/{id}', 'postTask')->name('post_task');
-            Route::post('/complain/{id}', 'complainTask')->name('complain_task');
-            Route::post('/rate/{id}', 'rateTask')->name('rate_task');
-            Route::get('task/attachments/{id}', 'attachments')->name('attachments');
+            Route::post('/revision/{id}', 'revisionTaskClient')->name('revision_task_clients');
+            Route::post('/rate/{id}', 'rateTaskClient')->name('rate_task');
+            Route::get('download/attachments/{id}', 'downloadAttachment')->name('download->attachments');
         });
 
         #kanban
@@ -115,7 +131,7 @@ Route::middleware(['oAuth'])->controller(AuthController::class)->group(function 
      * begin root group for worker
      **/
     Route::prefix('worker')->middleware('worker')->group(function () {
-        #show the news inquiries(card) and all the inquiries(table) 
+        #show the news inquiries(card) and all the inquiries(table)
         Route::get('/dashboard', [WorkerController::class, 'index'])->name('worker_dashboard');
         Route::get('/profile', [WorkerController::class, 'profile'])->name('client_profile');
         Route::post('/profile/update({id})', [WorkerController::class, 'updateProfile'])->name('update-profile');

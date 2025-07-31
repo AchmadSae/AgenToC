@@ -2,41 +2,30 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\RevisionHistoryModel;
+use App\Models\TaskModel;
 use App\Services\TaskInterface;
+use RealRashid\SweetAlert\Facades\Alert;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
-use Illuminate\Http\Request;
-use App\Models\User;
+use Illuminate\Support\Facades\Request;
 use Illuminate\Support\Facades\Auth;
-use Symfony\Component\CssSelector\Exception\InternalErrorException;
 use App\Services\MethodServiceUtil;
+use App\Models\User;
+use App\Services\UserInterface;
+use App\Models\FeedBackModel;
 
 use function PHPUnit\Framework\isEmpty;
 
 class ClientController extends Controller
 {
-    private $isValidTask;
-    private $taskService;
-    private $methodServiceUtil;
+    protected TaskInterface $taskService;
+    protected MethodServiceUtil $methodServiceUtil;
 
+    protected UserInterface $userService;
 
-    public function __construct(TaskInterface $taskInterface, MethodServiceUtil $methodServiceUtil)
-    {
-        $this->isValidTask = [
-            'title' => 'required|unique:tasks|max:255',
-            'description' => 'required',
-            'user_id' => 'required',
-            'deadline' => 'required|date',
-            'task_contract' => 'required',
-            'required_skills' => 'required',
-            'attachment' => 'required|file|mimes:pdf,doc,docx,jpg,jpeg,png|max:2048',
-        ];
-
-        $this->taskService = $taskInterface;
-        $this->methodServiceUtil = $methodServiceUtil;
-    }
     /**
      * view current product or task in-progress(can chat the worker(no attachment)
-     * -> this view simmilar like detail task from list of task)
+     * -> this view same like detail task from list of task)
      * calender set about due date off all task
      * @return mixed
      **/
@@ -44,7 +33,7 @@ class ClientController extends Controller
     {
         $taskChat = [];
         $task = [];
-        $taskByUserNeadDeadline = [];
+        $taskByUserNearDeadline = [];
         $user = Auth::user()->user_detail_id;
         try {
             $task = $this->taskService->getAllTask('in-progress', false);
@@ -53,73 +42,156 @@ class ClientController extends Controller
             }
             #if task deadline have more than one result get only one near the deadline
             if (count($task) > 1) {
-                $taskByUserNeadDeadline = $task->where('user_detail_id', $user)->sortBy('deadline')->first();
+                $taskByUserNearDeadline = $task->where('user_detail_id', $user)->sortBy('deadline')->first();
             } else {
-                $taskByUserNeadDeadline = $task->where('user_detail_id', $user)->first();
+                $taskByUserNearDeadline = $task->where('user_detail_id', $user)->first();
             }
 
             #get chat message based
-            $taskChat = $this->methodServiceUtil->fetchMassageByTaskId($taskByUserNeadDeadline->task_id);
+            $taskChat = $this->methodServiceUtil->fetchMassageByTaskId($taskByUserNearDeadline->task_id);
         } catch (ModelNotFoundException $e) {
             return redirect()->back()->with('error', $e->getMessage());
         } catch (\Throwable $th) {
             return redirect()->back()->with('error', 'Ups! something went wrong: ' . $th->getMessage());
         }
-        return view('client.dashboard', ['taskByUser' => $taskByUserNeadDeadline, 'chatHistory' => $taskChat]);
+        return view('client.dashboard', ['taskByUser' => $taskByUserNearDeadline, 'chatHistory' => $taskChat]);
     }
 
-
     /**
-     * @param $request
+     * view the profile of client and edit the profile
+     * view reference /demo10/account/settings.html
      * @return mixed
      **/
-    public function createInquiry(Request $request)
+
+    public function clientProfile()
     {
-        $response = [];
-        $valid = $request->validate($this->isValidTask);
+        $data = [];
         try {
-            $response = $this->taskInterface->stored($valid);
+            $data = User::findOrFail(Auth::user()->id)
+                ->with('UserDetail')
+                ->first();
         } catch (\Throwable $th) {
-            return redirect()->back()->with('Ups! something went wrong', $th->getMessage());
+            return redirect()->back()->with('error', 'Ups! something went wrong: ' . $th->getMessage());
         }
-        return redirect()->route('client_dashboard')->with('success', 'Post Task Title' . $response['title'] . 'has been created');
+        return view('client.profile', compact('data'));
     }
 
     /**
-     * @param $id, $workerId
-     * @return mixed
+     * By click the save change button, profile will be updated
      **/
-
-    public function binding($id, $workerId)
+    public function updateProfile(Request $request)
     {
-        $response = $this->taskInterface->bindTask($id, $workerId);
-        if (!$response) {
-            throw new InternalErrorException("Error Processing Request", 500);
+        $request->validate([
+            'address' => 'max:255',
+            'phone' => 'max:13' | 'numeric',
+            'postal_code' => 'max:5' | 'numeric',
+            'credit_card' => 'max:16' | 'numeric',
+        ]);
+
+        try {
+            $this->userService->updateUser($request->all(), 'client');
+        } catch (\Throwable $th) {
+            return redirect()->back()->with('error', 'Ups! something went wrong: ' . $th->getMessage());
         }
-        return redirect()->back()->with('success', 'Post Task has been assigned');
+        Alert::success('success', 'Profile updated successfully');
+        return redirect()->back();
     }
 
     /**
-     * @param $id
+     * view history product(done), review and complain(done)
+     **/
+    public function history()
+    {
+        $revision = [];
+        $task = [];
+        $feedback = [];
+        try {
+            $feedback = FeedBackModel::where('user_id', Auth::user()->id)->get();
+            $task = $this->taskService->getAllTask('done', false);
+            foreach ($task as $t) {
+                $revision = RevisionHistoryModel::where('task_id', $t->task_id)
+                    ->where('status', 'done')
+                    ->get();
+            }
+        } catch (\Throwable $th) {
+            return redirect()->back()->with('error', 'Ups! something went wrong: ' . $th->getMessage());
+        }
+        return view('client.history', compact('revision', 'task', 'feedback'));
+    }
+
+    /**
+    * View all task and user can click the card of task for detail ( included the status of the project and show the chat if project still in-progress)
+     * file:///D:/development/AgentC/demo10/pages/user-profile/projects.html
      * @return mixed
+    **/
+    public function tasksClient(){
+          $allTasks = TaskModel::where('user_id', Auth::user()->id)->get();
+          return view('client.tasks', compact('allTasks'));
+    }
+
+    /**
+    * Detail tasks (show the sub tasks and show the chat if tasks in-progress)
+     *
+     * @return mixed
+    **/
+
+    public function detailTask($id){
+          $taskChat = [];
+          $task = TaskModel::findOrFail($id);
+          $subTask = TaskModel::with(['detailTask'])->where('id', $id)->first();
+          if ($task->status == 'in-progress') {
+                $taskChat = $this->methodServiceUtil->fetchMassageByTaskId($task->id);
+          }
+          return view('client.detailTask', compact('task', 'subTask', 'taskChat'));
+    }
+
+    /**
+    * complain task (will be added in button modal in card of task in-progress)
+     * file:///D:/development/AgentC/demo10/apps/support-center/tickets/view.html
+     * @return \Illuminate\Http\RedirectResponse
      **/
 
-    public function approval($id)
-    {
-        $response = $this->taskInterface->approval($id);
-        #decrease the coins
-        if (!$response) {
-            throw new ModelNotFoundException("Error Processing Request", 500);
-        }
-        return redirect()->back()->with('success', 'Post Task has been approved');
+    public function revisionTaskClient(Request $request){
+          $response =[];
+          $userDetailId = Auth::user()->user_detail_id;
+          $request->validate([
+                'task_id' => 'required',
+                'title' => 'required|max:100',
+                'description' => 'required'
+          ]);
+          $data = $request->all();
+          $data['user_detail_id'] = $userDetailId;
+          try {
+               $response = $this->taskService->storedTicketForRevision($data);
+          }catch (\Throwable $e){
+                Alert::error('Ups! something went wrong: ' . $e->getMessage());
+                return redirect()->back();
+          }
+          Alert::success('success', 'Revision Ticket '.$response['id'].' successfully posted');
+          return redirect()->back();
+    }
+    /**
+    * posted feedback for done task the button rate will display when task done
+    **/
+    public function rateTaskClient(Request $request){
+          $request->validate([
+                'task_id' => 'required',
+                'rate' => 'required',
+                'comment' => 'required|max:255'
+          ]);
+          $isDone = TaskModel::findOrFail($request->task_id)->value('status');
+          if($isDone == 'done'){
+                $Feedback = new FeedbackModel();
+                $Feedback->user_id = Auth::user()->user_detail_id;
+                $Feedback->task_id = $request->task_id;
+                $Feedback->comment = $request->comment;
+                $Feedback->rating = $request->rate;
+                $Feedback->save();
+            Alert::success('success', 'Thanks For Your Feedback');
+            return redirect()->back();
+          }
+          Alert::info('info', 'Your task still on going');
+          return redirect()->back();
     }
 
-    public function destroyTask($id)
-    {
-        $response = $this->taskInterface->deleteTask($id);
-        if (!$response) {
-            throw new ModelNotFoundException("Error Processing Request", 500);
-        }
-        return redirect()->back()->with('success', 'Post Task has been deleted');
-    }
 }

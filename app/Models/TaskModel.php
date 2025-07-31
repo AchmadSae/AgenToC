@@ -21,21 +21,21 @@ class TaskModel extends Model
         'is_approved'
     ];
 
-    public function detailTask()
+    public function detailTask(): \Illuminate\Database\Eloquent\Relations\BelongsTo
     {
         return $this->belongsTo(DetailTaskModel::class, 'detail_task_id', 'id');
     }
-    public function kanban()
+    public function subTask(): TaskModel|\Illuminate\Database\Eloquent\Relations\HasMany
     {
         return $this->hasMany(KanbanModel::class, 'task_id');
     }
 
-    public function chats()
+    public function chats(): TaskModel|\Illuminate\Database\Eloquent\Relations\HasMany
     {
         return $this->hasMany(MessageModel::class, 'task_id');
     }
 
-    public function revisionHistory()
+    public function revisionHistory(): TaskModel|\Illuminate\Database\Eloquent\Relations\HasMany
     {
         return $this->hasMany(RevisionHistoryModel::class, 'task_id');
     }

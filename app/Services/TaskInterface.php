@@ -15,4 +15,5 @@ interface TaskInterface
     public function revision($data): array;
     public function getAllTask($status = 'done', $isDeadline = false): Collection;
     public function isRevisionExist($taskId): bool;
+    public function storedTicketForRevision($data): array;
 }

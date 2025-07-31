@@ -12,18 +12,17 @@ use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
 
-class TaskMessageSent
+class TaskMessageSent implements ShouldBroadcast
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
-    public $task;
-    /**
-     * Create a new event instance.
-     */
-    public function __construct(TaskModel $chat)
-    {
-        $this->task = $chat->load('user', 'task');
-    }
+    public $message;
+    public $taskId;
 
+    public function __construct($message, $taskId)
+    {
+        $this->message = $message;
+        $this->taskId = $taskId;
+    }
     /**
      * Get the channels the event should broadcast on.
      *
@@ -32,7 +31,7 @@ class TaskMessageSent
     public function broadcastOn(): array
     {
         return [
-            new PrivateChannel('task-chat.' . $this->task->id),
+            new PrivateChannel('task-chat.' . $this->taskId),
         ];
     }
 }

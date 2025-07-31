@@ -6,4 +6,5 @@ use Illuminate\Database\Eloquent\Collection;
 interface UserInterface
 {
     public function getSpecifiedRole($role): Collection;
+    public function updateUser(array $data, $role, $isEmployee = false);
 }

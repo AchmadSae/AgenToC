@@ -7,7 +7,7 @@ use App\Helpers\Constant;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
 use App\Models\MessageModel;
-use Illuminate\Support\Facades\Broadcast;
+use App\Events\NotificationSent;
 
 class MethodServiceUtil
 {
@@ -69,14 +69,23 @@ class MethodServiceUtil
 
     public function sendMessage($data)
     {
-        $message = MessageModel::create([
+        MessageModel::create([
             'task_id' => $data['task_id'],
             'user_id' => $data['user_id'],
             'message' => $data['message']
         ]);
 
-        broadcast(new TaskMessageSent($message))->toOthers();
+        broadcast(new TaskMessageSent($data['message'], $data['task_id']))->toOthers();
+    }
 
-        return $message;
+    /**
+     * broadcast notification
+     **/
+    public function sendNotification($data)
+    {
+        $notification = $data['text'];
+        $userId = $data['userId'];
+
+        broadcast(new NotificationSent($notification, $userId))->toOthers();
     }
 }

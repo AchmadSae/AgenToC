@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('kanban', function (Blueprint $table) {
-            $table->id();
+            $table->string('id')->primary();
             $table->string('kanban_id')->unique();
             $table->string('name');
             $table->enum('status', ['todo', 'in_progress', 'done'])->default('todo');

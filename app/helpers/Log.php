@@ -4,9 +4,10 @@ namespace App\Helpers;
 
 class Log
 {
-    public static function browser($data, $message)
+    public static function browser($message, $data): void
     {
-        $jsonData = json_encode($data);
-        echo "<script>console.log(" . $message . '= ' . $jsonData . ");</script>";
+          $jsonMessage = json_encode($message);
+          $jsonData = json_encode($data);
+          echo "<script>console.log(" . $jsonMessage . " + ' = ' + " . $jsonData . ");</script>";
     }
 }

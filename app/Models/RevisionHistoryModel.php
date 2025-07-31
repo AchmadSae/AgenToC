@@ -16,7 +16,7 @@ class RevisionHistoryModel extends Model
         'attachment'
     ];
 
-    public function task()
+    public function task(): \Illuminate\Database\Eloquent\Relations\BelongsTo
     {
         return $this->belongsTo(TaskModel::class, 'task_id', 'id');
     }

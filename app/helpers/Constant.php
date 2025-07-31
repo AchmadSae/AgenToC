@@ -26,4 +26,6 @@ class Constant
     public const ADMIN_CEO_LEVEL = 'ceo';
     public const ADMIN_MANAGER_LEVEL = 'manager';
     public const ADMIN_REGULAR_LEVEL = 'regular';
+    public const DB_ATTEMPT = 'DB_ATTEMPT';
+      const GAS_USER_TICKET = 'GAS_USER_TICKET';
 }

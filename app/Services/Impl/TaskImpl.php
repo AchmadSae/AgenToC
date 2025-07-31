@@ -3,8 +3,10 @@
 namespace App\Services\Impl;
 
 use App\Helpers\Constant;
+use App\Helpers\Log;
 use App\Models\DetailTaskModel;
 use App\Models\TaskModel;
+use App\Models\ticket_revision;
 use App\Services\TaskInterface;
 use Carbon\Carbon;
 use App\Models\User;
@@ -20,46 +22,55 @@ use Symfony\Component\HttpFoundation\Exception\BadRequestException;
 
 class TaskImpl implements TaskInterface
 {
-    protected $localDate;
+    protected string $localDate;
 
-    protected $timeDateLine;
-    protected $globalDBattempts;
+    protected mixed $globalDbAttempts;
 
     public function __construct()
     {
-        $this->globalDBattempts = GlobalParam::get('DB_ATTEMPTS')->value;
-
+        $this->globalDbAttempts = GlobalParam::where('code', '=', Constant::DB_ATTEMPT)->value('value');
         $t = Carbon::now();
         $this->localDate = Carbon::parse($t)
             ->setTimezone('Asia/Jakarta')
             ->toDateTimeString();
     }
 
-    /**
-     * @pram string $workerId
-     * @param string $userId
-     * @return void
-     **/
-    public function coinsBalanceByApproved($workerId = null, $userId = null): void
+      /**
+       * @pram string $workerId
+       * @param string|null $userId
+       * @return void
+       *
+       * @throws \Throwable
+       */
+    public function coinsBalanceByApproved($workerId = null, string $userId = null, bool $isPostTicket = false): void
     {
-        $costUser = GlobalParam::Where('code', Constant::GAS_USER);
-        $costWorker = GlobalParam::Where('code', Constant::GAS_WORKER);
-        DB::transaction(function () use ($workerId, $userId, $costUser, $costWorker) {
-            $worker = UserDetailModel::where('user_detail_id', $workerId)->lockForUpdate()->first();
-            $client = UserDetailModel::where('user_detail_id', $userId)->lockForUpdate()->first();
+          $costTicketUser = GlobalParam::where('code', '=', Constant::GAS_USER_TICKET)->value('value');
+        $costUser = GlobalParam::Where('code', Constant::GAS_USER)->value('value');
+        $costWorker = GlobalParam::Where('code', Constant::GAS_WORKER)->value('value');
+        if (!$isPostTicket) {
+              DB::transaction(function () use ($userId, $costTicketUser) {
+                    $client = UserDetailModel::where('user_detail_id', $userId)->lockForUpdate()->first();
+                    $client->balance_coins -= $costTicketUser;
+                    $client->save();
+              }, $this->globalDbAttempts);
+        }else{
+              DB::transaction(function () use ($workerId, $userId, $costUser, $costWorker) {
+                  $worker = UserDetailModel::where('user_detail_id', $workerId)->lockForUpdate()->first();
+                  $client = UserDetailModel::where('user_detail_id', $userId)->lockForUpdate()->first();
 
-            // Assuming you want to increase the worker's balance by a certain amount
-            $worker->balance_coins -= GlobalParam::where('code', $costUser)->first()->value;
-            $client->balance_coins -= GlobalParam::where('code', $costWorker)->first()->value;
+                  // Assuming you want to increase the worker's balance by a certain amount
+                  $worker->balance_coins -= $costWorker;
+                  $client->balance_coins -= $costUser;
 
-            $worker->save();
-            $client->save();
-        }, $this->globalDBattempts);
+                  $worker->save();
+                  $client->save();
+              }, $this->globalDbAttempts);
+        }
     }
 
     /**
      * create task
-     * 
+     *
      * @param object $data
      * @return array
      **/
@@ -67,7 +78,7 @@ class TaskImpl implements TaskInterface
     {
         $user = UserDetailModel::where('user_detail_id', $data->user_detail_id)->first();
         $typeTask = $data->task_type;
-        #prepare data 
+        #prepare data
         $task = [
             'id' => GenerateId::generateId(Constant::ID_TASK, false),
             'slug' => GenerateId::generateSlug($data->title),
@@ -130,13 +141,15 @@ class TaskImpl implements TaskInterface
         return $detailTask->save();
     }
 
-    /**
-     * approval task
-     * 
-     * @param string $value
-     * @param string $id
-     * @return bool
-     **/
+      /**
+       * approval task
+       *
+       * @param string $value
+       * @param string $id
+       * @return bool
+       *
+       * @throws \Throwable
+       */
     public function approval($id): bool
     {
         $task = TaskModel::find($id);
@@ -225,4 +238,36 @@ class TaskImpl implements TaskInterface
         }
         return true;
     }
+
+      public function storedTicketForRevision($data): array
+      {
+            $ticketId = GenerateId::generateId($data['ticket_id'], false);
+            $ticketCoins = GlobalParam::where("code", "=", Constant::GAS_USER_TICKET)->value("value");
+            $coins = UserDetailModel::where('user_detail_id', $data->user_detail_id)->value('balance_coins');
+            if ($coins == 0) {
+                  return [
+                        'message' => "You need at least  < .$ticketCoins coins",
+                  ];
+            }
+
+            try {
+                  ticket_revision::create(
+                        [
+                              'id' => $ticketId,
+                              'task_id' => $data->task_id,
+                              'title' => $data->title,
+                              'description' => $data->description,
+                              'attachment' => $data->attachment,
+                        ]
+                  );
+                  $this->coinsBalanceByApproved(null, $data->user_detail_id, true);
+            } catch (\throwable $e) {
+                  Log::browser($e->getMessage(), "Internal Error");
+            }
+
+            return [
+                  'id' => $ticketId,
+                  'task_id' => $data->task_id,
+            ];
+      }
 }

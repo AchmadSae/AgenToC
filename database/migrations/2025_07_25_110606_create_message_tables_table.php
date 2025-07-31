@@ -11,11 +11,20 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('tasks_chats', function (Blueprint $table) {
+        Schema::create('tasks_chats_tmp', function (Blueprint $table) {
             $table->id();
             $table->foreignId('task_id')->constrained('users')->onDelete('cascade');
             $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
             $table->text('message');
+            $table->timestamps();
+        });
+
+        Schema::create('notification_tmp', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
+            $table->string('title');
+            $table->text('message');
+            $table->boolean('is_read')->default(false);
             $table->timestamps();
         });
     }

@@ -168,7 +168,6 @@ class AdminController extends Controller
     public function addGlobalParamView(Request $request)
     {
         #get email current user
-        $email = Auth::user()->email;
         $request->validate([
             'code' => 'required|is_unique:global_params.code',
             'value' => 'required',
@@ -180,7 +179,7 @@ class AdminController extends Controller
             $data->value = $request->value;
             $data->code = $request->code;
             $data->description = $request->description;
-            $data->updated_by = $email;
+            $data->updated_by = auth()->user()->username;
             $data->save();
         } catch (\Throwable $th) {
             Alert::error('error', $th->getMessage());

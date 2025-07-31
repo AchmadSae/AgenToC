@@ -27,7 +27,7 @@ class PrepareDbSeeder extends Seeder
             ['code' => 'GAS_FEE_USER', 'value' => '0.2', 'description' => 'Amount Coins for Task Inquiry'],
             ['code' => 'GAS_FEE_WORKER', 'value' => '0.1', 'description' => 'Amount Coins for Task Inquiry'],
             ['code' => 'COINS_PRICE', 'value' => '80000', 'description' => 'Coins Price'],
-            ['code' => 'DB_ATTEMPTS', 'value' => '5', 'description' => 'DB Transaction Attempts'],
+            ['code' => 'DB_ATTEMPT', 'value' => '5', 'description' => 'DB Transaction Attempts'],
         ]);
         // // Insert user_detail
         // $user_detail1 = UserDetailModel::create([
