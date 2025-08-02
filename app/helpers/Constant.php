@@ -14,11 +14,11 @@ class Constant
     public const ID_TASK_DETAIL = 'TSKDTL';
     public const TRANS_DEPOSIT = 'coins';
     public const TRANS_PRODUCT = 'product';
-    public const TASK_PENDING = 'pending';
-    public const TASK_APPROVED = 'approved';
-    public const TASK_REJECTED = 'rejected';
-    public const TASK_COMPLETED = 'completed';
-    public const TASK_CANCELLED = 'cancelled';
+    public const TASK_STATUS_IN_PROGRESS = 'in_progress';
+    public const TASK_STATUS_APPROVED = 'approved';
+    public const TASK_STATUS_REJECTED = 'rejected';
+    public const TASK_STATUS_COMPLETED = 'completed';
+    public const TASK_STATUS_CANCEL = 'cancel';
     public const GAS_USER = 'GAS_FEE_USER';
     public const GAS_WORKER = 'GAS_FEE_WORKER';
     public const MAX_ATTEMPTS = 5;
@@ -26,6 +26,7 @@ class Constant
     public const ADMIN_CEO_LEVEL = 'ceo';
     public const ADMIN_MANAGER_LEVEL = 'manager';
     public const ADMIN_REGULAR_LEVEL = 'regular';
-    public const DB_ATTEMPT = 'DB_ATTEMPT';
+    public const DB_ATTEMPT = 5;
       const GAS_USER_TICKET = 'GAS_USER_TICKET';
+      const TASK_STATUS_OPEN = 'open';
 }

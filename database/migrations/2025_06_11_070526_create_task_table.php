@@ -14,10 +14,10 @@ return new class extends Migration {
             $table->string('id')->primary();
             $table->string('slug')->unique();
             $table->string('client_id');
-            $table->string('worker_id');
+            $table->string('worker_id')->nullable();
             $table->string('kanban_id')->nullable();
             $table->string('detail_task_id');
-            $table->string('status')->default('pending');
+            $table->string('status')->default(\App\Helpers\Constant::TASK_STATUS_OPEN);
             $table->dateTime('deadline');
             $table->boolean('is_approved')->default(false);
             $table->timestamps();
@@ -29,8 +29,10 @@ return new class extends Migration {
             $table->text('description');
             $table->text('task_type');
             $table->integer('price');
-            $table->text('required_skills');
-            $table->binary('attachment')->nullable();
+            $table->string('attachment_request')->nullable();
+            $table->text('required_skills')->nullable();
+            $table->string('attachment_tmp')->nullable();
+            $table->string('attachment')->nullable();
             $table->timestamps();
         });
         Schema::create('revision_history', function (Blueprint $table) {
@@ -38,8 +40,8 @@ return new class extends Migration {
             $table->string('task_id');
             $table->text('changes');
             $table->string('description')->nullable();
-            $table->string('status')->default('in_progress');
-            $table->binary('attachment')->nullable();
+            $table->string('status')->default('pending');
+            $table->string('attachment')->nullable();
             $table->timestamps();
         });
 
@@ -49,7 +51,7 @@ return new class extends Migration {
               $table->string('title');
               $table->text('description');
               $table->string('status')->default('pending');
-              $table->binary('attachment')->nullable();
+              $table->string('attachment_tmp')->nullable();
         });
 
         Schema::create('feedback', function (Blueprint $table) {

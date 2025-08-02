@@ -95,50 +95,32 @@ class TaskImpl implements TaskInterface
             'task_contract' => $data->task_contract,
             'price' => $data->price,
             'required_skills' => $data->required_skills,
-            'attachment' => $data->attachment,
+            'attachment_request' => $data->attachment_request,
             'task_type' => $typeTask,
         ];
 
         TaskModel::create($task);
         DetailTaskModel::create($detailTask);
-        $response = [
-            'id' => $task['id'],
-            'detail_task_id' => $detailTask['id'],
-            'title' => $task['title'],
-            'deadline' => $task['deadline'],
-            'created_at' => $task['created_at'],
-        ];
-
-        return $response;
+          return [
+              'id' => $task['id'],
+              'detail_task_id' => $detailTask['id'],
+              'title' => $task['title'],
+              'deadline' => $task['deadline'],
+              'created_at' => $task['created_at'],
+          ];
     }
 
 
-
-    public function editTask($id, $data): bool
+      /**
+       * @throws \Throwable
+       */
+      public function editTask($id, $data): bool
     {
-
-        $task = TaskModel::find($id);
-        if (!$task) {
-            throw new BadRequestException('Task not found');
-        }
-
-        $task->title = $data['title'] ?? $task->title;
-        $task->deadline = $data['deadline'] ?? $task->deadline;
-        $task->save();
-
-        $detailTask = DetailTaskModel::find($task->detail_task_id);
-        if (!$detailTask) {
-            throw new InternalErrorException('Detail task not found');
-        }
-
-        $detailTask->description = $data['description'] ?? $detailTask->description;
-        $detailTask->task_contract = $data['task_contract'] ?? $detailTask->task_contract;
-        $detailTask->price = $data['price'] ?? $detailTask->price;
-        $detailTask->required_skills = $data['required_skills'] ?? $detailTask->required_skills;
-        if (isset($data['attachment'])) {
-            $detailTask->attachment = $data['attachment'];
-        }
-        return $detailTask->save();
+        $task = TaskModel::find($id)->lockForUpdate()->first();
+        DB::transaction(function () use ($task, $data) {
+              $task->update($data);
+        }, $this->globalDbAttempts);
+        return true;
     }
 
       /**
@@ -195,18 +177,16 @@ class TaskImpl implements TaskInterface
 
     public function getAllTask($status = 'done', $isDeadline = false): Collection
     {
-        $task = [];
-        if ($status == 'in-progress' && $isDeadline) {
+        if ($status == Constant::TASK_STATUS_IN_PROGRESS && $isDeadline) {
             $now = Carbon::parse($this->localDate);
             $tomorrow = $now->copy()->addDay();
 
-            $task = TaskModel::where('status', $status)
+            return  TaskModel::where('status', $status)
                 ->whereBetween('deadline', [$now, $tomorrow])
                 ->get();
         }
 
-        $task = TaskModel::where('status', $status)->get();
-        return $task;
+          return TaskModel::orderBy('created_at', 'desc')->get();
     }
 
     public function revision($data): array
@@ -270,4 +250,15 @@ class TaskImpl implements TaskInterface
                   'task_id' => $data->task_id,
             ];
       }
+
+    public function downloadAttachment($id): string
+    {
+        $detailTaskId = TaskModel::where('id', $id)->first()->detail_task_id;
+        $isDoneTask = TaskModel::where('id', $detailTaskId)->value('status');
+        if ($isDoneTask != Constant::TASK_APPROVED){
+              throw new BadRequestException('Task still in progress');
+        }
+        $file = DetailTaskModel::where('id', $detailTaskId)->value('attachment')->first();
+        return $file;
+    }
 }

@@ -2,9 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Helpers\Constant;
 use App\Models\RevisionHistoryModel;
 use App\Models\TaskModel;
 use App\Services\TaskInterface;
+use Illuminate\Support\Facades\Storage;
 use RealRashid\SweetAlert\Facades\Alert;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Support\Facades\Request;
@@ -31,24 +33,21 @@ class ClientController extends Controller
      **/
     public function index()
     {
-        $taskChat = [];
-        $task = [];
-        $taskByUserNearDeadline = [];
         $user = Auth::user()->user_detail_id;
+        $taskByUserNearDeadline = [];
         try {
-            $task = $this->taskService->getAllTask('in-progress', false);
-            if (isEmpty($task)) {
-                throw new ModelNotFoundException("Task not found", 404);
-            }
-            #if task deadline have more than one result get only one near the deadline
-            if (count($task) > 1) {
-                $taskByUserNearDeadline = $task->where('user_detail_id', $user)->sortBy('deadline')->first();
-            } else {
-                $taskByUserNearDeadline = $task->where('user_detail_id', $user)->first();
+            $taskInDeadline = $this->taskService->getAllTask(Constant::TASK_STATUS_IN_PROGRESS, false);
+            if (!isEmpty($taskInDeadline)) {
+                  #if task deadline have more than one result get only one near the deadline
+                  if (count($taskInDeadline) > 1) {
+                      $taskByUserNearDeadline = $taskInDeadline->where('client_id', $user)->sortBy('deadline')->first();
+                  } else {
+                      $taskByUserNearDeadline = $taskInDeadline->where('client_id', $user)->first();
+                  }
             }
 
             #get chat message based
-            $taskChat = $this->methodServiceUtil->fetchMassageByTaskId($taskByUserNearDeadline->task_id);
+            $taskChat = $this->methodServiceUtil->fetchMassageByTaskId($taskByUserNearDeadline->id);
         } catch (ModelNotFoundException $e) {
             return redirect()->back()->with('error', $e->getMessage());
         } catch (\Throwable $th) {
@@ -65,15 +64,12 @@ class ClientController extends Controller
 
     public function clientProfile()
     {
-        $data = [];
         try {
-            $data = User::findOrFail(Auth::user()->id)
-                ->with('UserDetail')
-                ->first();
+            $profile = User::findOrFail(Auth::user()->user_detail_id);
         } catch (\Throwable $th) {
             return redirect()->back()->with('error', 'Ups! something went wrong: ' . $th->getMessage());
         }
-        return view('client.profile', compact('data'));
+        return view('client.profile', compact('profile'));
     }
 
     /**
@@ -83,9 +79,12 @@ class ClientController extends Controller
     {
         $request->validate([
             'address' => 'max:255',
+            'profile_photo_path' => 'mimes:jpeg,jpg,png|max:2048',
             'phone' => 'max:13' | 'numeric',
+            'email' => 'email',
             'postal_code' => 'max:5' | 'numeric',
             'credit_card' => 'max:16' | 'numeric',
+
         ]);
 
         try {
@@ -102,21 +101,21 @@ class ClientController extends Controller
      **/
     public function history()
     {
-        $revision = [];
-        $task = [];
-        $feedback = [];
-        try {
-            $feedback = FeedBackModel::where('user_id', Auth::user()->id)->get();
-            $task = $this->taskService->getAllTask('done', false);
-            foreach ($task as $t) {
-                $revision = RevisionHistoryModel::where('task_id', $t->task_id)
-                    ->where('status', 'done')
-                    ->get();
-            }
-        } catch (\Throwable $th) {
-            return redirect()->back()->with('error', 'Ups! something went wrong: ' . $th->getMessage());
-        }
-        return view('client.history', compact('revision', 'task', 'feedback'));
+          $revision = [];
+          $task = [];
+          $feedback = [];
+          try {
+                $taskDone = $this->taskService->getAllTask(Constant::TASK_STATUS_COMPLETED, false);
+                $taskWorker = $taskDone->where('client_id', Auth::user()->user_detail_id);
+                foreach ($taskWorker as $task) {
+                      $feedback = FeedBackModel::where('task_id', $task->id)->get();
+                      $revision = RevisionHistoryModel::where('task_id', $task->id)->get();
+                }
+
+          } catch (\Throwable $th) {
+                return redirect()->back()->with('error', 'Ups! something went wrong: ' . $th->getMessage());
+          }
+          return view('client.history', compact('revision', 'task', 'feedback'));
     }
 
     /**
@@ -192,6 +191,21 @@ class ClientController extends Controller
           }
           Alert::info('info', 'Your task still on going');
           return redirect()->back();
+    }
+
+    /**
+    * get original file after task is done
+     * click button done in detail task and download button will be show
+    **/
+
+    public function downloadAttachment($id){
+          try {
+                  $path = $this->taskService->downloadAttachment($id);
+                  return Storage::download($path);
+          }catch (\Throwable $th){
+                alert()->error('File not allowed to download' . $th->getMessage());
+                return redirect()->back();
+          }
     }
 
 }

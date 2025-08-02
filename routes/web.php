@@ -117,7 +117,7 @@ Route::middleware(['oAuth'])->group(function () {
             Route::get('/detail/{id}', 'detailTask')->name('detail_task');
             Route::post('/revision/{id}', 'revisionTaskClient')->name('revision_task_clients');
             Route::post('/rate/{id}', 'rateTaskClient')->name('rate_task');
-            Route::get('download/attachments/{id}', 'downloadAttachment')->name('download->attachments');
+            Route::get('/download/{id}', 'downloadAttachment')->name('download->attachments');
         });
 
         #kanban
@@ -133,11 +133,11 @@ Route::middleware(['oAuth'])->group(function () {
     Route::prefix('worker')->middleware('worker')->group(function () {
         #show the news inquiries(card) and all the inquiries(table)
         Route::get('/dashboard', [WorkerController::class, 'index'])->name('worker_dashboard');
-        Route::get('/profile', [WorkerController::class, 'profile'])->name('client_profile');
-        Route::post('/profile/update({id})', [WorkerController::class, 'updateProfile'])->name('update-profile');
+        Route::get('/profile', [WorkerController::class, 'workerProfile'])->name('client_profile');
+        Route::post('/profile/update({id})', [WorkerController::class, 'updateProfileWorker'])->name('update-profile');
         Route::get('history', [WorkerController::class, 'history'])->name('history');
         #Task done can't complain with time limit response from client
-        Route::post('/done/task({id})', [WorkerController::class, 'task'])->name('done-task');
+        Route::post('/done/task({id})', [WorkerController::class, 'doneTaskWorker'])->name('done-task');
         Route::prefix('complains')->controller(WorkerController::class)->group(function () {
             Route::get('/({id})', 'complains')->name('complains');
             Route::get('/update/{id}', 'updateComplain')->name('update-complain');
