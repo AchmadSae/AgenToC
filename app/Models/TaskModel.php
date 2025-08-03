@@ -17,6 +17,7 @@ class TaskModel extends Model
         'worker_id',
         'detail_task_id',
         'status',
+        'acceptance_deadline_time',
         'deadline',
         'is_approved'
     ];

@@ -124,7 +124,7 @@ class ClientController extends Controller
      * @return mixed
     **/
     public function tasksClient(){
-          $allTasks = TaskModel::where('user_id', Auth::user()->id)->get();
+          $allTasks = TaskModel::where('user_id', Auth::user()->user_detail_id)->paginate(6);
           return view('client.tasks', compact('allTasks'));
     }
 
@@ -145,7 +145,7 @@ class ClientController extends Controller
     }
 
     /**
-    * complain task (will be added in button modal in card of task in-progress)
+    * complain task (will be added in button modal in card of task that have been completed and have an countdown auto done status)
      * file:///D:/development/AgentC/demo10/apps/support-center/tickets/view.html
      * @return \Illuminate\Http\RedirectResponse
      **/
@@ -162,6 +162,10 @@ class ClientController extends Controller
           $data['user_detail_id'] = $userDetailId;
           try {
                $response = $this->taskService->storedTicketForRevision($data);
+               if ($response['status'] == 'error') {
+                     Alert::info('Info', $response['message']);
+                     return redirect()->back();
+               }
           }catch (\Throwable $e){
                 Alert::error('Ups! something went wrong: ' . $e->getMessage());
                 return redirect()->back();

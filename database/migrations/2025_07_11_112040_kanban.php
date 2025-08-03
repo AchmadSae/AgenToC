@@ -3,6 +3,7 @@
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
+use App\Helpers\Constant;
 
 return new class extends Migration
 {
@@ -15,7 +16,7 @@ return new class extends Migration
             $table->string('id')->primary();
             $table->string('kanban_id')->unique();
             $table->string('name');
-            $table->enum('status', ['todo', 'in_progress', 'done'])->default('todo');
+            $table->enum('status', [Constant::SUBTASK_STATUS_TODO, Constant::TASK_STATUS_IN_PROGRESS, Constant::TASK_STATUS_COMPLETED])->default(Constant::SUBTASK_STATUS_TODO);
             $table->integer('order')->default(0);
             $table->timestamps();
 

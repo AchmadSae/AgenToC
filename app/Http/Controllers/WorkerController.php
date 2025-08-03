@@ -5,12 +5,15 @@ namespace App\Http\Controllers;
 use App\Helpers\Constant;
 use App\Models\FeedBackModel;
 use App\Models\GlobalParam;
+use App\Models\KanbanModel;
 use App\Models\RevisionHistoryModel;
 use App\Models\TaskModel;
 use App\Models\User;
+use App\Services\KanbanInterface;
 use App\Services\MethodServiceUtil;
 use App\Services\TaskInterface;
 use App\Services\UserInterface;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use RealRashid\SweetAlert\Facades\Alert;
@@ -23,8 +26,10 @@ class WorkerController extends Controller
       protected MethodServiceUtil $methodServiceUtil;
       protected UserInterface $userService;
 
+      protected KanbanInterface $kanbanService;
+
       /**
-      * view the incoming in progress task based worker_id and deadline
+      * view the incoming in progress and task who have revision inquiry task based worker_id and deadline
        * file:///D:/development/AgentC/demo10/pages/user-profile/projects.html
        *
       **/
@@ -34,9 +39,11 @@ class WorkerController extends Controller
           $taskByWorkerNearDeadline = [];
           try {
                 $taskInDeadline = $this->taskService->getAllTask(Constant::TASK_STATUS_IN_PROGRESS, false);
-                if (!isEmpty($taskInDeadline)) {
-                      if (count($taskInDeadline) > 1) {
+                $incomingNewestRevision = $this->taskService->getAllTask(Constant::TASK_STATUS_REVISION, false);
+                if (!isEmpty($taskInDeadline) AND !isEmpty($incomingNewestRevision)) {
+                      if (count($taskInDeadline) > 1 OR count($incomingNewestRevision) > 1) {
                             $taskByWorkerNearDeadline = $taskInDeadline->where('worker_id', $user)->sortBy('deadline')->first();
+                            $incomingNewestRevision = $incomingNewestRevision->where('worker_id', $user)->sortBy('acceptance_deadline_time')->last();
                       } else {
                             $taskByWorkerNearDeadline = $taskInDeadline->where('worker_id', $user)->first();
                       }
@@ -45,7 +52,7 @@ class WorkerController extends Controller
           }catch(\Throwable $th){
                 return redirect()->back()->with('error', $th->getMessage());
           }
-          return view('worker.dashboard', compact('taskByWorkerNearDeadline', 'taskChat'));
+          return view('worker.dashboard', compact('taskByWorkerNearDeadline', 'taskChat', 'incomingNewestRevision'));
     }
 
     /**
@@ -83,16 +90,15 @@ class WorkerController extends Controller
     }
 
       /**
-       * view history product(done),
+       * view history all task revision and feedback,
        **/
-      public function history()
+      public function historyWorker()
       {
             $revision = [];
-            $task = [];
             $feedback = [];
             try {
-                  $taskDone = $this->taskService->getAllTask(Constant::TASK_STATUS_COMPLETED, false);
-                  $taskWorker = $taskDone->where('worker_id', Auth::user()->user_detail_id);
+                  $tasks = TaskModel::with('details')->get();
+                  $taskWorker = $tasks->where('worker_id', Auth::user()->user_detail_id);
                   foreach ($taskWorker as $task) {
                         $feedback = FeedBackModel::where('task_id', $task->id)->get();
                         $revision = RevisionHistoryModel::where('task_id', $task->id)->get();
@@ -101,7 +107,7 @@ class WorkerController extends Controller
             } catch (\Throwable $th) {
                   return redirect()->back()->with('error', 'Ups! something went wrong: ' . $th->getMessage());
             }
-            return view('worker.history', compact('revision', 'task', 'feedback'));
+            return view('worker.history', compact('revision', 'tasks', 'feedback'));
       }
 
       /**
@@ -112,11 +118,55 @@ class WorkerController extends Controller
        */
 
       public function doneTaskWorker($id){
+            $timeDueDateCompleted = Carbon::now()->addDays(7);
             $taskModel = TaskModel::findOrFail($id)->lockForUpdate()->first();
-            DB::transaction(function () use ($taskModel) {
+            DB::transaction(function () use ($timeDueDateCompleted, $taskModel) {
                   $taskModel->status = Constant::TASK_STATUS_COMPLETED;
+                  $taskModel->acceptance_deadline_time = $timeDueDateCompleted;
                   $taskModel->save();
             }, Constant::DB_ATTEMPT);
+      }
+
+      /**
+       * Worker click the accepted task open and added subtask for kanban
+       * the card have modal button to accepted and show the form to fill the subtask for kanban
+       * @return mixed
+       * direct view to kanban
+       * <input type="text" name="subtask[]" />
+       * <input type="text" name="subtask[]" />
+       **/
+
+      public function startTaskWorker(Request $request){
+            $countSubTask = $request->countSubTask;
+            $subtasks = [];
+            if ($countSubTask == 0) {
+                  Alert::warning('Subtask is required!');
+            }
+            foreach ($request->subtask as $sub) {
+                  $subtasks[] = [
+                        'kanban_id' => $request->kanban_id,
+                        'name'      => $sub
+                  ];
+            }
+            try {
+                  KanbanModel::insert($subtasks);
+            }catch(\Throwable $th) {
+                  Alert::error('Ups! something went wrong: ' . $th->getMessage());
+                  return redirect()->back();
+            }
+            Alert::success('Subtask started!');
+            return redirect()->route('kanban-board');
+      }
+
+      /**
+       * View all task and worker can click the card of task for detail ( included the status of the project and show the chat if project still in-progress)
+       * file:///D:/development/AgentC/demo10/pages/user-profile/projects.html
+       * @return mixed
+       **/
+
+      public function tasksWorker(){
+            $allTasks = TaskModel::where('user_id', Auth::user()->user_detail_id)->paginate(6);
+            return view('worker.tasks', compact('allTasks'));
       }
 
 }

@@ -6,7 +6,7 @@ use App\Helpers\Constant;
 use App\Helpers\Log;
 use App\Models\DetailTaskModel;
 use App\Models\TaskModel;
-use App\Models\ticket_revision;
+use App\Models\TicketRevisionModel;
 use App\Services\TaskInterface;
 use Carbon\Carbon;
 use App\Models\User;
@@ -221,17 +221,29 @@ class TaskImpl implements TaskInterface
 
       public function storedTicketForRevision($data): array
       {
+            $statusTask = TaskModel::find($data['task_id'])->status;
+            $acceptance_deadline_time = TaskModel::find($data['task_id'])->acceptance_deadline_time;
             $ticketId = GenerateId::generateId($data['ticket_id'], false);
             $ticketCoins = GlobalParam::where("code", "=", Constant::GAS_USER_TICKET)->value("value");
             $coins = UserDetailModel::where('user_detail_id', $data->user_detail_id)->value('balance_coins');
             if ($coins == 0) {
                   return [
+                        'status' => 'error',
                         'message' => "You need at least  < .$ticketCoins coins",
+                  ];
+            }
+            if($statusTask != Constant::TASK_STATUS_COMPLETED OR $acceptance_deadline_time > Carbon::now()) {
+                  return [
+                        'status' => 'error',
+                        'message' => "Your task is not completed Or Passed the response time",
                   ];
             }
 
             try {
-                  ticket_revision::create(
+                  $Task = TaskModel::find($data['task_id'])->lockForUpdate()->first();
+                  $Task->status = Constant::TASK_STATUS_REVISION;
+                  $Task->save();
+                  TicketRevisionModel::create(
                         [
                               'id' => $ticketId,
                               'task_id' => $data->task_id,
@@ -246,7 +258,8 @@ class TaskImpl implements TaskInterface
             }
 
             return [
-                  'id' => $ticketId,
+                  'status' => 'success',
+                  'ticket_id' => $ticketId,
                   'task_id' => $data->task_id,
             ];
       }
@@ -255,10 +268,9 @@ class TaskImpl implements TaskInterface
     {
         $detailTaskId = TaskModel::where('id', $id)->first()->detail_task_id;
         $isDoneTask = TaskModel::where('id', $detailTaskId)->value('status');
-        if ($isDoneTask != Constant::TASK_APPROVED){
+        if ($isDoneTask != Constant::TASK_STATUS_APPROVED){
               throw new BadRequestException('Task still in progress');
         }
-        $file = DetailTaskModel::where('id', $detailTaskId)->value('attachment')->first();
-        return $file;
+          return DetailTaskModel::where('id', $detailTaskId)->value('attachment')->first();
     }
 }

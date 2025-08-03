@@ -20,6 +20,7 @@ return new class extends Migration {
             $table->string('status')->default(\App\Helpers\Constant::TASK_STATUS_OPEN);
             $table->dateTime('deadline');
             $table->boolean('is_approved')->default(false);
+            $table->dateTime('acceptance_deadline_time')->nullable();
             $table->timestamps();
         });
 

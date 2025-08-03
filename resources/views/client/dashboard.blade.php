@@ -1,4 +1,5 @@
-<x-app-layout>
+<x-app-lay>
+
     <x-slot:title>
         Client Dashboard
         </x-slot>
@@ -20,4 +21,4 @@
         </div>
 
 
-</x-app-layout>
+</x-app-lay>

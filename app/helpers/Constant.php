@@ -29,4 +29,6 @@ class Constant
     public const DB_ATTEMPT = 5;
       const GAS_USER_TICKET = 'GAS_USER_TICKET';
       const TASK_STATUS_OPEN = 'open';
+      const TASK_STATUS_REVISION = 'revision';
+      const SUBTASK_STATUS_TODO = 'todo';
 }

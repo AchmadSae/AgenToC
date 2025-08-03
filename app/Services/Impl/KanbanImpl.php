@@ -25,8 +25,7 @@ class KanbanImpl implements KanbanInterface
 
     public function getItemByStatus($id): KanbanModel
     {
-        $item = KanbanModel::where('status', $id)->first();
-        return $item;
+          return KanbanModel::where('status', $id)->first();
     }
 
     public function storedDefult($data): array

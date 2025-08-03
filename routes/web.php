@@ -18,8 +18,6 @@ Route::get('/test', function () {
 Route::get('/', [TransactionsController::class, 'checkout'])->name('home');
 #checkout
 Route::get('/checkout', [TransactionsController::class, 'checkout'])->name('checkout');
-#feedback
-Route::post('/feedback', [TransactionsController::class, 'feedback'])->name('feedback');
 
 Route::controller(AuthController::class)->group(function () {
     Route::get('signin/{flag}', 'showLoginForm')->name('sign-in');
@@ -135,13 +133,16 @@ Route::middleware(['oAuth'])->group(function () {
         Route::get('/dashboard', [WorkerController::class, 'index'])->name('worker_dashboard');
         Route::get('/profile', [WorkerController::class, 'workerProfile'])->name('client_profile');
         Route::post('/profile/update({id})', [WorkerController::class, 'updateProfileWorker'])->name('update-profile');
-        Route::get('history', [WorkerController::class, 'history'])->name('history');
-        #Task done can't complain with time limit response from client
+        Route::get('history', [WorkerController::class, 'historyWorker'])->name('history');
+        #Task done client cant create ticket revision based  time limit response from client
         Route::post('/done/task({id})', [WorkerController::class, 'doneTaskWorker'])->name('done-task');
-        Route::prefix('complains')->controller(WorkerController::class)->group(function () {
-            Route::get('/({id})', 'complains')->name('complains');
-            Route::get('/update/{id}', 'updateComplain')->name('update-complain');
+        Route::prefix('task')->controller(WorkerController::class)->group(function () {
+              Route::get('/', 'tasksWorker')->name('tasks_worker');
+              Route::post('/start', 'startTaskWorker')->name('start-task');
+              Route::get('/detail/{id}', 'detailTask')->name('detail_task_worker');
+              Route::post('/revision/{id}', 'revisionTaskWorker')->name('revision_task_worker');
         });
+        // https://github.com/ERaufi/LaravelProjects/blob/main/app/Http/Controllers/KanbanController.php
         // Route::prefix('kanban-board')->controller(KanbanController::class)->group(function () {
         //     Route::view('/', 'KanbanBoard.Index')->name('kanban-board');
         //     Route::get('get-all', 'getItems')->name('get-all-items');
