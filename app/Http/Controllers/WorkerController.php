@@ -8,6 +8,7 @@ use App\Models\GlobalParam;
 use App\Models\KanbanModel;
 use App\Models\RevisionHistoryModel;
 use App\Models\TaskModel;
+use App\Models\TicketRevisionModel;
 use App\Models\User;
 use App\Services\KanbanInterface;
 use App\Services\MethodServiceUtil;
@@ -118,13 +119,15 @@ class WorkerController extends Controller
        */
 
       public function doneTaskWorker($id){
-            $timeDueDateCompleted = Carbon::now()->addDays(7);
-            $taskModel = TaskModel::findOrFail($id)->lockForUpdate()->first();
-            DB::transaction(function () use ($timeDueDateCompleted, $taskModel) {
-                  $taskModel->status = Constant::TASK_STATUS_COMPLETED;
-                  $taskModel->acceptance_deadline_time = $timeDueDateCompleted;
-                  $taskModel->save();
-            }, Constant::DB_ATTEMPT);
+
+            try {
+                  $this->taskService->doneTask($id);
+                  Alert::success('Task done successfully!');
+                  return redirect()->back();
+            }catch(\Throwable $th){
+                  Alert::error('Ups! something went wrong: ' . $th->getMessage());
+                  return redirect()->back();
+            }
       }
 
       /**
@@ -155,7 +158,7 @@ class WorkerController extends Controller
                   return redirect()->back();
             }
             Alert::success('Subtask started!');
-            return redirect()->route('kanban-board');
+            return redirect()->route('kanban-board', compact('subtasks'));
       }
 
       /**
@@ -169,4 +172,24 @@ class WorkerController extends Controller
             return view('worker.tasks', compact('allTasks'));
       }
 
+      /**
+       * Detail tasks (show the sub tasks and show the chat if tasks in-progress)
+       * show button to kanban if status != approved
+       * @return mixed
+       **/
+
+      public function detailTask($id){
+            $taskChat = [];
+            $ticketShowList = [];
+            $task = TaskModel::findOrFail($id);
+            $subTask = TaskModel::with('detailTask')->where('id', $id)->first();
+            $isHaveTicketRev = TicketRevisionModel::with('task')->where('task_id', $id)->exists();
+            if($isHaveTicketRev){
+                  $ticketShowList = TicketRevisionModel::with('task')->where('task_id', $id)->orderBy('created_at', 'desc')->get();
+            }
+            if ($task->status == 'in-progress') {
+                  $taskChat = $this->methodServiceUtil->fetchMassageByTaskId($task->id);
+            }
+            return view('client.detailTask', compact('task', 'subTask', 'taskChat', 'ticketShowList'));
+      }
 }

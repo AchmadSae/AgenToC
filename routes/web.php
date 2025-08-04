@@ -1,8 +1,8 @@
 <?php
 
 use App\Http\Controllers\AdminController;
-use App\Http\Controllers\CommandController;
 use App\Http\Controllers\WorkerController;
+use App\Http\Controllers\KanbanController;
 use App\Http\Controllers\ClientController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
@@ -20,10 +20,10 @@ Route::get('/', [TransactionsController::class, 'checkout'])->name('home');
 Route::get('/checkout', [TransactionsController::class, 'checkout'])->name('checkout');
 
 Route::controller(AuthController::class)->group(function () {
-    Route::get('signin/{flag}', 'showLoginForm')->name('sign-in');
+    Route::get('signing/{flag}', 'showLoginForm')->name('sign-in')->defaults('flag', 'user');
     Route::post('login', 'login')->name('login');
     Route::post('logout', 'logout')->name('logout');
-    Route::get('signup/{flag}', 'showRegistrationForm')->name('sign-up');
+    Route::get('signup/{flag}', 'showRegistrationForm')->name('sign-up')->defaults('flag', 'user');
     Route::post('register', 'register')->name('register');
     // Email verification
     Route::get('email/verify/{id}/{hash}', 'verifyEmail')->name('verification.verify');
@@ -37,10 +37,10 @@ Route::controller(AuthController::class)->group(function () {
 
 Route::middleware(['oAuth'])->group(function () {
     #Password reset
-    Route::get('password/reset', [AuthController::class, 'showLinkRequestForm'])->name('password.request');
-    Route::post('password/email', [AuthController::class, 'sendResetLink'])->name('password.email');
-    Route::get('password/reset/{token}', [AuthController::class, 'showResetForm'])->name('password.reset');
-    Route::post('password/reset', [AuthController::class, 'reset'])->name('password.update');
+    Route::post('password/reset', [AuthController::class, 'showRequestForm'])->name('show-pass-request');
+    Route::post('password/email', [AuthController::class, 'sendResetLinkEmail'])->name('link-email');
+    Route::get('password/reset/', [AuthController::class, 'showResetForm'])->name('password-reset');
+    Route::post('password/new', [AuthController::class, 'reset'])->name('password-update');
 
     #begin rout broadcast
     Broadcast::channel('task.{taskId}', function ($user, $taskId) {
@@ -51,9 +51,9 @@ Route::middleware(['oAuth'])->group(function () {
         return (int) $user->id === (int) $userId;
     });
 
-    Route::post('/chat/{id}', [CommandController::class, 'sendChat'])->name('send-chat');
-    Rout::get('/notification', [CommandController::class, 'fetchNotifications'])->name('notification');
-    Rout::post('/notification/{id}/read', [CommandController::class, 'markAsRead'])->name('mark-as-read');
+//    Route::post('/chat/{id}', [CommandController::class, 'sendChat'])->name('send-chat');
+//    Rout::get('/notification', [CommandController::class, 'fetchNotifications'])->name('notification');
+//    Rout::post('/notification/{id}/read', [CommandController::class, 'markAsRead'])->name('mark-as-read');
     #end rout broadcast
 
 
@@ -135,22 +135,18 @@ Route::middleware(['oAuth'])->group(function () {
         Route::post('/profile/update({id})', [WorkerController::class, 'updateProfileWorker'])->name('update-profile');
         Route::get('history', [WorkerController::class, 'historyWorker'])->name('history');
         #Task done client cant create ticket revision based  time limit response from client
-        Route::post('/done/task({id})', [WorkerController::class, 'doneTaskWorker'])->name('done-task');
         Route::prefix('task')->controller(WorkerController::class)->group(function () {
               Route::get('/', 'tasksWorker')->name('tasks_worker');
+              Route::post('/done/{id}', 'doneTaskWorker')->name('done-task');
               Route::post('/start', 'startTaskWorker')->name('start-task');
               Route::get('/detail/{id}', 'detailTask')->name('detail_task_worker');
-              Route::post('/revision/{id}', 'revisionTaskWorker')->name('revision_task_worker');
         });
         // https://github.com/ERaufi/LaravelProjects/blob/main/app/Http/Controllers/KanbanController.php
-        // Route::prefix('kanban-board')->controller(KanbanController::class)->group(function () {
-        //     Route::view('/', 'KanbanBoard.Index')->name('kanban-board');
-        //     Route::get('get-all', 'getItems')->name('get-all-items');
-        //     Route::post('store', 'store')->name('store');
-        //     Route::post('update', 'update'->name('update-kanban'));
-        //     Route::post('reorder', 'reorder')->name('reorder-kanban');
-        //     Route::post('delete', 'destroy')->name('delete-kanban');
-        // });
+         Route::prefix('kanban-board')->controller(KanbanController::class)->group(function () {
+             Route::view('/', 'Workers.KanbanBoard')->name('kanban-board');
+             Route::post('reorder', 'reorder')->name('reorder-kanban');
+             Route::post('delete', 'destroy')->name('delete-kanban');
+         });
     });
     /**
      * end root group for worker

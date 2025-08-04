@@ -9,27 +9,20 @@ use Illuminate\Database\QueryException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Password;
+use Random\RandomException;
 use RealRashid\SweetAlert\Facades\Alert;
 use App\Services\AuthInterface;
+use Illuminate\Auth\Notifications\ResetPassword;
 use Symfony\Component\CssSelector\Exception\InternalErrorException;
+use TheSeer\Tokenizer\Token;
 
 class AuthController extends Controller
 {
-    protected $authInterface;
-    public function __construct(AuthInterface $authInterface)
-    {
-        $this->authInterface = $authInterface;
-    }
-
+    protected AuthInterface $authInterface;
     public function showLoginForm($flag)
     {
-        if (!$flag == 'user') {
-            return view('auth.login', ['flag' => $flag]);
-        }
-
         return view('auth.login', ['flag' => $flag]);
     }
-
 
     public function login(Request $request)
     {
@@ -129,36 +122,39 @@ class AuthController extends Controller
 
     public function resendVerification(Request $request)
     {
-        if ($request->user()->hasVerifiedEmail()) {
-            return redirect('/');
-        }
-        $request->user()->sendEmailVerificationNotification();
-        Alert::success('info', 'Verification link sent!');
-        return back();
     }
 
     // Password reset
-    public function showLinkRequestForm()
+    public function showLinkRequestForm(Request $request)
     {
-        return view('auth.passwords.email'); // Buat view email.blade.php
+
     }
 
     public function sendResetLinkEmail(Request $request)
     {
-        $request->validate(['email' => 'required|email']);
+          $request->validate(['email' => 'required|email']);
 
-        $status = Password::sendResetLink(
-            $request->only('email')
-        );
+          $status = Password::sendResetLink($request->only('email'));
 
-        return $status == Password::RESET_LINK_SENT
-            ? back()->with('status', __($status))
-            : back()->withErrors(['email' => __($status)]);
+          return $status == Password::RESET_LINK_SENT
+                ? back()->with('success', 'email sent')
+                : back()->withErrors(['email' => __($status)]);
+
     }
 
-    public function showResetForm($token)
+    public function showRequestForm()
     {
-        return view('auth.passwords.reset', ['token' => $token]);
+          return view('auth.password.reset_password_email');
+
+    }
+
+      /**
+       * @throws RandomException
+       */
+      public function showResetForm()
+    {
+          $token = bin2hex(random_bytes(20));
+          return view('auth.password.form_reset_password_email', ['token' => $token]);
     }
 
     public function reset(Request $request)

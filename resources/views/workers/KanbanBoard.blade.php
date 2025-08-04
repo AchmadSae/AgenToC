@@ -9,20 +9,13 @@
                   var currentSection = '';
                   var addOrUpdate = null;
                   var selectedTask = null;
-
+                  var subtasks = {{ $subtasks ? : null }}
                   $(function() {
-                        $.ajax({
-                              type: 'get',
-                              url: '{{ URL('kanban-board/get-all') }}',
-                              success: function(data) {
-                                    console.log(data);
-                                    data.map(x => {
-                                          appendItem(x);
-                                    })
-                              }
-                        });
+                        //add data subtask to kanban
+                        subtasks.map(x =>{
+                              appendItem(subtasks)
+                        })
                   });
-
 
                   function appendItem(item) {
                         var newItem = `
@@ -71,59 +64,6 @@
                         update: reOrderKanbanOrder,
                   }).disableSelection();
 
-                  function showTaskModal(section) {
-                        currentSection = section;
-                        addOrUpdate = 'add';
-                        $('#taskModalLabel').text('Add Task');
-                        $('#task-name').val('');
-                        $('#taskModal').modal('show');
-                  }
-
-                  $('#save-task').click(function() {
-                        var taskName = $('#task-name').val();
-
-                        if (taskName) {
-                              if (addOrUpdate == 'add') {
-                                    $.post("{{ url('kanban-board/store') }}", {
-                                          _token: "{{ csrf_token() }}",
-                                          name: taskName,
-                                          status: currentSection,
-                                    }, function(response) {
-                                          appendItem(response.item);
-                                    });
-                              } else {
-                                    $.post("{{ url('kanban-board/update') }}", {
-                                          _token: "{{ csrf_token() }}",
-                                          name: taskName,
-                                          id: selectedTask.attr('item_id'),
-                                    }, function(response) {
-                                          selectedTask.text(taskName);
-                                    });
-                              }
-
-                              $('#taskModal').modal('hide');
-                        }
-                  });
-
-                  $(document).on('click', '.edit-task', function() {
-                        addOrUpdate = 'update';
-                        selectedTask = $(this).parent().parent().find("#taskName");
-                        $('#taskModalLabel').text('Edit Task');
-                        $('#task-name').val(selectedTask.text());
-                        $('#taskModal').modal('show');
-                  });
-
-                  $(document).on('click', '.delete-task', function() {
-                        if (confirm('Are you sure you want to delete this task?')) {
-                              let item = $(this);
-                              $.post("{{ url('kanban-board/delete') }}", {
-                                    _token: "{{ csrf_token() }}",
-                                    id: item.parent().parent().find("#taskName").attr('item_id'),
-                              }, function(response) {
-                                    item.parent().parent().parent().remove();
-                              });
-                        }
-                  });
             </script>
       @endpush
 </x-app-lay>

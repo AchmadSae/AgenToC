@@ -5,6 +5,7 @@ namespace App\Services\Impl;
 use App\Helpers\Constant;
 use App\Helpers\Log;
 use App\Models\DetailTaskModel;
+use App\Models\KanbanModel;
 use App\Models\TaskModel;
 use App\Models\TicketRevisionModel;
 use App\Services\TaskInterface;
@@ -17,6 +18,7 @@ use App\Helpers\GenerateId;
 use App\Models\GlobalParam;
 use App\Models\RevisionHistoryModel;
 use App\Models\UserDetailModel;
+use RealRashid\SweetAlert\Facades\Alert;
 use Symfony\Component\CssSelector\Exception\InternalErrorException;
 use Symfony\Component\HttpFoundation\Exception\BadRequestException;
 
@@ -25,8 +27,9 @@ class TaskImpl implements TaskInterface
     protected string $localDate;
 
     protected mixed $globalDbAttempts;
+      private TaskInterface $taskService;
 
-    public function __construct()
+      public function __construct()
     {
         $this->globalDbAttempts = GlobalParam::where('code', '=', Constant::DB_ATTEMPT)->value('value');
         $t = Carbon::now();
@@ -273,4 +276,26 @@ class TaskImpl implements TaskInterface
         }
           return DetailTaskModel::where('id', $detailTaskId)->value('attachment')->first();
     }
+
+      /**
+       * @throws \Throwable
+       */
+      public function doneTask($id)
+      {
+            $timeDueDateCompleted = Carbon::now()->addDays(7);
+            $taskModel = TaskModel::findOrFail($id)->lockForUpdate()->first();
+            $allStatusSubTask = KanbanModel::where('task_id', $taskModel->id)->get();
+            $this->taskService->doneTask($id);
+            foreach ($allStatusSubTask as $subTask) {
+                  if ($subTask != Constant::SUBTASK_STATUS_DONE) {
+                        throw new BadRequestException('Task still in progress');
+                  }
+            }
+            DB::transaction(function () use ($timeDueDateCompleted, $taskModel) {
+                  $taskModel->status = Constant::TASK_STATUS_COMPLETED;
+                  $taskModel->acceptance_deadline_time = $timeDueDateCompleted;
+                  $taskModel->save();
+            }, Constant::DB_ATTEMPT);
+            return $taskModel->id;
+      }
 }

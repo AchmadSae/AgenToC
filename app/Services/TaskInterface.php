@@ -18,4 +18,6 @@ interface TaskInterface
     public function storedTicketForRevision($data): array;
 
     public function downloadAttachment($id): string;
+
+    public function doneTask($id);
 }
