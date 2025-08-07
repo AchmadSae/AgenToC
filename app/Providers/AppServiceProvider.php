@@ -2,8 +2,11 @@
 
 namespace App\Providers;
 
+use App\Services\Impl\TransactionImpl;
 use App\Services\TaskInterface;
 use App\Services\AuthInterface;
+use App\Services\TransactionsInterface;
+use Elastic\Apm\TransactionInterface;
 use Illuminate\Support\ServiceProvider;
 use App\Services\KanbanInterface;
 use App\Services\Impl\TaskImpl;
@@ -28,6 +31,10 @@ class AppServiceProvider extends ServiceProvider
 
         $this->app->bind(KanbanInterface::class, function ($app) {
             return new KanbanImpl();
+        });
+
+        $this->app->bind(TransactionsInterface::class, function ($app) {
+              return new TransactionImpl();
         });
     }
 

@@ -27,6 +27,7 @@
       },
       "dependencies": {
             "@alpinejs/intersect": "^3.14.9",
-            "jquery": "^3.7.1"
+            "jquery": "^3.7.1",
+            "laravel-echo": "^2.1.7"
       }
 }

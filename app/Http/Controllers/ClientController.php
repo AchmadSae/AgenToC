@@ -28,7 +28,7 @@ class ClientController extends Controller
     /**
      * view current product or task in-progress(can chat the worker(no attachment)
      * -> this view same like detail task from list of task)
-     * calender set about due date off all task
+     * calendar set about due date off all task
      * @return mixed
      **/
     public function index()
@@ -129,7 +129,7 @@ class ClientController extends Controller
     }
 
     /**
-    * Detail tasks (show the sub tasks and show the chat if tasks in-progress)
+    * Detail tasks (show the sub-tasks and show the chat if tasks in-progress)
      *
      * @return mixed
     **/

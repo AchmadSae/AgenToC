@@ -12,21 +12,24 @@ use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
 
-class TaskMessageSent implements ShouldBroadcast
+class ChatTaskSent implements ShouldBroadcast
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
-    public $message;
-    public $taskId;
+    public String $message;
+    public String $taskId;
 
-    public function __construct($message, $taskId)
+    public String $userDetailId;
+
+    public function __construct($message, $taskId, $sender)
     {
         $this->message = $message;
         $this->taskId = $taskId;
+        $this->userDetailId = $sender;
     }
     /**
      * Get the channels the event should broadcast on.
      *
-     * @return array<int, \Illuminate\Broadcasting\Channel>
+     * @return array<int, Channel>
      */
     public function broadcastOn(): array
     {

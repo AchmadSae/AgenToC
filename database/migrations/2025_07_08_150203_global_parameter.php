@@ -11,7 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('Global_Parameter', function (Blueprint $table) {
+        Schema::create('global_parameter', function (Blueprint $table) {
             $table->id();
             $table->string('code')->unique();
             $table->string('value');

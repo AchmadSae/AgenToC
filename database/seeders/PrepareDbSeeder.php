@@ -20,7 +20,7 @@ class PrepareDbSeeder extends Seeder
             ['role_id' => 'RWORKER', 'role_name' => 'worker', 'created_at' => now(), 'updated_at' => now()],
         ]);
 
-        DB::table('global_param')->insert([
+        DB::table('global_parameter')->insert([
             ['code' => 'DEFAULT_PASS', 'value' => 'uniq123', 'description' => 'Default password for user registry'],
             ['code' => 'CW', 'name' => 'Content Writing', 'value' => '10', 'description' => 'All the social media content writing'],
             ['code' => 'GD', 'name' => 'Graphics Design', 'value' => '8', 'description' => 'An custom disgn with specific target'],

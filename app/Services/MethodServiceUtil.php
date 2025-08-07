@@ -2,7 +2,7 @@
 
 namespace App\Services;
 
-use App\Events\TaskMessageSent;
+use App\Events\ChatTaskSent;
 use App\Helpers\Constant;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
@@ -67,7 +67,7 @@ class MethodServiceUtil
             ->get();
     }
 
-    public function sendMessage($data)
+    public function sendMessage($data): void
     {
         MessageModel::create([
             'task_id' => $data['task_id'],
@@ -75,7 +75,7 @@ class MethodServiceUtil
             'message' => $data['message']
         ]);
 
-        broadcast(new TaskMessageSent($data['message'], $data['task_id']))->toOthers();
+        broadcast(new ChatTaskSent($data['message'], $data['task_id']))->toOthers();
     }
 
     /**

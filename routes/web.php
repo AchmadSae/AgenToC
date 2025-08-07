@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AdminController;
+use App\Http\Controllers\CommandController;
 use App\Http\Controllers\WorkerController;
 use App\Http\Controllers\KanbanController;
 use App\Http\Controllers\ClientController;
@@ -15,7 +16,9 @@ Route::get('/test', function () {
 /**
  * begin root route
  **/
-Route::get('/', [TransactionsController::class, 'checkout'])->name('home');
+Route::get('/', function () {
+      return view('home');
+})->name('home');
 #checkout
 Route::get('/checkout', [TransactionsController::class, 'checkout'])->name('checkout');
 
@@ -25,9 +28,14 @@ Route::controller(AuthController::class)->group(function () {
     Route::post('logout', 'logout')->name('logout');
     Route::get('signup/{flag}', 'showRegistrationForm')->name('sign-up')->defaults('flag', 'user');
     Route::post('register', 'register')->name('register');
-    // Email verification
+    # Email verification
     Route::get('email/verify/{id}/{hash}', 'verifyEmail')->name('verification.verify');
     Route::post('email/resend', 'resendVerification')->name('verification.resend');
+      #Password reset
+      Route::post('password/reset', 'showRequestForm')->name('show-pass-request');
+      Route::post('password/email', 'sendResetLinkEmail')->name('link-email');
+      Route::get('password/reset/', 'showResetForm')->name('password-reset');
+      Route::post('password/new', 'reset')->name('password-update');
 });
 
 /**
@@ -36,25 +44,15 @@ Route::controller(AuthController::class)->group(function () {
 
 
 Route::middleware(['oAuth'])->group(function () {
-    #Password reset
-    Route::post('password/reset', [AuthController::class, 'showRequestForm'])->name('show-pass-request');
-    Route::post('password/email', [AuthController::class, 'sendResetLinkEmail'])->name('link-email');
-    Route::get('password/reset/', [AuthController::class, 'showResetForm'])->name('password-reset');
-    Route::post('password/new', [AuthController::class, 'reset'])->name('password-update');
-
     #begin rout broadcast
     Broadcast::channel('task.{taskId}', function ($user, $taskId) {
         return $user->tasks()->where('tasks.id', $taskId)->exists();
     });
-
-    Broadcast::channel('user.{userId}', function ($user, $userId) {
-        return (int) $user->id === (int) $userId;
+    Broadcast::channel('user.{userId}', function ($user, $userDetailId) {
+        return (string) $user->user_detail_id === (string) $userDetailId;
     });
-
-//    Route::post('/chat/{id}', [CommandController::class, 'sendChat'])->name('send-chat');
-//    Rout::get('/notification', [CommandController::class, 'fetchNotifications'])->name('notification');
-//    Rout::post('/notification/{id}/read', [CommandController::class, 'markAsRead'])->name('mark-as-read');
-    #end rout broadcast
+    #chat
+      Route::post('/chat/send', [CommandController::class, 'sendChat'])->name('chat.send');
 
 
 
