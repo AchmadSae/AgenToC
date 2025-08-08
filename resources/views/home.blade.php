@@ -6,7 +6,7 @@
             <!--begin::Wrapper-->
             <div class="bgi-no-repeat bgi-size-contain bgi-position-x-center bgi-position-y-bottom landing-dark-bg"
                 style="
-            background-image: url(assets/media/svg/illustrations/landing.svg);
+            background-image: url({{ asset('assets/media/svg/illustrations/landing.svg') }});
           ">
                 <!--begin::Header-->
                 @include('template.header_landing')
@@ -293,4 +293,4 @@
             </i>
         </div>
         <!--end::Scrolltop-->
-        </x-guests-lay>
+        </x-guest-lay>

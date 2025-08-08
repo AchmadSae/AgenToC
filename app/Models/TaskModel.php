@@ -53,7 +53,7 @@ class TaskModel extends Model
      * search by any field and value
      **/
 
-    public function searchAny($field, $value)
+    public function searchAny($field, $value): \LaravelIdea\Helper\App\Models\_IH_TaskModel_C|array
     {
         return $this->where($field, 'like', '%' . $value . '%')->get();
     }

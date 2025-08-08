@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\CommandController;
+use App\Http\Controllers\LandingController;
 use App\Http\Controllers\WorkerController;
 use App\Http\Controllers\KanbanController;
 use App\Http\Controllers\ClientController;
@@ -16,9 +17,7 @@ Route::get('/test', function () {
 /**
  * begin root route
  **/
-Route::get('/', function () {
-      return view('home');
-})->name('home');
+Route::get('/', [LandingController::class, 'index'])->name('landing');
 #checkout
 Route::get('/checkout', [TransactionsController::class, 'checkout'])->name('checkout');
 

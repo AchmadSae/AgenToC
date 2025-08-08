@@ -3,6 +3,7 @@
 namespace Database\Seeders;
 
 use App\Helpers\Constant;
+use App\Helpers\GenerateId;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Database\Seeder;
 
@@ -13,11 +14,12 @@ class productSeeder extends Seeder
      * Run the database seeds.
      */
 
-    public function run(){
+    public function run(): void
+    {
           DB::table('product_groups')->insert([
                 'code' => Constant::PRODUCT_GRAPHIC,
                 'value' => 'Visual Graphic Design',
-                'terms_and_police' => 'Layanan
+                'terms_and_policy' => 'Layanan
                   Kami menyediakan jasa desain grafis seperti logo, poster, konten sosial media, dan lainnya berdasarkan brief dari klien.
 
                   Proses
@@ -48,6 +50,15 @@ class productSeeder extends Seeder
 
                   Jika sudah mulai, DP hangus.'
 
+          ]);
+
+          DB::table('products')->insert([
+                  'product_group_code' => Constant::PRODUCT_GRAPHIC,
+                  'product_code' => GenerateId::generateId('GD', false),
+                  'product_name' => 'Logo Design Brand Company',
+                  'price' => 230000,
+                  'product_description' => '1. sample product description is unique
+2. Unlimited revision'
           ]);
     }
 }

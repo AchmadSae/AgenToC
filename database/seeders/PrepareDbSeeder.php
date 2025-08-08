@@ -22,12 +22,9 @@ class PrepareDbSeeder extends Seeder
 
         DB::table('global_parameter')->insert([
             ['code' => 'DEFAULT_PASS', 'value' => 'uniq123', 'description' => 'Default password for user registry'],
-            ['code' => 'CW', 'name' => 'Content Writing', 'value' => '10', 'description' => 'All the social media content writing'],
-            ['code' => 'GD', 'name' => 'Graphics Design', 'value' => '8', 'description' => 'An custom disgn with specific target'],
             ['code' => 'GAS_FEE_USER', 'value' => '0.2', 'description' => 'Amount Coins for Task Inquiry'],
             ['code' => 'GAS_FEE_WORKER', 'value' => '0.1', 'description' => 'Amount Coins for Task Inquiry'],
             ['code' => 'COINS_PRICE', 'value' => '80000', 'description' => 'Coins Price'],
-            ['code' => 'DB_ATTEMPT', 'value' => '5', 'description' => 'DB Transaction Attempts'],
         ]);
         // // Insert user_detail
         // $user_detail1 = UserDetailModel::create([
