@@ -1,9 +1,8 @@
 "use strict";
-
 // Class definition
 var KTCreateApp = function () {
 	// Elements
-	var modal;	
+	var modal;
 	var modalEl;
 
 	var stepper;
@@ -92,7 +91,7 @@ var KTCreateApp = function () {
 					// Prevent default button action
 					e.preventDefault();
 
-					// Disable button to avoid multiple click 
+					// Disable button to avoid multiple click
 					formSubmitButton.disabled = true;
 
 					// Show loading indication
@@ -296,8 +295,47 @@ var KTCreateApp = function () {
 			}
 		));
 	}
+      let handleCancelAction;
+      handleCancelAction = () => {
+            const closeButton = modalEl.querySelector('[data-kt-modal-action-type="close"]');
+            closeButton.addEventListener('click', e => {
+                  cancelAction(e);
+            });
 
-	return {
+            const cancelAction = (e) => {
+                  e.preventDefault();
+
+                  Swal.fire({
+                        text: "Are you sure you would like to cancel?",
+                        icon: "warning",
+                        showCancelButton: true,
+                        buttonsStyling: false,
+                        confirmButtonText: "Yes, cancel it!",
+                        cancelButtonText: "No, return",
+                        customClass: {
+                              confirmButton: "btn btn-primary",
+                              cancelButton: "btn btn-active-light"
+                        }
+                  }).then(function (result) {
+                        if (result.value) {
+                              form.reset(); // Reset form
+                              modal.hide(); // Hide modal
+                        } else if (result.dismiss === 'cancel') {
+                              Swal.fire({
+                                    text: "Your form has not been cancelled!.",
+                                    icon: "error",
+                                    buttonsStyling: false,
+                                    confirmButtonText: "Ok, got it!",
+                                    customClass: {
+                                          confirmButton: "btn btn-primary",
+                                    }
+                              });
+                        }
+                  });
+            }
+      };
+
+      return {
 		// Public Functions
 		init: function () {
 			// Elements
@@ -317,6 +355,7 @@ var KTCreateApp = function () {
 			initStepper();
 			initForm();
 			initValidation();
+                  handleCancelAction();
 		}
 	};
 }();
