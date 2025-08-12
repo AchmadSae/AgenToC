@@ -177,7 +177,7 @@
                                 <!--begin::Item-->
                                 <a class="d-block card-rounded overlay" data-fslightbox="lightbox-projects"
                                     href="assets/media/stock/600x400/img-20.jpg">
-                                    <!--begin::Image-->
+        WW                            <!--begin::Image-->
                                     <div class="overlay-wrapper bgi-no-repeat bgi-position-center bgi-size-cover card-rounded h-250px"
                                         style="
                             background-image: url('assets/media/stock/600x600/img-20.jpg');
