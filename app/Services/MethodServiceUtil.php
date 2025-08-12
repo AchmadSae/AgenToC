@@ -4,10 +4,13 @@ namespace App\Services;
 
 use App\Events\ChatTaskSent;
 use App\Helpers\Constant;
+use App\Models\TaskFileModel;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
 use App\Models\MessageModel;
 use App\Events\NotificationSent;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 
 class MethodServiceUtil
 {
@@ -60,7 +63,7 @@ class MethodServiceUtil
         return $flag;
     }
 
-    public function fetchMassageByTaskId($taskId)
+    public function fetchMassageByTaskId($taskId): \Illuminate\Database\Eloquent\Collection|array|\LaravelIdea\Helper\App\Models\_IH_MessageModel_C
     {
         return MessageModel::where('task_id', $taskId)
             ->with('user')
@@ -81,11 +84,12 @@ class MethodServiceUtil
     /**
      * broadcast notification
      **/
-    public function sendNotification($data)
+    public function sendNotification($data): void
     {
         $notification = $data['text'];
         $userId = $data['userId'];
 
         broadcast(new NotificationSent($notification, $userId))->toOthers();
     }
+
 }

@@ -158,7 +158,7 @@ class WorkerController extends Controller
                   return redirect()->back();
             }
             Alert::success('Subtask started!');
-            return redirect()->route('kanban-board', compact('subtasks'));
+            return redirect()->route('kanban.board', compact('subtasks'));
       }
 
       /**

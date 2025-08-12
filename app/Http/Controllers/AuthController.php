@@ -9,6 +9,7 @@ use Illuminate\Database\QueryException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Password;
+use Laravel\Socialite\Facades\Socialite;
 use Random\RandomException;
 use RealRashid\SweetAlert\Facades\Alert;
 use App\Services\AuthInterface;
@@ -48,10 +49,10 @@ class AuthController extends Controller
                 return back();
             }
             return match ($request->role) {
-                'admin' => redirect()->route('admin_dashboard'),
-                'user' => redirect()->route('client_dashboard'),
-                'worker' => redirect()->route('worker_dashboard'),
-                default => redirect()->route('home'),
+                'admin' => redirect()->route('admin.dashboard'),
+                'user' => redirect()->route('client.dashboard'),
+                'worker' => redirect()->route('worker.dashboard'),
+                default => redirect()->route('landing'),
             };
         }
 
@@ -81,7 +82,7 @@ class AuthController extends Controller
             //code...
             $response = $this->authInterface->register($request);
             Alert::success('success', $response['message']);
-            return redirect()->route('sign-in', ['flag' => $response['flag']]);
+            return redirect()->route('sign.in', ['flag' => $response['flag']]);
         } catch (InternalErrorException $th) {
             return back()->withErrors([
                 'info' => "Error! Please notify admin." . $th->getMessage(),
@@ -111,7 +112,7 @@ class AuthController extends Controller
 
         if ($user->hasVerifiedEmail()) {
             Alert::info('info', 'Email already verified!');
-            return redirect()->route('sign-in', ['flag' => 'user']);
+            return redirect()->route('sign.in', ['flag' => 'user']);
         }
 
         $user->markEmailAsVerified();
@@ -176,5 +177,32 @@ class AuthController extends Controller
         return $response == Password::PASSWORD_RESET
             ? redirect()->route('login')->with('status', __($response))
             : back()->withErrors(['email' => [__($response)]]);
+    }
+
+    public function googleLogin(){
+            return Socialite::driver('google')->redirect();
+    }
+
+    /**
+    *
+    **/
+    public function googleAuthCallback(){
+            $user = Socialite::driver('google')->user();
+            try {
+                  $response = $this->authInterface->authGoogle($user);
+                  if (!$response['success']) {
+                        return [
+                              'success' => false,
+                              'message' => 'email already exists',
+                        ];
+                  }
+            }catch (InternalErrorException $th) {
+                  Alert::error('error', $th->getMessage());
+                  return redirect()->back();
+            }
+            return [
+                  'success' => true,
+                  'message' => 'login success',
+            ];
     }
 }
