@@ -23,7 +23,7 @@ class AuthMiddleware
 
         if (!$user) {
             Alert::info('Error', 'You must be logged in');
-            return redirect()->route('sign-in', ['flag' => 'user']);
+            return redirect()->route('sign.in', ['flag' => 'user']);
         }
         return $next($request);
     }

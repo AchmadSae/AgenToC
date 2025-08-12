@@ -20,12 +20,12 @@ class TransactionsModel extends Model
         'status',
     ];
 
-    public function user()
+    public function user(): \Illuminate\Database\Eloquent\Relations\BelongsTo
     {
         return $this->belongsTo(User::class, 'email');
     }
 
-    public function task()
+    public function task(): \Illuminate\Database\Eloquent\Relations\BelongsTo
     {
         return $this->belongsTo(TaskModel::class, 'task_id');
     }

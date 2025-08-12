@@ -14,23 +14,13 @@ use Illuminate\Auth\Events\PasswordReset;
 use Illuminate\Support\Facades\Password;
 use Illuminate\Validation\ValidationException;
 use Illuminate\Support\Str;
-use illuminate\http\request;
-use App\Models\GlobalParam;
 use Illuminate\Cache\RateLimiter;
 use Illuminate\Auth\Events\Lockout;
-
-
+use Throwable;
 
 
 class AuthImpl implements AuthInterface
 {
-    protected $globalDBattempts;
-
-
-    public function __construct()
-    {
-        $this->globalDBattempts = GlobalParam::get('DB_ATTEMPTS')->value;
-    }
 
     public function hasVerifiedEmail($email): bool
     {
@@ -60,11 +50,13 @@ class AuthImpl implements AuthInterface
         return true;
     }
 
-    public function register($data, $isTransaction = false): array
+      /**
+       * @throws Throwable
+       */
+      public function register($data, $isGoogleAuth = false): array
     {
         #local $user_Detail_id for prevent duplicate id
         $user_detail_id = GenerateId::generateId('UD', true);
-        $registeredUser = [];
         $role_id = match ($data->role) {
             'admin' => Constant::ROLE_ADMIN,
             'worker' => Constant::ROLE_WORKER,
@@ -73,14 +65,18 @@ class AuthImpl implements AuthInterface
         #debug
         Log::browser($data, 'Register User role: ' . $role_id);
         #check email isUnique
-        $user = User::where('email', $data->email)->first();
-        if ($user) {
-            return [
-                'message' => 'Your email and username is already registered.',
-            ];
-        }
+          if(!$isGoogleAuth) {
+              $user = User::where('email', $data->email)->first();
+              if ($user) {
+                  return [
+                        'user_detail_id' => $user->user_detail_id,
+                      'message' => 'Your email and username is already registered.',
+                        'success' => false,
+                  ];
+              }
+          }
 
-        $response = DB::transaction(function () use ($user_detail_id, $role_id, $data, &$registeredUser, $isTransaction) {
+        $response = DB::transaction(function () use ($user_detail_id, $role_id, $data, &$registeredUser, $isGoogleAuth) {
             //code...
             $user_detail = UserDetailModel::create([
                 'id' => $user_detail_id,
@@ -97,18 +93,20 @@ class AuthImpl implements AuthInterface
             DB::table('user_detail_roles')->insert([
                 'user_detail_id' => $user_detail->id,
                 'role_id' => $role_id,
+                  'is_active' => $isGoogleAuth,
             ]);
-            #check isFromTransaction
-            if (!$isTransaction) {
+            if (!$isGoogleAuth) {
                 # code...
                 $registeredUser->sendEmailVerificationNotification();
             }
+            #check isFromTransaction
             return $registeredUser;
-        }, $this->globalDBattempts);
+        }, Constant::DB_ATTEMPT);
         return [
             'flag' => $data->role,
-            'user' => $response,
+            'user_detail_id' => $response->user_detail_id,
             'message' => 'Successfully registered! Confirm email to activate your account.',
+              'success' => true,
         ];
     }
 
@@ -120,19 +118,18 @@ class AuthImpl implements AuthInterface
     #on test
     public function reset($data): bool
     {
-        $status = Password::reset(
-            $data->only('email', 'password', 'password_confirmation', 'token'),
-            function (User $user, string $password) {
-                $user->forceFill([
-                    'password' => Hash::make($password),
-                ])->setRememberToken(Str::random(60));
+          return Password::reset(
+              $data->only('email', 'password', 'password_confirmation', 'token'),
+              function (User $user, string $password) {
+                  $user->forceFill([
+                      'password' => Hash::make($password),
+                  ])->setRememberToken(Str::random(60));
 
-                $user->save();
+                  $user->save();
 
-                event(new PasswordReset($user));
-            }
-        );
-        return $status;
+                  event(new PasswordReset($user));
+              }
+          );
     }
 
     #on test
@@ -153,8 +150,29 @@ class AuthImpl implements AuthInterface
         ]);
     }
 
-    public function throttleKey($email)
+    public function throttleKey($email): string
     {
         return Str::transliterate(Str::lower($email) . '|' . request()->ip());
     }
+
+      /**
+       * @throws Throwable
+       */
+      public function authGoogle($googleUser): array
+      {
+            $data = [
+                  'username' => $googleUser->name,
+                  'email' => $googleUser->email,
+                  'profile' => $googleUser->avatar,
+            ];
+            $isSigned = User::where('google_id', $googleUser->id)->exists();
+            #insert
+            if ($isSigned) {
+                  return [
+                        'isSigned' => true,
+                        'success' => false,
+                  ];
+            }
+            return $this->register($data, true);
+      }
 }

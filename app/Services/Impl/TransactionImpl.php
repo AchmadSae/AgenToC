@@ -7,6 +7,7 @@ use App\Helpers\Constant;
 use App\Helpers\GenerateId;
 use App\Mail\Receipt;
 use App\Helpers\Log;
+use App\Models\TaskFileModel;
 use App\Models\TransactionsModel;
 use App\Models\User;
 use App\Models\UserDetailModel;
@@ -14,8 +15,10 @@ use App\Services\AuthInterface;
 use App\Services\TransactionsInterface;
 use Exception;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Storage;
 use Midtrans\Snap;
 use Illuminate\Support\Facades\DB;
+use RealRashid\SweetAlert\Facades\Alert;
 use Symfony\Component\CssSelector\Exception\InternalErrorException;
 use Illuminate\Database\Eloquent\Collection;
 use Throwable;
@@ -23,6 +26,7 @@ use Throwable;
 class TransactionImpl implements TransactionsInterface
 {
     protected AuthInterface $authService;
+    protected TransactionsInterface $transactionService;
 
       /**
        * @throws InternalErrorException
@@ -30,9 +34,9 @@ class TransactionImpl implements TransactionsInterface
        */
       public function checkoutByMidtrans($data): array
     {
-        $data['user_id'] = $this->id_user;
+        $data['user_id'] = $data->id_user;
         try {
-              UserDetailModel::where('id', $this->user_detail_id)->lockForUpdate()->first();
+              UserDetailModel::where('id', $data->user_detail_id)->lockForUpdate()->first();
             DB::transaction(function () use ($data) {
                 TransactionsModel::create($data);
             }, Constant::DB_ATTEMPT);
@@ -65,26 +69,58 @@ class TransactionImpl implements TransactionsInterface
        */
       public function checkout($data): array
     {
-        $response = DB::transaction(function () use ($data) {
-            User::where('email', $data['email'])->lockForUpdate()->first();
-            return TransactionsModel::create([
-                'user_id' => $data['email'],
-                'product_id' => $data['product_id'],
-                'product_type' => $data['product_type'],
-                'payment_method' => Constant::PAYMENT_BANK,
-                'status' => false,
-            ]);
-        }, Constant::DB_ATTEMPT);
-        #debug
-        Log::browser($data, 'Checkout User');
+          $savedFiles = [];
+          $userDetailId = "";
         #check user isRegistered
-        $flag = $this->authService->hasVerifiedEmail($data['email']);
-        if (!$flag) {
-            #register user
-            $this->authService->register($data, true);
+          $authResponse = $this->authService->register($data, false);
+
+
+        if (!$authResponse['success']) {
+              #skip register and checkout
+              $userDetailId = $authResponse['user_detail_id'];
+        }else {
+              $userDetailId = GenerateId::generateId('UD', true);
         }
+          DB::beginTransaction();
+                // Here you would also handle other form fields and potentially create a Task
+                // For now, we only persist files and link to provided task_id if present
+                TransactionsModel::create([
+                      'user_id' => $userDetailId,
+                      'product_id' => $data['product_id'],
+                      'product_type' => $data['product_group_code'],
+                      'payment_method' => $data['card_number'],
+                      'status' => false,
+                ]);
+                if ($data->hasFile('files')) {
+                      foreach ($data->file('files') as $file) {
+                            $path = $file->store('file/task', 'public');
+
+                            $record = TaskFileModel::create([
+                                  'task_id' => $data->input('task_id', ''),
+                                  'path' => $path,
+                                  'file_map' => $data->input('file_map', ''),
+                                  'original_name' => $file->getClientOriginalName(),
+                                  'mime_type' => $file->getClientMimeType(),
+                                  'size' => $file->getSize(),
+                                  'disk' => 'public',
+                            ]);
+
+                            $savedFiles[] = [
+                                  'id' => $record->id,
+                                  'path' => $record->path,
+                                  'file_map' => $record->file_map,
+                                  'url' => Storage::disk('public')->url($record->path),
+                                  'original_name' => $record->original_name,
+                                  'mime_type' => $record->mime_type,
+                                  'size' => $record->size,
+                            ];
+                      }
+                }
+                DB::commit();
         return [
-            'transaction' => $response
+            'success' => true,
+              'message' => 'Checkout submitted and files saved.',
+              'files' => $savedFiles,
         ];
     }
 

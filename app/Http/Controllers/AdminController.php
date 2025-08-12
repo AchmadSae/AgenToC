@@ -8,6 +8,7 @@ use App\Models\TransactionsModel;
 use App\Services\TaskInterface;
 use App\Services\TransactionsInterface;
 use App\Services\UserInterface;
+use Illuminate\Contracts\View\View;
 use Illuminate\Http\Request;
 use App\Models\GlobalParam;
 use App\Models\RevisionHistoryModel;
@@ -41,8 +42,7 @@ class AdminController extends Controller
     }
     /**
      * view  of register user (included unverified user), amount out of income and task almost get dateline
-     * view reference dashboards/projects.html 
-     * @return \Illuminate\Contracts\View\Factory|\Illuminate\Contracts\View\View|\Illuminate\Http\RedirectResponse
+     * view reference dashboards/projects.html
      * @throws \Throwable
      * */
     public function index()
@@ -64,7 +64,6 @@ class AdminController extends Controller
     /**
      * view all the transactions (Paginate)
      * reference /widgets/tables.html <!--begin::Tables Widget 13-->
-     * @return \Illuminate\Contracts\View\Factory|\Illuminate\Contracts\View\View|\Illuminate\Http\RedirectResponse
      * @throws \Throwable
      **/
     public function Transactions()
@@ -82,7 +81,7 @@ class AdminController extends Controller
     /**
      * view transaction detail
      * reference apps/invoices/view/invoice-2.html
-     * @return \Illuminate\Contracts\View\Factory|\Illuminate\Contracts\View\View|\Illuminate\Http\RedirectResponse
+     * @return \Illuminate\Contracts\View\Factory|View|\Illuminate\Http\RedirectResponse
      * @throws \Throwable
      **/
     public function TransactionDetail($id)
@@ -118,7 +117,7 @@ class AdminController extends Controller
     /**
      * add global parameter
      * reference /widgets/tables.html <!--begin::Tables Widget 13-->
-     * @return \Illuminate\Contracts\View\Factory|\Illuminate\Contracts\View\View|\Illuminate\Http\RedirectResponse
+     * @return \Illuminate\Contracts\View\Factory|View|\Illuminate\Http\RedirectResponse
      * @throws \Throwable
      **/
     public function addGlobalParam(Request $request)
@@ -137,14 +136,14 @@ class AdminController extends Controller
         } catch (\Throwable $th) {
             Alert::error('error', $th->getMessage());
         }
-        return redirect()->route('admin.global-param');
+        return redirect()->route('global.param');
     }
 
 
     /**
      * view all global parameters
      * reference /widgets/tables.html <!--begin::Tables Widget 13-->
-     * @return \Illuminate\Contracts\View\Factory|\Illuminate\Contracts\View\View|\Illuminate\Http\RedirectResponse
+     * @return \Illuminate\Contracts\View\Factory|View|\Illuminate\Http\RedirectResponse
      * @throws \Throwable
      **/
     public function GlobalParam()
@@ -162,7 +161,7 @@ class AdminController extends Controller
     /**
      * request hit by ajax to add global parameter when modal show a form
      * reference /widgets/tables.html <!--begin::Tables Widget 13-->
-     * @return \Illuminate\Contracts\View\Factory|\Illuminate\Contracts\View\View|\Illuminate\Http\RedirectResponse
+     * @return \Illuminate\Contracts\View\Factory|View|\Illuminate\Http\RedirectResponse
      * @throws \Throwable
      **/
     public function addGlobalParamView(Request $request)
@@ -189,7 +188,7 @@ class AdminController extends Controller
     /**
      * request hit by ajax to add global parameter when modal show a form
      * reference /widgets/tables.html <!--begin::Tables Widget 13-->
-     * @return \Illuminate\Contracts\View\Factory|\Illuminate\Contracts\View\View|\Illuminate\Http\RedirectResponse
+     * @return \Illuminate\Contracts\View\Factory|View|\Illuminate\Http\RedirectResponse
      * @throws \Throwable
      **/
     public function updateGlobalParam(Request $request, $id)
@@ -211,7 +210,7 @@ class AdminController extends Controller
         } catch (\Throwable $th) {
             Alert::error('error', $th->getMessage());
         }
-        return redirect()->route('admin.global-param');
+        return redirect()->route('global.param');
     }
     #end global parameter
 
@@ -219,7 +218,7 @@ class AdminController extends Controller
     /**
      * view all the feedback from user (list included carousel)
      * reference widgets/feeds.html <!--begin::Tickets-->
-     * @return \Illuminate\Contracts\View\Factory|\Illuminate\Contracts\View\View|\Illuminate\Http\RedirectResponse
+     * @return \Illuminate\Contracts\View\Factory|View|\Illuminate\Http\RedirectResponse
      * @throws \Throwable
      **/
 
@@ -262,7 +261,7 @@ class AdminController extends Controller
     /**
      * view list of all task
      * reference widgets/tables.html <!--begin::Tables Widget 13-->
-     * @return \Illuminate\Contracts\View\Factory|\Illuminate\Contracts\View\View|\Illuminate\Http\RedirectResponse
+     * @return \Illuminate\Contracts\View\Factory|View|\Illuminate\Http\RedirectResponse
      * @throws \Throwable
      **/
     public function tasks()
@@ -280,7 +279,7 @@ class AdminController extends Controller
     /**
      * view detail of task (is have an revision => show the revision detail)
      * reference demo10/dashboards/projects.html (combined card and show the current revision if exist)
-     * @return \Illuminate\Contracts\View\Factory|\Illuminate\Contracts\View\View|\Illuminate\Http\RedirectResponse
+     * @return \Illuminate\Contracts\View\Factory|View|\Illuminate\Http\RedirectResponse
      * @throws \Throwable
      **/
     public function taskDetail($id)
@@ -336,7 +335,7 @@ class AdminController extends Controller
     /**
      * view all the assets (assets of employees)
      * reference apps/user-management/users/list.html
-     * @return \Illuminate\Contracts\View\Factory|\Illuminate\Contracts\View\View|\Illuminate\Http\RedirectResponse
+     * @return \Illuminate\Contracts\View\Factory|View|\Illuminate\Http\RedirectResponse
      * @throws \Throwable
      **/
     public function employees()
@@ -415,7 +414,7 @@ class AdminController extends Controller
     /**
      * view all the equity (included asstes of company)
      * reference /widgets/tables.html <!--begin::Tables Widget 13-->
-     * @return \Illuminate\Contracts\View\Factory|\Illuminate\Contracts\View\View|\Illuminate\Http\RedirectResponse
+     * @return \Illuminate\Contracts\View\Factory|View|\Illuminate\Http\RedirectResponse
      * @throws \Throwable
      **/
     public function equity()

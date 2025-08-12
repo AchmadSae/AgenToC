@@ -88,7 +88,7 @@
             <!--end::Menu wrapper-->
             <!--begin::Toolbar-->
             <div class="flex-equal text-end ms-1">
-                <a href="{{ route('sign-in', ['flag' => 'user']) }}" class="btn btn-success">Sign In</a>
+                <a href="{{ route('sign.in', ['flag' => 'user']) }}" class="btn btn-success">Sign In</a>
             </div>
             <!--end::Toolbar-->
         </div>

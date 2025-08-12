@@ -25,25 +25,22 @@
 @endphp
 
 <body class="
-    {{ in_array($routeName, ['sign-in', 'sign-up']) ? 'auth-bg' : 'bg-body position-relative' }}
+    {{ in_array($routeName, ['sign.in', 'sign.up']) ? 'auth-bg' : 'bg-body position-relative' }}
 " data-bs-spy="scroll" data-bs-target="#kt_landing_menu">
     <!--begin::Root-->
     <div class="d-flex flex-column flex-root">
         <!-- Page Content -->
         {{ $slot }}
         <!-- end Page Content -->
-    </div>
-    </div>
-
+    </div
     @stack('modals')
     @include('sweetalert::alert')
-
-    </div>
     <!--begin::Global Javascript Bundle(mandatory for all pages)-->
     <script src="{{ asset('assets/plugins/global/plugins.bundle.js') }}"></script>
     <script src="{{  asset('assets/js/scripts.bundle.js') }}"></script>
     <!--end::Global Javascript Bundle-->
     <!--begin::Custom Javascript(used for this page only)-->
+    <script src="{{ asset('assets/js/custom/utilities/modals/create-app.js') }}"></script>
 
     <!--end::Custom Javascript-->
     <!--end::Javascript-->
