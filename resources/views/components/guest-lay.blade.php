@@ -34,10 +34,12 @@
         <!-- end Page Content -->
     </div
     @stack('modals')
+    @stack('scripts')
     @include('sweetalert::alert')
     <!--begin::Global Javascript Bundle(mandatory for all pages)-->
     <script src="{{ asset('assets/plugins/global/plugins.bundle.js') }}"></script>
     <script src="{{  asset('assets/js/scripts.bundle.js') }}"></script>
+    <script src="{{ asset('assets/js/custom/utilities/modals/create-app.js') }}"></script>
     <!--end::Global Javascript Bundle-->
     <!--begin::Custom Javascript(used for this page only)-->
     <script src="{{ asset('assets/js/custom/utilities/modals/create-app.js') }}"></script>
