@@ -60,7 +60,10 @@ class AuthImpl implements AuthInterface
         return true;
     }
 
-    public function register($data, $isTransaction = false): array
+      /**
+       * @throws \Throwable
+       */
+      public function register($data, $isTransaction = false): array
     {
         #local $user_Detail_id for prevent duplicate id
         $user_detail_id = GenerateId::generateId('UD', true);
@@ -80,7 +83,7 @@ class AuthImpl implements AuthInterface
             ];
         }
 
-        $response = DB::transaction(function () use ($user_detail_id, $role_id, $data, &$registeredUser, $isTransaction) {
+          $registeredUser = DB::transaction(function () use ($user_detail_id, $role_id, $data, &$registeredUser, $isTransaction) {
             //code...
             $user_detail = UserDetailModel::create([
                 'id' => $user_detail_id,
@@ -97,6 +100,7 @@ class AuthImpl implements AuthInterface
             DB::table('user_detail_roles')->insert([
                 'user_detail_id' => $user_detail->id,
                 'role_id' => $role_id,
+                  'is_active' => $isTransaction
             ]);
             #check isFromTransaction
             if (!$isTransaction) {
@@ -107,8 +111,7 @@ class AuthImpl implements AuthInterface
         }, $this->globalDBattempts);
         return [
             'flag' => $data->role,
-            'user' => $response,
-            'message' => 'Successfully registered! Confirm email to activate your account.',
+            'user' => $registeredUser,
         ];
     }
 

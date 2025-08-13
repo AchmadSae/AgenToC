@@ -30,11 +30,20 @@ return new class extends Migration {
             $table->text('description');
             $table->text('task_type');
             $table->integer('price');
-            $table->string('attachment_request')->nullable();
+            $table->string('task_contract')->nullable();
             $table->text('required_skills')->nullable();
-            $table->string('attachment_tmp')->nullable();
-            $table->string('attachment')->nullable();
             $table->timestamps();
+        });
+
+        Schema::create('task_file', function (Blueprint $table) {
+              $table->id();
+              $table->string('task_id');
+              $table->string('file_path');
+              $table->string('file_name');
+              $table->string('file_type');
+              $table->string('mime_type')->nullable();
+              $table->integer('file_size')->nullable();
+              $table->timestamps();
         });
         Schema::create('revision_history', function (Blueprint $table) {
             $table->id();

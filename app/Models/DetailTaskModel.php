@@ -9,10 +9,10 @@ class DetailTaskModel extends Model
     protected $table = 'detail_tasks';
 
     protected $fillable = [
+          'title',
         'description',
-        'attachment',
         'price',
-        'skill_required',
+        'required_skills',
         'task_contract',
     ];
 }

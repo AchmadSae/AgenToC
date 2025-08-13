@@ -20,6 +20,7 @@ Route::get('/test', function () {
 Route::get('/', [LandingController::class, 'index'])->name('landing');
 #checkout
 Route::get('/checkout', [TransactionsController::class, 'checkout'])->name('checkout');
+Route::post('/upload-file-checkout', [TransactionsController::class, 'uploadFileCheckout'])->name('upload-file-checkout');
 
 Route::controller(AuthController::class)->group(function () {
     Route::get('signing/{flag}', 'showLoginForm')->name('sign-in')->defaults('flag', 'user');

@@ -31,7 +31,7 @@ class MethodServiceUtil
         ];
     }
 
-    public function isPermissionExist($email, $typeAdmin)
+    public function isPermissionExist($email, $typeAdmin): bool
     {
         $flag = false;
         switch ($typeAdmin) {
@@ -60,7 +60,7 @@ class MethodServiceUtil
         return $flag;
     }
 
-    public function fetchMassageByTaskId($taskId)
+    public function fetchMassageByTaskId($taskId): \Illuminate\Database\Eloquent\Collection|array|\LaravelIdea\Helper\App\Models\_IH_MessageModel_C
     {
         return MessageModel::where('task_id', $taskId)
             ->with('user')
@@ -88,4 +88,18 @@ class MethodServiceUtil
 
         broadcast(new NotificationSent($notification, $userId))->toOthers();
     }
+
+      public function saveFile($files): array
+      {
+
+            $filePaths = [];
+            foreach ($files as $file) {
+                  $fileName = time().'_'.$file->getClientOriginalName();
+                  $path = $file->storeAs('assets/media/task', $fileName, 'public');
+
+                  $filePaths[] = '/storage/'.$path;
+            }
+
+            return ['file_paths' => $filePaths];
+      }
 }

@@ -41,6 +41,11 @@ class TaskModel extends Model
         return $this->hasMany(RevisionHistoryModel::class, 'task_id');
     }
 
+    public function taskFiles(): TaskModel|\Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(TaskFilesModel::class, 'task_id');
+    }
+
     public function getTask($id)
     {
         return $this->belongsTo(DetailTaskModel::class, 'detail_task_id', 'id')->where('id', $id)->first();

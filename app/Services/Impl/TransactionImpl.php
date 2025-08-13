@@ -7,6 +7,9 @@ use App\Helpers\Constant;
 use App\Helpers\GenerateId;
 use App\Mail\Receipt;
 use App\Helpers\Log;
+use App\Models\DetailTaskModel;
+use App\Models\TaskFilesModel;
+use App\Models\TaskModel;
 use App\Models\TransactionsModel;
 use App\Models\User;
 use App\Models\UserDetailModel;
@@ -65,26 +68,64 @@ class TransactionImpl implements TransactionsInterface
        */
       public function checkout($data): array
     {
-        $response = DB::transaction(function () use ($data) {
-            User::where('email', $data['email'])->lockForUpdate()->first();
-            return TransactionsModel::create([
-                'user_id' => $data['email'],
-                'product_id' => $data['product_id'],
-                'product_type' => $data['product_type'],
-                'payment_method' => Constant::PAYMENT_BANK,
-                'status' => false,
+          #debug
+          Log::browser($data, 'Checkout User');
+          $user_detail_id = "";
+          $userRegisterResponse = [];
+
+          #check user isRegistered
+          $flag = $this->authService->hasVerifiedEmail($data['email']);
+          if (!$flag) {
+                #register user
+               $userRegisterResponse[] = $this->authService->register($data, true);
+               $registeredUser = $userRegisterResponse['user'];
+               $user_detail_id = $registeredUser['user_detail_id'];
+          }else {
+              $user_detail_id = User::where('email', $data['email'])->first()->user_detail_id;
+          }
+        $transaction = DB::transaction(function () use ($data, $user_detail_id) {
+            User::where('user_detail_id', $user_detail_id)->lockForUpdate()->first();
+
+
+            $task = TaskModel::create([
+                'id' => GenerateId::generateId('TSK', false),
+                'kanban_id' => GenerateId::generateId('KBN', false),
+                'client_id' => $user_detail_id,
+                'detail_task_id' => GenerateId::generateId('DTK', false),
+                'deadline' => $data['due_date']
             ]);
+
+            $transaction = TransactionsModel::create([
+                    'user_id' => $data['email'],
+                    'product_id' => $data['product_code'],
+                    'task_id' => $task->id,
+                    'product_type' => $data['product_type'],
+                    'payment_method' => Constant::PAYMENT_BANK,
+                    'total_amount' => $data['price'],
+                    'status' => false,
+            ]);
+            DetailTaskModel::create([
+                'id' => $task->detail_task_id,
+                'title' => $data['title'],
+                'description' => $data['description'],
+                  'price' => $data['price'],
+            ]);
+            foreach ($data['file_paths'] as $file_path) {
+                TaskFilesModel::create([
+                    'task_id' => $task->id,
+                      'file_path' => $file_path,
+                      'file_name' => basename($file_path),
+                      'file_type' => Constant::FILE_TYPE_CHECKOUT,
+                      'mime_type' => mime_content_type($file_path),
+                      'file_size' => filesize($file_path),
+                ]);
+            }
+            return $transaction;
         }, Constant::DB_ATTEMPT);
-        #debug
-        Log::browser($data, 'Checkout User');
-        #check user isRegistered
-        $flag = $this->authService->hasVerifiedEmail($data['email']);
-        if (!$flag) {
-            #register user
-            $this->authService->register($data, true);
-        }
+
         return [
-            'transaction' => $response
+            'status' => true,
+              'transaction' => $transaction
         ];
     }
 

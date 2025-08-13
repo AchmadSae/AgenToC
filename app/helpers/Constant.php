@@ -34,4 +34,5 @@ class Constant
       const SUBTASK_STATUS_DONE = 'done';
       const TRANS_ID = 'INV';
       const PRODUCT_GRAPHIC = 'design_graphic';
+      const FILE_TYPE_CHECKOUT = 'checkout';
 }
