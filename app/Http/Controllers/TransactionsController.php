@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Helpers\Constant;
+use App\Helpers\Log;
 use App\Models\GlobalParam;
 use App\Services\MethodServiceUtil;
 use App\Services\TransactionsInterface;
@@ -26,6 +27,9 @@ class TransactionsController extends Controller
     public function checkout(Request $request)
     {
         $response = [];
+        $request->merge([
+              'card_number' => preg_replace('/\s+/', '', $request->card_number),
+        ]);
         #validation
         $request->validate([
               'email' => 'required|email',
@@ -36,10 +40,10 @@ class TransactionsController extends Controller
               'description' => 'required',
               'uploaded_files' => 'nullable',
         ]);
+        Log::browser('past validation', $request);
         $data = $request->all();
         #make default password
         $data['password'] = GlobalParam::where('code', 'DEFAULT_PASS')->first()->value;
-        $data['user_detail_id'] = auth()->user()->user_detail_id;
         try {
             //code...
             $response = $this->transactionService->checkout($data);
@@ -47,23 +51,33 @@ class TransactionsController extends Controller
             Alert::error('error', $th->getMessage());
         }
         #receipt waiting payment
-//        return view('transaction.receipt', [
-//            'status' => $response['status'],
-//            'data' => $response['transaction'],
-//            ]);
-          return response()->json($response, 200);
+        return view('transaction.receipt', [
+            'status' => $response['status'],
+            'data' => $response['transaction'],
+            ]);
     }
 
     public function uploadFileCheckout(Request $request)
     {
-          if (!$request->hasFile('file')) {
+          if (!$request->hasFile('files')) {
                 return response()->json([
                       'status' => false,
-                      'message' => 'File not found'
+                      'message' => 'File(s) not found'
                 ]);
           }
+          $allPaths = [];
           try {
-                $response = $this->methodService->saveFile($request->file('file'));
+                foreach ((array) $request->file('files') as $file) {
+                      if ($file) {
+                            $response = $this->methodService->saveFile($file);
+                            // saveFile may return ['file_paths' => [...]] or single path; normalize
+                            if (isset($response['file_paths']) && is_array($response['file_paths'])) {
+                                  $allPaths = array_merge($allPaths, $response['file_paths']);
+                            } elseif (isset($response['path'])) {
+                                  $allPaths[] = $response['path'];
+                            }
+                      }
+                }
           } catch (\Throwable $th) {
                 return response()->json([
                       'status' => false,
@@ -72,7 +86,7 @@ class TransactionsController extends Controller
           }
           return response()->json([
                 'status' => true,
-                'file_paths' => $response['file_paths'],
+                'file_paths' => array_values(array_unique($allPaths)),
                 'message' => 'File uploaded successfully',
           ]);
     }

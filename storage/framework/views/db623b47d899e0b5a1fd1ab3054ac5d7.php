@@ -20,14 +20,15 @@
                 <div class="d-flex flex-center mb-5 mb-lg-15">
                     <!--begin::Tabs-->
                     <ul class="nav border-transparent flex-center fs-5 fw-bold">
-                          @foreach($products as $product)
+                          <?php $__currentLoopData = $products; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $product): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                                 <li class="nav-item">
                                       <a class="nav-link text-gray-500 text-active-primary px-3 px-lg-6 active" href="#"
-                                         data-bs-toggle="tab" data-bs-target="#kt_landing_{{ $product->product_group_code }}">
-                                           {{ $product->productGroup->value }}
+                                         data-bs-toggle="tab" data-bs-target="#kt_landing_<?php echo e($product->product_group_code); ?>">
+                                           <?php echo e($product->productGroup->value); ?>
+
                                       </a>
                                 </li>
-                          @endforeach
+                          <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                     </ul>
                     <!--end::Tabs-->
                 </div>
@@ -35,8 +36,8 @@
                 <!--begin::Tabs content cards product-->
                 <div class="tab-content">
                     <!--begin::Tab pane-->
-                      @foreach($products as $product)
-                            <div class="tab-pane fade show active" id="kt_landing_{{ $product->product_group_code }}">
+                      <?php $__currentLoopData = $products; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $product): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                            <div class="tab-pane fade show active" id="kt_landing_<?php echo e($product->product_group_code); ?>">
                                   <!--begin::Row-->
                                   <div class="row g-10 ">
                                         <div class="col-lg-4">
@@ -46,7 +47,7 @@
                                                                 <!--begin::Heading-->
                                                                 <div class="mb-7 text-center">
                                                                       <!--begin::Title-->
-                                                                      <h1 class="text-gray-900 mb-5 fw-boldest">{{ $product->product_name }}</h1>
+                                                                      <h1 class="text-gray-900 mb-5 fw-boldest"><?php echo e($product->product_name); ?></h1>
                                                                       <!--end::Title-->
                                                                       <!--begin::Description-->
                                                                       <div class="text-gray-500 fw-semibold mb-5">
@@ -56,8 +57,8 @@
                                                                       <!--begin::Price-->
                                                                       <div class="text-center">
                                                                             <span class="mb-2 text-primary">Rp</span>
-                                                                            <span class="fs-3x fw-bold text-primary" data-kt-plan-price-month="{{number_format($product->price, 0, ',', '.') }}"
-                                                                                  data-kt-plan-price-annual="{{number_format($product->price, 0, ',', '.') }}">{{number_format($product->price, 0, ',', '.') }}</span>
+                                                                            <span class="fs-3x fw-bold text-primary" data-kt-plan-price-month="<?php echo e(number_format($product->price, 0, ',', '.')); ?>"
+                                                                                  data-kt-plan-price-annual="<?php echo e(number_format($product->price, 0, ',', '.')); ?>"><?php echo e(number_format($product->price, 0, ',', '.')); ?></span>
                                                                             <span class="fs-7 fw-semibold opacity-50"
                                                                                   data-kt-plan-price-month="/ item" data-kt-plan-price-annual="/ Ann">/item</span>
                                                                       </div>
@@ -67,26 +68,26 @@
                                                                 <!--begin::Features-->
                                                                 <div class="w-100 mb-5">
                                                                       <!--begin::Item-->
-                                                                      @foreach(preg_split('/\.\s*/', $product->product_description, -1, PREG_SPLIT_NO_EMPTY) as $point)
+                                                                      <?php $__currentLoopData = preg_split('/\.\s*/', $product->product_description, -1, PREG_SPLIT_NO_EMPTY); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $point): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                                                                             <div class="d-flex flex-stack mb-5">
-                                                                                  <span class="fw-semibold fs-6 text-gray-800 text-start pe-3">{{ $point }}</span>
+                                                                                  <span class="fw-semibold fs-6 text-gray-800 text-start pe-3"><?php echo e($point); ?></span>
                                                                                   <i class="ki-duotone ki-check-circle fs-1 text-success">
                                                                                         <span class="path1"></span>
                                                                                         <span class="path2"></span>
                                                                                   </i>
                                                                             </div>
-                                                                      @endforeach
+                                                                      <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                                                                       <!--end::Item-->
                                                                 </div>
                                                                 <!--end::Features-->
                                                                 <!--begin::Select-->
                                                                 <a href="#" class="btn btn-primary"
-                                                                   data-product-code="{{ $product->product_code }}"
-                                                                   data-product-name="{{ $product->product_name }}"
-                                                                   data-product-price="{{ $product->price }}"
-                                                                   data-product-description="{{ $product->product_description }}"
-                                                                   data-product-group-name="{{ $product->productGroup->value }}"
-                                                                   data-product-image="{{ $product->product_image }}"
+                                                                   data-product-code="<?php echo e($product->product_code); ?>"
+                                                                   data-product-name="<?php echo e($product->product_name); ?>"
+                                                                   data-product-price="<?php echo e($product->price); ?>"
+                                                                   data-product-description="<?php echo e($product->product_description); ?>"
+                                                                   data-product-group-name="<?php echo e($product->productGroup->value); ?>"
+                                                                   data-product-image="<?php echo e($product->product_image); ?>"
                                                                    data-bs-toggle="modal"
                                                                    data-bs-target="#kt_modal_checkout">Select</a>
                                                                 <!--end::Select-->
@@ -97,7 +98,7 @@
                                   </div>
                                   <!--end::Row-->
                             </div>
-                      @endforeach
+                      <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                     <!--end::Tab pane-->
                 </div>
                 <!--end::Tabs content-->
@@ -115,8 +116,8 @@
             <!--begin::Modal content-->
             <div class="modal-content">
                   <!--begin::Form-->
-                  <form class="form" method="POST" action="{{ route('checkout') }}" id="kt_modal_checkout_form">
-                        @csrf
+                  <form class="form" method="POST" action="<?php echo e(route('checkout')); ?>" id="kt_modal_checkout_form">
+                        <?php echo csrf_field(); ?>
                         <!--begin::Modal header-->
                         <div class="modal-header" id="kt_modal_checkout_header">
                               <!--begin::Modal title-->
@@ -312,6 +313,7 @@
       </div>
 </div>
 <!--end::Modal - New Address-->
-@push('scripts')
-      <script src="{{ asset('assets/js/custom/utilities/modals/checkout-product.js') }}"></script>
-@endpush
+<?php $__env->startPush('scripts'); ?>
+      <script src="<?php echo e(asset('assets/js/custom/utilities/modals/checkout-product.js')); ?>"></script>
+<?php $__env->stopPush(); ?>
+<?php /**PATH D:\development\CollaborateAgenToC\AgentC\resources\views/landing/products.blade.php ENDPATH**/ ?>
