@@ -15,8 +15,13 @@ class TransactionsController extends Controller
 {
 
     protected TransactionsInterface $transactionService;
-
     protected MethodServiceUtil $methodService;
+
+    public function __construct(TransactionsInterface $transactionService, MethodServiceUtil $methodService)
+    {
+        $this->transactionService = $transactionService;
+        $this->methodService = $methodService;
+    }
 
     public function checkout(Request $request)
     {
@@ -56,7 +61,7 @@ class TransactionsController extends Controller
                 ]);
           }
           try {
-                $response = $this->methodService->saveFile($request);
+                $response = $this->methodService->saveFile($request->file('file'));
           } catch (\Throwable $th) {
                 return response()->json([
                       'status' => false,

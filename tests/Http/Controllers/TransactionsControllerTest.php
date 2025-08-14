@@ -17,18 +17,18 @@ class TransactionsControllerTest extends TestCase
 {
     use RefreshDatabase;
 
-    protected $transactionService;
-    protected $methodService;
-    protected $controller;
+    protected TransactionsInterface $transactionService;
+    protected MethodServiceUtil $methodService;
+    protected TransactionsController $controller;
 
     protected function setUp(): void
     {
         parent::setUp();
-        
+
         // Create mocks for dependencies
         $this->transactionService = Mockery::mock(TransactionsInterface::class);
         $this->methodService = Mockery::mock(MethodServiceUtil::class);
-        
+
         // Create test user and authenticate
         $user = new \App\Models\User([
             'id' => 1,
@@ -36,18 +36,11 @@ class TransactionsControllerTest extends TestCase
             'email' => 'test@example.com',
             'user_detail_id' => 'UD123'
         ]);
-        
+
         $this->actingAs($user);
-        
+
         // Create controller instance with mocked dependencies
         $this->controller = new TransactionsController($this->transactionService, $this->methodService);
-        
-        // Create test global parameter
-        GlobalParam::create([
-            'code' => 'DEFAULT_PASS',
-            'value' => 'test123',
-            'description' => 'Default password for testing'
-        ]);
     }
 
     protected function tearDown(): void
@@ -69,12 +62,12 @@ class TransactionsControllerTest extends TestCase
                 'status' => 'pending'
             ]
         ];
-        
+
         $this->transactionService
             ->shouldReceive('checkout')
             ->once()
             ->andReturn($mockResponse);
-        
+
         // Make request
         $response = $this->post(route('checkout'), [
             'email' => 'test@example.com',
@@ -83,7 +76,7 @@ class TransactionsControllerTest extends TestCase
             'title' => 'Test Product',
             'description' => 'Test Description'
         ]);
-        
+
         // Assertions
         $response->assertStatus(200);
         $response->assertViewIs('receipt');
@@ -95,7 +88,7 @@ class TransactionsControllerTest extends TestCase
     public function test_checkout_validation_fails()
     {
         $response = $this->post(route('checkout'), []);
-        
+
         $response->assertSessionHasErrors([
             'email', 'name', 'product_code', 'title', 'description'
         ]);
@@ -108,7 +101,7 @@ class TransactionsControllerTest extends TestCase
             ->shouldReceive('checkout')
             ->once()
             ->andThrow(new \Exception('Service error'));
-        
+
         $response = $this->post(route('checkout'), [
             'email' => 'test@example.com',
             'name' => 'Test User',
@@ -116,41 +109,51 @@ class TransactionsControllerTest extends TestCase
             'title' => 'Test Product',
             'description' => 'Test Description'
         ]);
-        
+
         $response->assertSessionHas('error');
     }
 
     /** @test */
     public function test_upload_file_checkout_success()
     {
-        Storage::fake('public');
-        
-        $file = UploadedFile::fake()->create('test.pdf', 100);
-        
-        $this->methodService
-            ->shouldReceive('saveFile')
+        // Create a fake uploaded file
+        $uploadedFile = UploadedFile::fake()->create(
+            'test.pdf',
+            100, // size in KB
+            'application/pdf'
+        );
+
+        // Create a request with the uploaded file
+        $request = new \Illuminate\Http\Request();
+        $request->files->set('file', $uploadedFile);
+
+        // Mock the saveFile method to return a successful response
+        $this->methodService->shouldReceive('saveFile')
             ->once()
+            ->with(Mockery::on(function ($arg) use ($uploadedFile) {
+                return $arg === $uploadedFile;
+            }))
             ->andReturn([
-                'file_paths' => ['/path/to/uploaded/file.pdf'],
-                'message' => 'File uploaded successfully'
+                'file_paths' => ['/storage/assets/media/task/test_123.pdf']
             ]);
-        
-        $response = $this->post(route('upload.checkout'), [
-            'file' => $file
+
+        // Call the controller method
+        $response = $this->controller->uploadFileCheckout($request);
+
+        // Assert the response
+        $this->assertEquals(200, $response->getStatusCode());
+        $response->assertJson([
+            'status' => true,
+            'message' => 'File uploaded successfully',
+            'file_paths' => ['/storage/assets/media/task/test_123.pdf']
         ]);
-        
-        $response->assertStatus(200)
-            ->assertJson([
-                'status' => true,
-                'message' => 'File uploaded successfully'
-            ]);
     }
 
     /** @test */
     public function test_upload_file_checkout_no_file()
     {
-        $response = $this->post(route('upload.checkout'));
-        
+        $response = $this->post(route('upload-file-checkout'));
+
         $response->assertStatus(200)
             ->assertJson([
                 'status' => false,
@@ -163,16 +166,16 @@ class TransactionsControllerTest extends TestCase
     {
         Storage::fake('public');
         $file = UploadedFile::fake()->create('test.pdf', 100);
-        
+
         $this->methodService
             ->shouldReceive('saveFile')
             ->once()
             ->andThrow(new \Exception('Upload failed'));
-        
-        $response = $this->post(route('upload.checkout'), [
+
+        $response = $this->post(route('upload-file-checkout'), [
             'file' => $file
         ]);
-        
+
         $response->assertStatus(200)
             ->assertJson([
                 'status' => false,

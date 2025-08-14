@@ -7,7 +7,6 @@ use App\Helpers\Constant;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
 use App\Models\MessageModel;
-use App\Events\NotificationSent;
 
 class MethodServiceUtil
 {
@@ -91,15 +90,34 @@ class MethodServiceUtil
 
       public function saveFile($files): array
       {
-
             $filePaths = [];
-            foreach ($files as $file) {
-                  $fileName = time().'_'.$file->getClientOriginalName();
-                  $path = $file->storeAs('assets/media/task', $fileName, 'public');
 
-                  $filePaths[] = '/storage/'.$path;
+            // Convert single file to array for consistent processing
+            if (!is_array($files)) {
+                $files = [$files];
             }
 
-            return ['file_paths' => $filePaths];
+            foreach ($files as $file) {
+                if (is_string($file)) {
+                    $filePaths[] = $file;
+                    continue;
+                }
+
+                $fileName = time().'_'.$file->getClientOriginalName();
+
+                $directory = public_path('assets/media/task');
+                if (!is_dir($directory)) {
+                      mkdir($directory, 0777, true);
+                }
+
+                $file->move($directory, $fileName);
+
+                $fileName = time().'_'.$file->getClientOriginalName();
+                $filePaths[] = '/assets/media/task/'.$fileName;
+            }
+
+            return [
+                'file_paths' => $filePaths
+            ];
       }
 }

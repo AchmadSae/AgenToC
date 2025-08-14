@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class GlobalParam extends Model
 {
     protected $table = 'global_parameter';
-    protected $fillabel = [
+    protected $fillable = [
         'code',
         'value',
         'description'
