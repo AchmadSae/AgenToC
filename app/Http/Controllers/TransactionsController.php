@@ -31,8 +31,10 @@ class TransactionsController extends Controller
               'email' => 'required|email',
               'name' => 'required',
               'product_code' => 'required',
-              'title' => 'required',
+              'title' => 'required|max:100',
+              'card_number' => 'required|numeric',
               'description' => 'required',
+              'uploaded_files' => 'nullable',
         ]);
         $data = $request->all();
         #make default password
@@ -45,11 +47,11 @@ class TransactionsController extends Controller
             Alert::error('error', $th->getMessage());
         }
         #receipt waiting payment
-          dd($response);
-        return view('receipt', [
-            'status' => $response['status'],
-            'data' => $response['transaction'],
-            ]);
+//        return view('transaction.receipt', [
+//            'status' => $response['status'],
+//            'data' => $response['transaction'],
+//            ]);
+          return response()->json($response, 200);
     }
 
     public function uploadFileCheckout(Request $request)

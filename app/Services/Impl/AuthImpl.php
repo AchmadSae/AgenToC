@@ -79,11 +79,12 @@ class AuthImpl implements AuthInterface
         $user = User::where('email', $data->email)->first();
         if ($user) {
             return [
+                  'status' => false,
                 'message' => 'Your email and username is already registered.',
             ];
         }
 
-          $registeredUser = DB::transaction(function () use ($user_detail_id, $role_id, $data, &$registeredUser, $isTransaction) {
+          $registeredUser = DB::transaction(function () use ($user_detail_id, $role_id, $data, $isTransaction) {
             //code...
             $user_detail = UserDetailModel::create([
                 'id' => $user_detail_id,
@@ -110,6 +111,7 @@ class AuthImpl implements AuthInterface
             return $registeredUser;
         }, $this->globalDBattempts);
         return [
+              'status' => true,
             'flag' => $data->role,
             'user' => $registeredUser,
         ];

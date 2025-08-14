@@ -70,18 +70,15 @@ class TransactionImpl implements TransactionsInterface
     {
           #debug
           Log::browser($data, 'Checkout User');
-          $user_detail_id = "";
           $userRegisterResponse = [];
 
-          #check user isRegistered
-          $flag = $this->authService->hasVerifiedEmail($data['email']);
-          if (!$flag) {
-                #register user
-               $userRegisterResponse[] = $this->authService->register($data, true);
-               $registeredUser = $userRegisterResponse['user'];
-               $user_detail_id = $registeredUser['user_detail_id'];
+          #check register user
+          $userRegisterResponse[] = $this->authService->register($data, true);
+          if (!$userRegisterResponse['status']) {
+                $user_detail_id = User::where('email', $data['email'])->first()->user_detail_id;
           }else {
-              $user_detail_id = User::where('email', $data['email'])->first()->user_detail_id;
+                $registeredUser = $userRegisterResponse['user'];
+                $user_detail_id = $registeredUser['user_detail_id'];
           }
         $transaction = DB::transaction(function () use ($data, $user_detail_id) {
             User::where('user_detail_id', $user_detail_id)->lockForUpdate()->first();
@@ -110,7 +107,7 @@ class TransactionImpl implements TransactionsInterface
                 'description' => $data['description'],
                   'price' => $data['price'],
             ]);
-            foreach ($data['file_paths'] as $file_path) {
+            foreach ($data['uploaded_files'] as $file_path) {
                 TaskFilesModel::create([
                     'task_id' => $task->id,
                       'file_path' => $file_path,
