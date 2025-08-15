@@ -116,12 +116,12 @@
             <!--begin::Modal content-->
             <div class="modal-content">
                   <!--begin::Form-->
-                  <form class="form" action="<?php echo e(route('checkout')); ?>" id="kt_modal_checkout_form">
+                  <form class="form" method="POST" action="<?php echo e(route('checkout')); ?>" id="kt_modal_checkout_form">
                         <?php echo csrf_field(); ?>
                         <!--begin::Modal header-->
                         <div class="modal-header" id="kt_modal_checkout_header">
                               <!--begin::Modal title-->
-                              <h4>Checkout <span data-field="product_name"></span></h4>
+                              <h4  class="fw-bold text-dark">Checkout <span id="kt_modal_checkout_title"></span> </>
                               <!--end::Modal title-->
                               <!--begin::Close-->
                               <div class="btn btn-sm btn-icon btn-active-color-primary" id="kt_modal_checkout_close">
@@ -151,11 +151,7 @@
                                           <!--end::Col-->
                                           <!--end::Input-->
                                           <!--begin::hidden input-->
-                                          <input type="hidden" name="product_code" data-field="product_code" />
-                                          <input type="hidden" name="product_name" data-field="product_name" />
-                                          <input type="hidden" name="product_price" data-field="product_price" />
-                                          <input type="hidden" name="product_description" data-field="product_description" />
-                                          <input type="hidden" name="product_image" data-field="product_image" />
+                                          <input id="kt_modal_checkout_product_code" type="hidden" name="product_code" data-field="product_code" value="" />
                                           <!--end::hidden input-->
                                     </div>
                                     <!--end::Input group-->
@@ -177,8 +173,16 @@
                                                 <label class="required fs-5 fw-semibold mb-2">Due date</label>
                                                 <!--end::Label-->
                                                 <!--begin::Datepicker-->
-                                                <input class="form-control form-control-solid ps-12" placeholder="Select a date" name="due_date" />
+                                                <input type="datetime-local" 
+                                                       class="form-control form-control-solid ps-12" 
+                                                       placeholder="Select a date and time" 
+                                                       name="due_date" 
+                                                       min="<?php echo e(now()->format('Y-m-d\TH:i')); ?>"
+                                                       step="300" 
+                                                       required />
                                                 <!--end::Datepicker-->
+                                                <div class="fv-plugins-message-container invalid-feedback"></div>
+                                                <small class="text-muted">Please select a future date and time</small>
                                           </div>
                                           <!--end::Col-->
                                     </div>
@@ -278,7 +282,7 @@
                                                 <!--begin::Switch-->
                                                 <label class="form-check form-switch form-check-custom form-check-solid">
                                                       <!--begin::Input-->
-                                                      <input class="form-check-input" name="billing" type="checkbox" value="1" checked="checked" />
+                                                      <input class="form-check-input" name="isSavedCardNumber" type="checkbox" value="1" checked="checked" />
                                                       <!--end::Input-->
                                                       <!--begin::Label-->
                                                       <span class="form-check-label fw-semibold text-muted">Yes</span>
@@ -313,4 +317,7 @@
       </div>
 </div>
 <!--end::Modal - New Address-->
+<?php $__env->startPush('scripts'); ?>
+      <script src="<?php echo e(asset('assets/js/custom/utilities/modals/checkout-product.js')); ?>"></script>
+<?php $__env->stopPush(); ?>
 <?php /**PATH E:\iseng\AgenToC\resources\views/landing/products.blade.php ENDPATH**/ ?>

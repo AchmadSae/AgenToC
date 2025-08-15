@@ -24,13 +24,6 @@ use Illuminate\Auth\Events\Lockout;
 
 class AuthImpl implements AuthInterface
 {
-    protected $globalDBattempts;
-
-
-    public function __construct()
-    {
-        $this->globalDBattempts = GlobalParam::get('DB_ATTEMPTS')->value;
-    }
 
     public function hasVerifiedEmail($email): bool
     {
@@ -65,9 +58,18 @@ class AuthImpl implements AuthInterface
        */
       public function register($data, $isTransaction = false): array
     {
-        #local $user_Detail_id for prevent duplicate id
+          #check email isUnique
+          $user = User::where('email', $data->email)->first();
+          if ($user) {
+                return [
+                      'user' => null,
+                      'status' => false,
+                      'message' => 'Your email and username is already registered.',
+                ];
+          }
+          Log::browser($data, 'Begin AuthImpl.register() call');
+          #local $user_Detail_id for prevent duplicate id
         $user_detail_id = GenerateId::generateId('UD', true);
-        $registeredUser = [];
         $role_id = match ($data->role) {
             'admin' => Constant::ROLE_ADMIN,
             'worker' => Constant::ROLE_WORKER,
@@ -75,14 +77,7 @@ class AuthImpl implements AuthInterface
         };
         #debug
         Log::browser($data, 'Register User role: ' . $role_id);
-        #check email isUnique
-        $user = User::where('email', $data->email)->first();
-        if ($user) {
-            return [
-                  'status' => false,
-                'message' => 'Your email and username is already registered.',
-            ];
-        }
+
 
           $registeredUser = DB::transaction(function () use ($user_detail_id, $role_id, $data, $isTransaction) {
             //code...
@@ -91,6 +86,7 @@ class AuthImpl implements AuthInterface
                 'skills' => $data->skill,
                 'tag_line' => $data->tagline,
             ]);
+
             $registeredUser = User::create([
                 'user_detail_id' => $user_detail->id,
                 'name' => $data->name,
@@ -104,12 +100,16 @@ class AuthImpl implements AuthInterface
                   'is_active' => $isTransaction
             ]);
             #check isFromTransaction
-            if (!$isTransaction) {
-                # code...
-                $registeredUser->sendEmailVerificationNotification();
-            }
+                if (!$isTransaction) {
+                      if ($data->isSavedCardNumber = 1){
+                            $user_detail->update([
+                                  'credit_number' => $data->card_number,
+                            ]);
+                      }
+                      $registeredUser->sendEmailVerificationNotification();
+                }
             return $registeredUser;
-        }, $this->globalDBattempts);
+        }, Constant::DB_ATTEMPT);
         return [
               'status' => true,
             'flag' => $data->role,

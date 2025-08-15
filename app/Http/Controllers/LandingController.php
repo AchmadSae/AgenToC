@@ -12,7 +12,7 @@ class LandingController extends Controller
           $products = ProductsModel::with([
                 'productGroup:id,code,value'
           ])
-                ->select('id', 'product_name', 'price', 'product_description', 'product_image', 'product_group_code')
+                ->select('id', 'product_name','product_code', 'price', 'product_description', 'product_image', 'product_group_code')
                 ->orderBy('product_group_code', 'DESC')
                 ->get();
 //          dd($products->toArray());

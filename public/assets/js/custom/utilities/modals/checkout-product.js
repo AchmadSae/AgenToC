@@ -1,80 +1,13 @@
 "use strict";
-console.log("checkout-product.js loaded"); // Diagnostic log
 
-// Class definition
-var KTModalNewAddress = (function () {
+var KTModalNewAddress = function () {
       var submitButton;
       var cancelButton;
-      let closeButton;
       var validator;
       var form;
       var modal;
       var modalEl;
-
-      // Init form inputs
-      var initForm = function () {
-            var dueDate = $(form.querySelector('[name="due_date"]'));
-            dueDate.flatpickr({
-                  enableTime: true,
-                  dateFormat: "d, M Y, H:i",
-            });
-
-            // Function to update the file list UI
-
-            modalEl.addEventListener("show.bs.modal", function (event) {
-                  const button = event.relatedTarget;
-
-                  // Data dari tombol
-                  const data = {
-                        product_code: button.getAttribute("data-product-code"),
-                        product_name: button.getAttribute("data-product-name"),
-                        product_category: button.getAttribute(
-                              "data-product-category",
-                        ),
-                        product_price:
-                              button.getAttribute("data-product-price"),
-                        product_description: button.getAttribute(
-                              "data-product-description",
-                        ),
-                        product_image:
-                              button.getAttribute("data-product-image"),
-                  };
-
-                  Object.keys(data).forEach((key) => {
-                        modalEl
-                              .querySelectorAll(`[data-field="${key}"]`)
-                              .forEach((el) => {
-                                    if (
-                                          el.tagName === "INPUT" ||
-                                          el.tagName === "TEXTAREA"
-                                    ) {
-                                          el.value = data[key];
-                                    } else {
-                                          el.textContent = data[key];
-                                    }
-                              });
-                  });
-            });
-
-            // Upload multiple files
-            myDropzone.on("successmultiple", function (files, response) {
-                  const checkoutForm = document.querySelector(
-                        "#kt_modal_checkout_form",
-                  );
-                  if (response && Array.isArray(response.file_paths)) {
-                        response.file_paths.forEach(function (path) {
-                              let input = document.createElement("input");
-                              input.type = "hidden";
-                              input.name = "uploaded_files[]";
-                              input.value = path;
-                              checkoutForm.appendChild(input);
-                        });
-                  }
-                  // submit after all uploaded
-                  checkoutForm.submit();
-            });
-      };
-
+      var closeButton;
       let myDropzone = function () {
             function updateFileList() {
                   const fileListContainer = document.getElementById(
@@ -176,70 +109,121 @@ var KTModalNewAddress = (function () {
                   },
             ));
       };
+      // Init form inputs
+      var initForm = function () {
+            var dueDate = $(form.querySelector('[name="due_date"]'));
+            dueDate.flatpickr({
+                  enableTime: true,
+                  dateFormat: "Y-m-d H:i",  // This matches the HTML5 datetime-local format
+                  time_24hr: true,
+                  altInput: true,
+                  altFormat: "d, M Y, H:i",  // This is just for display
+                  defaultDate: new Date(),   // Optional: set a default date
+                  minDate: "today"
+            });
 
-      var handleForm = function () {
+            // Function to update the file list UI
+
+            modalEl.addEventListener("show.bs.modal", function (event) {
+                  const button = event.relatedTarget;
+
+                  // Data dari tombol
+
+                  let product_code = button.getAttribute("data-product-code");
+                  let product_name = button.getAttribute("data-product-name");
+                  let product_category = button.getAttribute("data-product-category");
+                  let product_price = button.getAttribute("data-product-price");
+                  let product_description = button.getAttribute("data-product-description");
+                  let product_image = button.getAttribute("data-product-image");
+                  $("#kt_modal_checkout_product_code").val(product_code);
+                  $("#kt_modal_checkout_title").text(product_name);
+            });
+
+            // Upload multiple files
+            myDropzone.on("successmultiple", function (files, response) {
+                  const checkoutForm = document.querySelector(
+                        "#kt_modal_checkout_form",
+                  );
+                  if (response && Array.isArray(response.file_paths)) {
+                        response.file_paths.forEach(function (path) {
+                              let input = document.createElement("input");
+                              input.type = "hidden";
+                              input.name = "uploaded_files[]";
+                              input.value = path;
+                              checkoutForm.appendChild(input);
+                        });
+                  }
+                  // submit after all uploaded
+                  checkoutForm.submit();
+            });
+
+      };
+      var handleForm = function() {
             // Stepper custom navigation
 
             // Init form validation rules. For more info check the FormValidation plugin's official documentation:https://formvalidation.io/
-            validator = FormValidation.formValidation(form, {
-                  fields: {
-                        title: {
-                              validators: {
-                                    notEmpty: {
-                                          message: "Title is required",
-                                    },
+            validator = FormValidation.formValidation(
+                  form,
+                  {
+                        fields: {
+                              'title': {
+                                    validators: {
+                                          notEmpty: {
+                                                message: 'title is required'
+                                          }
+                                    }
                               },
-                        },
-                        email: {
-                              validators: {
-                                    notEmpty: {
-                                          message: "Email is required",
-                                    },
+                              'email': {
+                                    validators: {
+                                          notEmpty: {
+                                                message: 'Last name is required'
+                                          }
+                                    }
                               },
-                        },
-                        name: {
-                              validators: {
-                                    notEmpty: {
-                                          message: "Name is required",
-                                    },
+                              'description': {
+                                    validators: {
+                                          notEmpty: {
+                                                message: 'Country is required'
+                                          }
+                                    }
                               },
-                        },
-                        description: {
-                              validators: {
-                                    notEmpty: {
-                                          message: "Description is required",
-                                    },
+                              'name': {
+                                    validators: {
+                                          notEmpty: {
+                                                message: 'Address 1 is required'
+                                          }
+                                    }
                               },
-                        },
-                        card_number: {
-                              validators: {
-                                    notEmpty: {
-                                          message: "Card number is required",
-                                    },
+                              'card_number': {
+                                    validators: {
+                                          notEmpty: {
+                                                message: 'Address 2 is required'
+                                          }
+                                    }
                               },
                         },
                         plugins: {
                               trigger: new FormValidation.plugins.Trigger(),
                               bootstrap: new FormValidation.plugins.Bootstrap5({
-                                    rowSelector: ".fv-row",
-                                    eleInvalidClass: "",
-                                    eleValidClass: "",
-                              }),
-                        },
-                  },
-            });
+                                    rowSelector: '.fv-row',
+                                    eleInvalidClass: '',
+                                    eleValidClass: ''
+                              })
+                        }
+                  }
+            );
 
             // Action buttons
-            submitButton.addEventListener("click", function (e) {
+            submitButton.addEventListener('click', function (e) {
                   e.preventDefault();
-                  console.log("submit clicked. Default action prevented");
 
                   // Validate form before submit
                   if (validator) {
                         validator.validate().then(function (status) {
-                              console.log("Validation status: " + status);
+                              console.log('validated!');
 
-                              if (status === "Valid") {
+                              if (status == 'Valid') {
+                                    // Set the path uploaded files
                                     if (
                                           myDropzone.getQueuedFiles().length > 0
                                     ) {
@@ -247,60 +231,42 @@ var KTModalNewAddress = (function () {
                                     } else {
                                           form.submit();
                                     }
-                                    submitButton.setAttribute(
-                                          "data-kt-indicator",
-                                          "on",
-                                    );
+                                    submitButton.setAttribute('data-kt-indicator', 'on');
 
                                     // Disable button to avoid multiple click
                                     submitButton.disabled = true;
 
                                     // Simulate ajax process
-                                    setTimeout(function () {
-                                          submitButton.removeAttribute(
-                                                "data-kt-indicator",
-                                          );
+                                    setTimeout(function() {
+                                          submitButton.removeAttribute('data-kt-indicator');
 
                                           // Enable button
                                           submitButton.disabled = false;
 
                                           // Show success message.  For more info check the plugin's official documentation: https://sweetalert2.github.io/
-                                          Swal.fire({
-                                                text: "Form has been successfully submitted!",
-                                                icon: "success",
-                                                buttonsStyling: false,
-                                                confirmButtonText:
-                                                      "Ok, got it!",
-                                                customClass: {
-                                                      confirmButton:
-                                                            "btn btn-primary",
-                                                },
-                                          }).then(function (result) {
-                                                if (result.isConfirmed) {
-                                                      modal.hide();
-                                                }
-                                          });
+                                          modal.hide();
 
                                           //form.submit(); // Submit form
                                     }, 5000);
                               } else {
                                     // Show error message.
                                     Swal.fire({
-                                          text: "Please check your required fields.",
+                                          text: "Sorry, looks like there are some errors detected, please try again.",
                                           icon: "error",
                                           buttonsStyling: false,
                                           confirmButtonText: "Ok, got it!",
                                           customClass: {
-                                                confirmButton:
-                                                      "btn btn-primary",
-                                          },
+                                                confirmButton: "btn btn-primary"
+                                          }
                                     });
                               }
                         });
                   }
             });
 
-            let cancelForm = () => {
+            cancelButton.addEventListener('click', function (e) {
+                  e.preventDefault();
+
                   Swal.fire({
                         text: "Are you sure you would like to cancel?",
                         icon: "warning",
@@ -310,13 +276,13 @@ var KTModalNewAddress = (function () {
                         cancelButtonText: "No, return",
                         customClass: {
                               confirmButton: "btn btn-primary",
-                              cancelButton: "btn btn-active-light",
-                        },
+                              cancelButton: "btn btn-active-light"
+                        }
                   }).then(function (result) {
                         if (result.value) {
                               form.reset(); // Reset form
                               modal.hide(); // Hide modal
-                        } else if (result.dismiss === "cancel") {
+                        } else if (result.dismiss === 'cancel') {
                               Swal.fire({
                                     text: "Your form has not been cancelled!.",
                                     icon: "error",
@@ -324,25 +290,12 @@ var KTModalNewAddress = (function () {
                                     confirmButtonText: "Ok, got it!",
                                     customClass: {
                                           confirmButton: "btn btn-primary",
-                                    },
+                                    }
                               });
                         }
                   });
-            };
-
-            cancelButton.addEventListener("click", function (e) {
-                  e.preventDefault();
-
-                  cancelForm();
             });
-
-            closeButton.addEventListener("click", function (e) {
-                  e.preventDefault();
-
-                  cancelForm();
-            });
-      };
-
+      }
       return {
             // Public functions
             init: function () {
@@ -370,9 +323,7 @@ var KTModalNewAddress = (function () {
                   handleForm();
             },
       };
-})();
-
-// On document ready
+}();
 KTUtil.onDOMContentLoaded(function () {
       KTModalNewAddress.init();
 });

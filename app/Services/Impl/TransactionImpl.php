@@ -26,6 +26,10 @@ use Throwable;
 class TransactionImpl implements TransactionsInterface
 {
     protected AuthInterface $authService;
+      public function __construct(AuthInterface $authService)
+      {
+            $this->authService = $authService;
+      }
 
       /**
        * @throws InternalErrorException
@@ -69,16 +73,29 @@ class TransactionImpl implements TransactionsInterface
       public function checkout($data): array
     {
           #debug
-          Log::browser($data, 'Checkout User');
-          $userRegisterResponse = [];
-
+//          dd($data);
+          Log::browser($data, 'Begin TransactionImpl.checkout');
           #check register user
-          $userRegisterResponse[] = $this->authService->register($data, true);
+          $userRegisterResponse = $this->authService->register($data, true);
+//          dd($userRegisterResponse);
           if (!$userRegisterResponse['status']) {
-                $user_detail_id = User::where('email', $data['email'])->first()->user_detail_id;
-          }else {
-                $registeredUser = $userRegisterResponse['user'];
-                $user_detail_id = $registeredUser['user_detail_id'];
+                $user = User::where('email', $data['email'])->first();
+
+                if (!$user) {
+                    throw new \Exception('User with email ' . $data['email'] . ' not found');
+                }
+
+                if (empty($user->user_detail_id)) {
+                    throw new \Exception('User detail not found for this user');
+                }
+
+                $user_detail_id = $user->user_detail_id;
+          } else {
+                if (empty($userRegisterResponse['user']->user_detail_id)) {
+                    throw new \Exception('User detail not found in registration response');
+                }
+
+                $user_detail_id = $userRegisterResponse['user']->user_detail_id;
           }
         $transaction = DB::transaction(function () use ($data, $user_detail_id) {
             User::where('user_detail_id', $user_detail_id)->lockForUpdate()->first();
@@ -93,6 +110,7 @@ class TransactionImpl implements TransactionsInterface
             ]);
 
             $transaction = TransactionsModel::create([
+                  'id' => GenerateId::generateId(Constant::TRANS_ID, false),
                     'user_id' => $data['email'],
                     'product_id' => $data['product_code'],
                     'task_id' => $task->id,

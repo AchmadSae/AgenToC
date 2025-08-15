@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Helpers\Constant;
 use App\Helpers\Log;
 use App\Models\GlobalParam;
+use App\Models\TransactionsModel;
+use App\Models\User;
 use App\Services\MethodServiceUtil;
 use App\Services\TransactionsInterface;
 use ErrorException;
@@ -26,35 +28,90 @@ class TransactionsController extends Controller
 
     public function checkout(Request $request)
     {
-        $response = [];
-        $request->merge([
-              'card_number' => preg_replace('/\s+/', '', $request->card_number),
-        ]);
-        #validation
-        $request->validate([
-              'email' => 'required|email',
-              'name' => 'required',
-              'product_code' => 'required',
-              'title' => 'required|max:100',
-              'card_number' => 'required|numeric',
-              'description' => 'required',
-              'uploaded_files' => 'nullable',
-        ]);
-        Log::browser('past validation', $request);
-        $data = $request->all();
-        #make default password
-        $data['password'] = GlobalParam::where('code', 'DEFAULT_PASS')->first()->value;
         try {
-            //code...
-            $response = $this->transactionService->checkout($data);
-        } catch (\Throwable $th) {
-            Alert::error('error', $th->getMessage());
-        }
-        #receipt waiting payment
-        return view('transaction.receipt', [
-            'status' => $response['status'],
-            'data' => $response['transaction'],
+            // Remove any spaces from card number
+            if ($request->has('card_number')) {
+                $request->merge([
+                    'card_number' => preg_replace('/\s+/', '', $request->card_number),
+                ]);
+            }
+
+            // Validate the request
+            $rules = [
+                'name' => 'required|string|max:255',
+                'email' => 'required|email',
+                'title' => 'required|string|max:255',
+                'description' => 'required|string',
+                'card_number' => 'required|string',
+                'product_code' => 'required|string',
+                'due_date' => 'required|date_format:Y-m-d H:i',
+                'uploaded_files' => 'sometimes|array',
+                'uploaded_files.*' => 'sometimes|string',
+                'isSavedCardNumber' => 'sometimes|string'
+            ];
+
+            $validator = \Validator::make($request->all(), $rules);
+
+            if ($validator->fails()) {
+                \Log::error('Validation failed:', $validator->errors()->toArray());
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Validation failed',
+                    'errors' => $validator->errors()
+                ], 422);
+            }
+
+            // Get the validated data
+            $data = $validator->validated();
+
+            // Handle due_date
+            if (isset($data['due_date'])) {
+                try {
+                    $data['due_date'] = \Carbon\Carbon::parse($data['due_date'])->format('Y-m-d H:i:s');
+                } catch (\Exception $e) {
+                    throw new \Exception('Invalid date format. Please use YYYY-MM-DD HH:MM');
+                }
+            }
+
+            // Handle uploaded files if they exist
+            if ($request->has('uploaded_files') && is_array($request->uploaded_files)) {
+                $data['uploaded_files'] = $request->uploaded_files;
+            } else {
+                $data['uploaded_files'] = [];
+            }
+
+            \Log::info('Processed data:', $data);
+
+            // Process the checkout using the service
+            try {
+                  dd($data);
+                $transaction = $this->transactionService->checkout($data);
+
+                Alert::success('Success', 'Transaction processed successfully!');
+                return redirect()->route('transactions.receipt', ['id' => $transaction['id'] ?? '']);
+
+            } catch (\Exception $e) {
+                \Log::error('Checkout error: ' . $e->getMessage(), [
+                    'trace' => $e->getTraceAsString()
+                ]);
+                Alert::error('Error', 'Transaction failed: ' . $e->getMessage());
+                return back()->withInput();
+            }
+
+        } catch (\Exception $e) {
+            \Log::error('Checkout error:', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+                'request' => $request->except(['card_number', '_token'])
             ]);
+            Alert::error('Failed to process transaction', 'Internal Server Error');
+            return redirect()->back()->status(500);
+//            return response()->json([
+//                'success' => false,
+//                'message' => 'An error occurred while processing your request: ' . $e->getMessage(),
+//                'error' => $e->getMessage()
+//            ], 500);
+        }
     }
 
     public function uploadFileCheckout(Request $request)
@@ -90,5 +147,17 @@ class TransactionsController extends Controller
                 'message' => 'File uploaded successfully',
           ]);
     }
+
+
+      /*
+       * show receipt
+       * @param string $id
+       */
+      public function receipt(string $id)
+      {
+            $transaction = TransactionsModel::findOrFail($id);
+            $user = User::where('user_detail_id', $transaction->user_id)->first();
+            return view('transaction.receipt', compact('transaction', 'user'));
+      }
 
 }
