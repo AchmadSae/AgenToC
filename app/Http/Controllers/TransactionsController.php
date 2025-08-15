@@ -84,11 +84,13 @@ class TransactionsController extends Controller
 
             // Process the checkout using the service
             try {
-                  dd($data);
                 $transaction = $this->transactionService->checkout($data);
-
+                if (!$transaction['status']) {
+                      Alert::error('Failed to process transaction', $transaction['message']);
+                      return redirect()->back()->withInput();
+                }
                 Alert::success('Success', 'Transaction processed successfully!');
-                return redirect()->route('transactions.receipt', ['id' => $transaction['id'] ?? '']);
+                return redirect()->route('transactions.receipt', ['id' => $transaction['transaction_id'] ]);
 
             } catch (\Exception $e) {
                 \Log::error('Checkout error: ' . $e->getMessage(), [

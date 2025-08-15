@@ -59,7 +59,7 @@ class AuthImpl implements AuthInterface
       public function register($data, $isTransaction = false): array
     {
           #check email isUnique
-          $user = User::where('email', $data->email)->first();
+          $user = User::where('email', $data['email'])->first();
           if ($user) {
                 return [
                       'user' => null,
@@ -70,7 +70,7 @@ class AuthImpl implements AuthInterface
           Log::browser($data, 'Begin AuthImpl.register() call');
           #local $user_Detail_id for prevent duplicate id
         $user_detail_id = GenerateId::generateId('UD', true);
-        $role_id = match ($data->role) {
+        $role_id = match ($data['role']) {
             'admin' => Constant::ROLE_ADMIN,
             'worker' => Constant::ROLE_WORKER,
             default => Constant::ROLE_CLIENT,
@@ -83,15 +83,15 @@ class AuthImpl implements AuthInterface
             //code...
             $user_detail = UserDetailModel::create([
                 'id' => $user_detail_id,
-                'skills' => $data->skill,
-                'tag_line' => $data->tagline,
+                'skills' => $data['skills'],
+                'tag_line' => $data['tag_line'],
             ]);
 
             $registeredUser = User::create([
                 'user_detail_id' => $user_detail->id,
-                'name' => $data->name,
-                'email' => $data->email,
-                'password' => Hash::make($data->password)
+                'name' => $data['name'],
+                'email' => $data['email'],
+                'password' => Hash::make($data['password'])
             ]);
 
             DB::table('user_detail_roles')->insert([
@@ -101,9 +101,9 @@ class AuthImpl implements AuthInterface
             ]);
             #check isFromTransaction
                 if (!$isTransaction) {
-                      if ($data->isSavedCardNumber = 1){
+                      if ($data['isSavedCardNumber']= 1){
                             $user_detail->update([
-                                  'credit_number' => $data->card_number,
+                                  'credit_number' => $data['card_number'],
                             ]);
                       }
                       $registeredUser->sendEmailVerificationNotification();
@@ -112,7 +112,7 @@ class AuthImpl implements AuthInterface
         }, Constant::DB_ATTEMPT);
         return [
               'status' => true,
-            'flag' => $data->role,
+            'flag' => $role_id,
             'user' => $registeredUser,
         ];
     }
