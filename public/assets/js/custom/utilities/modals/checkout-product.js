@@ -70,8 +70,11 @@ var KTModalNewAddress = (function () {
                               checkoutForm.appendChild(input);
                         });
                   }
-                  // submit after all uploaded
-                  checkoutForm.submit();
+                  // Use requestSubmit for a more reliable submission that mimics a user click
+                  if (checkoutForm) {
+                        console.log("Submitting form from successmultiple event...");
+                        checkoutForm.requestSubmit(document.querySelector("#kt_modal_checkout_submit"));
+                  }
             });
       };
 
@@ -240,49 +243,17 @@ var KTModalNewAddress = (function () {
                               console.log("Validation status: " + status);
 
                               if (status === "Valid") {
-                                    if (
-                                          myDropzone.getQueuedFiles().length > 0
-                                    ) {
-                                          myDropzone.processQueue();
-                                    } else {
-                                          form.submit();
-                                    }
-                                    submitButton.setAttribute(
-                                          "data-kt-indicator",
-                                          "on",
-                                    );
-
-                                    // Disable button to avoid multiple click
+                                    submitButton.setAttribute("data-kt-indicator", "on");
                                     submitButton.disabled = true;
 
-                                    // Simulate ajax process
-                                    setTimeout(function () {
-                                          submitButton.removeAttribute(
-                                                "data-kt-indicator",
-                                          );
-
-                                          // Enable button
-                                          submitButton.disabled = false;
-
-                                          // Show success message.  For more info check the plugin's official documentation: https://sweetalert2.github.io/
-                                          Swal.fire({
-                                                text: "Form has been successfully submitted!",
-                                                icon: "success",
-                                                buttonsStyling: false,
-                                                confirmButtonText:
-                                                      "Ok, got it!",
-                                                customClass: {
-                                                      confirmButton:
-                                                            "btn btn-primary",
-                                                },
-                                          }).then(function (result) {
-                                                if (result.isConfirmed) {
-                                                      modal.hide();
-                                                }
-                                          });
-
-                                          //form.submit(); // Submit form
-                                    }, 5000);
+                                    if (myDropzone.getQueuedFiles().length > 0) {
+                                          console.log("Files found in queue. Processing upload...");
+                                          myDropzone.processQueue(); // This will trigger 'successmultiple' which then submits the form
+                                    } else {
+                                          console.log("No files in queue. Submitting form directly.");
+                                          // Use requestSubmit for a more reliable submission
+                                          form.requestSubmit(submitButton);
+                                    }
                               } else {
                                     // Show error message.
                                     Swal.fire({
@@ -291,8 +262,7 @@ var KTModalNewAddress = (function () {
                                           buttonsStyling: false,
                                           confirmButtonText: "Ok, got it!",
                                           customClass: {
-                                                confirmButton:
-                                                      "btn btn-primary",
+                                                confirmButton: "btn btn-primary",
                                           },
                                     });
                               }
