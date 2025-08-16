@@ -1,21 +1,32 @@
 "use strict";
 
-var KTModalNewAddress = function () {
+// Class definition
+var KTModalCheckout = function () {
       var submitButton;
       var cancelButton;
+      var closeButton;
       var validator;
       var form;
       var modal;
       var modalEl;
-      var closeButton;
+      var dropzoneInstance;
       let myDropzone = function () {
-            function updateFileList() {
+            Dropzone.autoDiscover = false;
+            // Initialize Dropzone
+            const dropzoneElement = document.querySelector("#kt_modal_checkout_files_upload");
+            const checkoutForm = document.querySelector("#kt_modal_checkout_form");
+            const submitButton = document.querySelector("#kt_modal_checkout_submit"); // pastikan ada ID ini
+            // pastikan ada ID ini
+            function updateFileList(files) {
                   const fileListContainer = document.getElementById(
                         "kt_modal_uploaded_list",
                   );
                   fileListContainer.innerHTML = ""; // Clear current list
-
-                  myDropzone.files.forEach((file) => {
+                  if (!files || !files.length) {
+                        fileListContainer.innerHTML = "<li>No files uploaded yet.</li>";
+                        return;
+                  }
+                  files.forEach(file => {
                         const fileSize = (file.size / 1024).toFixed(2) + " KB";
                         const fileExtension = file.name
                               .split(".")
@@ -63,54 +74,106 @@ var KTModalNewAddress = function () {
                             </select>
                         </div>
                     `;
+                        fileListContainer.appendChild(fileElement);
+                  });
+                  // // Event Dropzone
+                  // myDropzone.on("addedfile", function() {
+                  //       updateFileList(dropzoneInstance.files); // Kirim daftar file
+                  // });
+                  //
+                  // myDropzone.on("removedfile", function() {
+                  //       updateFileList(dropzoneInstance.files); // Update lagi setelah remove
+                  // });
 
-                        // Add event listener for remove option
-                        const select = fileElement.querySelector("select");
-                        select.addEventListener("change", function () {
-                              if (this.value === "1") {
-                                    myDropzone.removeFile(file);
+            }
+            // Create a new Dropzone instance
+            dropzoneInstance = new Dropzone(dropzoneElement, {
+                  url: "/upload-file-checkout",
+                  paramName: "files",
+                  maxFiles: 3,
+                  maxFilesize: 10,
+                  addRemoveLinks: true,
+                  autoProcessQueue: false,
+                  uploadMultiple: true,
+                  parallelUploads: 10,
+                  acceptedFiles: ".jpg,.jpeg,.png,.pdf,.doc,.docx,.xls,.xlsx",
+                  headers: {
+                        "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]').content,
+                  },
+
+                  init: function () {
+                        const dz = this;
+                        let uploadTimeout;
+                        dz.on("addedfile", function () {
+                              updateFileList(dz.files);
+                        });
+
+                        dz.on("removedfile", function () {
+                              updateFileList(dz.files);
+                        });
+
+                        dz.on("sendingmultiple", function () {
+                              console.log('Starting file upload...');
+                              uploadTimeout = setTimeout(function() {
+                                    if (dz.files.length > 0) {
+                                          dz.cancelUpload(dz.getUploadingFiles()[0]);
+                                          Swal.fire({
+                                                text: "Upload timed out. Please try again with a smaller file or better connection.",
+                                                icon: "error",
+                                                buttonsStyling: false,
+                                                confirmButtonText: "OK"
+                                          });
+                                          submitButton.removeAttribute('data-kt-indicator');
+                                          submitButton.disabled = false;
+                                    }
+                              }, 300000); // 5 minutes
+                        });
+
+                        dz.on("successmultiple", function (files, response) {
+                              console.log('Upload successful:', response);
+
+                              if (response && response.status && response.file_paths) {
+                                    // Remove any existing file inputs to prevent duplicates
+                                    checkoutForm.querySelectorAll('input[name="uploaded_files[]"]').forEach(input => input.remove());
+
+                                    // Add new file inputs
+                                    response.file_paths.forEach(function (path) {
+                                          let input = document.createElement("input");
+                                          input.type = "hidden";
+                                          input.name = "uploaded_files[]";
+                                          input.value = path;
+                                          checkoutForm.appendChild(input);
+                                    });
+
+                                    console.log('Submitting form...');
+                                    checkoutForm.submit();
+                              } else {
+                                  console.error('Response not valid:', response);
+                                  submitButton.removeAttribute('data-kt-indicator');
+                                  submitButton.disabled = false;
                               }
                         });
 
-                        fileListContainer.appendChild(fileElement);
-                  });
-            }
+                        dz.on("errormultiple", function (files, message) {
+                              console.error('Upload error:', message);
+                              submitButton.removeAttribute('data-kt-indicator');
+                              submitButton.disabled = false;
 
-            // DropzoneJS
-            // Please refer to the DropzoneJS plugin's official documentation for more information: https://www.dropzonejs.com/#usage
-            return (myDropzone = new Dropzone(
-                  "#kt_modal_checkout_files_upload",
-                  {
-                        url: "/upload-file-checkout",
-                        paramName: "files", // send as 'files' to match backend
-                        maxFiles: 3,
-                        maxFilesize: 10,
-                        addRemoveLinks: true,
-                        autoProcessQueue: false,
-                        uploadMultiple: true,
-                        parallelUploads: 10,
-                        acceptedFiles:
-                              ".jpg,.jpeg,.png,.pdf,.doc,.docx,.xls,.xlsx",
-                        headers: {
-                              "X-CSRF-TOKEN": document.querySelector(
-                                    'meta[name="csrf-token"]',
-                              ).content,
-                        },
-                        // When file is added
-                        addedfile: function (file) {
-                              updateFileList();
-                        },
-                        // When file is removed
-                        removedfile: function (file) {
-                              updateFileList();
-                              this.options.maxFiles = this.options.maxFiles + 1;
-                        },
-                        // Remove single-file success handler; rely on successmultiple to collect paths
-                  },
-            ));
+                              Swal.fire({
+                                    text: "Error uploading files. Please try again.",
+                                    icon: "error",
+                                    buttonsStyling: false,
+                                    confirmButtonText: "OK"
+                              });
+                        });
+                  }
+
+            });
+
+
       };
       // Init form inputs
-      var initForm = function () {
+      var initForm = function() {
             var dueDate = $(form.querySelector('[name="due_date"]'));
             dueDate.flatpickr({
                   enableTime: true,
@@ -121,7 +184,6 @@ var KTModalNewAddress = function () {
                   defaultDate: new Date(),   // Optional: set a default date
                   minDate: "today"
             });
-
             // Function to update the file list UI
 
             modalEl.addEventListener("show.bs.modal", function (event) {
@@ -135,29 +197,15 @@ var KTModalNewAddress = function () {
                   let product_price = button.getAttribute("data-product-price");
                   let product_description = button.getAttribute("data-product-description");
                   let product_image = button.getAttribute("data-product-image");
+                  let product_group_name = button.getAttribute("data-product-group-name");
                   $("#kt_modal_checkout_product_code").val(product_code);
                   $("#kt_modal_checkout_title").text(product_name);
+                  $("#kt_modal_checkout_product_group_name").val(product_group_name);
+                  $("#kt_modal_checkout_product_price").val(product_price);
             });
+      }
 
-            // Upload multiple files
-            myDropzone.on("successmultiple", function (files, response) {
-                  const checkoutForm = document.querySelector(
-                        "#kt_modal_checkout_form",
-                  );
-                  if (response && Array.isArray(response.file_paths)) {
-                        response.file_paths.forEach(function (path) {
-                              let input = document.createElement("input");
-                              input.type = "hidden";
-                              input.name = "uploaded_files[]";
-                              input.value = path;
-                              checkoutForm.appendChild(input);
-                        });
-                  }
-                  // submit after all uploaded
-                  checkoutForm.submit();
-            });
-
-      };
+      // Handle form validation and submittion
       var handleForm = function() {
             // Stepper custom navigation
 
@@ -169,35 +217,38 @@ var KTModalNewAddress = function () {
                               'title': {
                                     validators: {
                                           notEmpty: {
-                                                message: 'title is required'
+                                                message: 'Title is required'
                                           }
                                     }
                               },
                               'email': {
                                     validators: {
                                           notEmpty: {
-                                                message: 'Last name is required'
+                                                message: 'Email is required'
+                                          },
+                                          emailAddress: {
+                                                message: 'Please enter a valid email address'
                                           }
                                     }
                               },
                               'description': {
                                     validators: {
                                           notEmpty: {
-                                                message: 'Country is required'
+                                                message: 'descriptions is required'
                                           }
                                     }
                               },
                               'name': {
                                     validators: {
                                           notEmpty: {
-                                                message: 'Address 1 is required'
+                                                message: 'Name is required'
                                           }
                                     }
                               },
                               'card_number': {
                                     validators: {
                                           notEmpty: {
-                                                message: 'Address 2 is required'
+                                                message: 'card number is required'
                                           }
                                     }
                               },
@@ -220,34 +271,24 @@ var KTModalNewAddress = function () {
                   // Validate form before submit
                   if (validator) {
                         validator.validate().then(function (status) {
-                              console.log('validated!');
+                              console.log('Form validation status:', status);
 
-                              if (status == 'Valid') {
-                                    // Set the path uploaded files
-                                    if (
-                                          myDropzone.getQueuedFiles().length > 0
-                                    ) {
-                                          myDropzone.processQueue();
-                                    } else {
-                                          form.submit();
-                                    }
+                              if (status === 'Valid') {
+                                    // Show loading state
                                     submitButton.setAttribute('data-kt-indicator', 'on');
-
-                                    // Disable button to avoid multiple click
                                     submitButton.disabled = true;
 
-                                    // Simulate ajax process
-                                    setTimeout(function() {
-                                          submitButton.removeAttribute('data-kt-indicator');
+                                    // Check if there are files to upload
+                                    const filesToUpload = dropzoneInstance.files;
+                                    console.log('Files to upload:', filesToUpload.length);
 
-                                          // Enable button
-                                          submitButton.disabled = false;
-
-                                          // Show success message.  For more info check the plugin's official documentation: https://sweetalert2.github.io/
-                                          modal.hide();
-
-                                          //form.submit(); // Submit form
-                                    }, 5000);
+                                    if (filesToUpload.length > 0) {
+                                          console.log('Starting file upload process...');
+                                          dropzoneInstance.processQueue();
+                                    } else {
+                                          console.log('No files to upload, submitting form directly');
+                                          form.submit();
+                                    }
                               } else {
                                     // Show error message.
                                     Swal.fire({
@@ -295,12 +336,42 @@ var KTModalNewAddress = function () {
                         }
                   });
             });
+            closeButton.addEventListener('click', function (e){
+                  Swal.fire({
+                        text: "Are you sure you would like to cancel?",
+                        icon: "warning",
+                        showCancelButton: true,
+                        buttonsStyling: false,
+                        confirmButtonText: "Yes, cancel it!",
+                        cancelButtonText: "No, return",
+                        customClass: {
+                              confirmButton: "btn btn-primary",
+                              cancelButton: "btn btn-active-light"
+                        }
+                  }).then(function (result) {
+                        if (result.value) {
+                              form.reset(); // Reset form
+                              modal.hide(); // Hide modal
+                        } else if (result.dismiss === 'cancel') {
+                              Swal.fire({
+                                    text: "Your form has not been cancelled!.",
+                                    icon: "error",
+                                    buttonsStyling: false,
+                                    confirmButtonText: "Ok, got it!",
+                                    customClass: {
+                                          confirmButton: "btn btn-primary",
+                                    }
+                              });
+                        }
+                  });
+            });
       }
+
       return {
             // Public functions
             init: function () {
                   // Elements
-                  modalEl = document.querySelector("#kt_modal_checkout");
+                  modalEl = document.querySelector('#kt_modal_checkout');
 
                   if (!modalEl) {
                         return;
@@ -308,22 +379,20 @@ var KTModalNewAddress = function () {
 
                   modal = new bootstrap.Modal(modalEl);
 
-                  form = document.querySelector("#kt_modal_checkout_form");
-                  submitButton = document.getElementById(
-                        "kt_modal_checkout_submit",
-                  );
-                  cancelButton = document.getElementById(
-                        "kt_modal_checkout_cancel",
-                  );
+                  form = document.querySelector('#kt_modal_checkout_form');
+                  submitButton = document.getElementById('kt_modal_checkout_submit');
+                  cancelButton = document.getElementById('kt_modal_checkout_cancel');
                   closeButton = document.getElementById(
                         "kt_modal_checkout_close",
                   );
                   myDropzone();
                   initForm();
                   handleForm();
-            },
+            }
       };
 }();
+
+// On document ready
 KTUtil.onDOMContentLoaded(function () {
-      KTModalNewAddress.init();
+      KTModalCheckout.init();
 });

@@ -36,4 +36,5 @@ class Constant
       const PRODUCT_GRAPHIC = 'design_graphic';
       const FILE_TYPE_CHECKOUT = 'checkout';
       const DEFAULT_PASS = 'DEFAULT_PASS';
+      const TASK_TYPE_CATALOG_PRODUCT = 'catalog_product';
 }

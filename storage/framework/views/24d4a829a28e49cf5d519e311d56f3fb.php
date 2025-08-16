@@ -83,6 +83,7 @@
                                                                 <!--begin::Select-->
                                                                 <a href="#" class="btn btn-primary"
                                                                    data-product-code="<?php echo e($product->product_code); ?>"
+                                                                   data-prduct-group-name="<?php echo e($product->productGroup->value); ?>"
                                                                    data-product-name="<?php echo e($product->product_name); ?>"
                                                                    data-product-price="<?php echo e($product->price); ?>"
                                                                    data-product-description="<?php echo e($product->product_description); ?>"
@@ -121,7 +122,7 @@
                         <!--begin::Modal header-->
                         <div class="modal-header" id="kt_modal_checkout_header">
                               <!--begin::Modal title-->
-                              <h4  class="fw-bold text-dark">Checkout <span id="kt_modal_checkout_title"></span> </>
+                              <h4  class="fw-bold text-dark">Checkout <span id="kt_modal_checkout_title"></span> </h4>
                               <!--end::Modal title-->
                               <!--begin::Close-->
                               <div class="btn btn-sm btn-icon btn-active-color-primary" id="kt_modal_checkout_close">
@@ -150,8 +151,14 @@
                                           </div>
                                           <!--end::Col-->
                                           <!--end::Input-->
+
+                                    </div>
+                                    <div id="kt_modal_checkout_product_hidden_input">
                                           <!--begin::hidden input-->
-                                          <input id="kt_modal_checkout_product_code" type="hidden" name="product_code" data-field="product_code" value="" />
+                                          <input id="kt_modal_checkout_product_code" type="hidden" name="product_code" value="" />
+                                          <input id="kt_modal_checkout_product_group_name" type="hidden"  name="product_group_name" />
+                                          <input id="kt_modal_checkout_product_price" type="hidden" name="price" />
+
                                           <!--end::hidden input-->
                                     </div>
                                     <!--end::Input group-->
@@ -164,6 +171,7 @@
                                                 <!--end::Label-->
                                                 <!--begin::Input-->
                                                 <input type="email" class="form-control form-control-solid" placeholder="" name="email" />
+
                                                 <!--end::Input-->
                                           </div>
                                           <!--end::Col-->
@@ -173,12 +181,12 @@
                                                 <label class="required fs-5 fw-semibold mb-2">Due date</label>
                                                 <!--end::Label-->
                                                 <!--begin::Datepicker-->
-                                                <input type="datetime-local" 
-                                                       class="form-control form-control-solid ps-12" 
-                                                       placeholder="Select a date and time" 
-                                                       name="due_date" 
+                                                <input type="datetime-local"
+                                                       class="form-control form-control-solid ps-12"
+                                                       placeholder="Select a date and time"
+                                                       name="due_date"
                                                        min="<?php echo e(now()->format('Y-m-d\TH:i')); ?>"
-                                                       step="300" 
+                                                       step="300"
                                                        required />
                                                 <!--end::Datepicker-->
                                                 <div class="fv-plugins-message-container invalid-feedback"></div>
@@ -188,7 +196,7 @@
                                     </div>
                                     <!--end::Input group-->
                                     <!--begin::Input group-->
-                                    <div class="row mb-5">
+                                    <div class="row mb-5 fv-row">
                                           <!--begin::Label-->
                                           <!--begin::Label-->
                                           <label class="required fs-5 fw-semibold mb-2">Descriptions</label>

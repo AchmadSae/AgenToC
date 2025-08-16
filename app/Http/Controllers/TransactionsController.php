@@ -47,7 +47,9 @@ class TransactionsController extends Controller
                 'due_date' => 'required|date_format:Y-m-d H:i',
                 'uploaded_files' => 'sometimes|array',
                 'uploaded_files.*' => 'sometimes|string',
-                'isSavedCardNumber' => 'sometimes|string'
+                'isSavedCardNumber' => 'sometimes|string',
+              'product_group_name' => 'required|string',
+              'price' => 'required|numeric',
             ];
 
             $validator = \Validator::make($request->all(), $rules);

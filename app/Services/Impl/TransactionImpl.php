@@ -114,29 +114,34 @@ class TransactionImpl implements TransactionsInterface
 
                       $transaction = TransactionsModel::create([
                             'id' => GenerateId::generateId(Constant::TRANS_ID, false),
+                            'task_id' => $task->id,
                             'user_id' => $user_detail_id,
                             'product_id' => $data['product_code'],
-                            'task_id' => $task->id,
-                            'product_type' => $data['product_type'],
+                            'product_type' => $data['product_group_name'],
                             'payment_method' => Constant::PAYMENT_BANK,
-                            'total_amount' => $data['price'],
+                            'total_price' => $data['price'],
                             'status' => false,
                       ]);
                       DetailTaskModel::create([
                             'id' => $task->detail_task_id,
                             'title' => $data['title'],
                             'description' => $data['description'],
+                            'task_type' => Constant::TASK_TYPE_CATALOG_PRODUCT,
                             'price' => $data['price'],
+                            'task_contract' => Constant::TASK_INQUIRY,
+                            'required_skills' => $data['skills']
                       ]);
-                      foreach ($data['uploaded_files'] as $file_path) {
-                            TaskFilesModel::create([
-                                  'task_id' => $task->id,
-                                  'file_path' => $file_path,
-                                  'file_name' => basename($file_path),
-                                  'file_type' => Constant::FILE_TYPE_CHECKOUT,
-                                  'mime_type' => mime_content_type($file_path),
-                                  'file_size' => filesize($file_path),
-                            ]);
+                      if (!empty($data['uploaded_files'])) {
+                            foreach ($data['uploaded_files'] as $file_path) {
+                                  TaskFilesModel::create([
+                                        'task_id' => $task->id,
+                                        'file_path' => $file_path,
+                                        'file_name' => basename($file_path),
+                                        'file_type' => Constant::FILE_TYPE_CHECKOUT,
+                                        'mime_type' => mime_content_type($file_path),
+                                        'file_size' => filesize($file_path),
+                                  ]);
+                            }
                       }
                       return $transaction;
                 }, Constant::DB_ATTEMPT);
