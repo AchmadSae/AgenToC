@@ -19,24 +19,13 @@ class AppServiceProvider extends ServiceProvider
     /**
      * Register any application services.
      */
-    public function register(): void
-    {
-        $this->app->bind(AuthInterface::class, function ($app) {
-            return new AuthImpl();
-        });
-
-        $this->app->bind(TaskInterface::class, function ($app) {
-            return new TaskImpl();
-        });
-
-        $this->app->bind(KanbanInterface::class, function ($app) {
-            return new KanbanImpl();
-        });
-
-        $this->app->bind(TransactionsInterface::class, function ($app) {
-              return new TransactionImpl();
-        });
-    }
+      public function register(): void
+      {
+            $this->app->bind(AuthInterface::class, AuthImpl::class);
+            $this->app->bind(TaskInterface::class, TaskImpl::class);
+            $this->app->bind(KanbanInterface::class, KanbanImpl::class);
+            $this->app->bind(TransactionsInterface::class, TransactionImpl::class);
+      }
 
     /**
      * Bootstrap any application services.

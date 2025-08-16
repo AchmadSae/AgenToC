@@ -11,8 +11,7 @@ return new class extends Migration {
     public function up(): void
     {
         Schema::create('tasks', function (Blueprint $table) {
-            $table->string('id')->primary();
-            $table->string('slug')->unique();
+            $table->string('id');
             $table->string('client_id');
             $table->string('worker_id')->nullable();
             $table->string('kanban_id')->nullable();

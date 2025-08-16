@@ -8,6 +8,7 @@ use App\Helpers\GenerateId;
 use App\Mail\Receipt;
 use App\Helpers\Log;
 use App\Models\DetailTaskModel;
+use App\Models\GlobalParam;
 use App\Models\TaskFilesModel;
 use App\Models\TaskModel;
 use App\Models\TransactionsModel;
@@ -26,6 +27,10 @@ use Throwable;
 class TransactionImpl implements TransactionsInterface
 {
     protected AuthInterface $authService;
+      public function __construct(AuthInterface $authService)
+      {
+            $this->authService = $authService;
+      }
 
       /**
        * @throws InternalErrorException
@@ -69,60 +74,86 @@ class TransactionImpl implements TransactionsInterface
       public function checkout($data): array
     {
           #debug
-          Log::browser($data, 'Checkout User');
-          $userRegisterResponse = [];
-
-          #check register user
-          $userRegisterResponse[] = $this->authService->register($data, true);
+//        dd($data);
+          Log::browser($data, 'Begin TransactionImpl.checkout');
+          #prepare data for check register user
+            $data['role'] = 'client';
+            $data['password'] = GlobalParam::where("code", "=", Constant::DEFAULT_PASS)->value("value");
+            $data['skills'] = '';
+            $data['tag_line'] = '';
+          $userRegisterResponse = $this->authService->register($data, true);
+//          dd($userRegisterResponse);
           if (!$userRegisterResponse['status']) {
-                $user_detail_id = User::where('email', $data['email'])->first()->user_detail_id;
-          }else {
-                $registeredUser = $userRegisterResponse['user'];
-                $user_detail_id = $registeredUser['user_detail_id'];
+                $user = User::where('email', $data['email'])->first();
+
+                if (!$user) {
+                    throw new \Exception('User with email ' . $data['email'] . ' not found');
+                }
+
+                if (empty($user->user_detail_id)) {
+                    throw new \Exception('User detail not found for this user');
+                }
+
+                $user_detail_id = $user->user_detail_id;
+          } else {
+                if (empty($userRegisterResponse['user']->user_detail_id)) {
+                    throw new \Exception('User detail not found in registration response');
+                }
+
+                $user_detail_id = $userRegisterResponse['user']->user_detail_id;
           }
-        $transaction = DB::transaction(function () use ($data, $user_detail_id) {
-            User::where('user_detail_id', $user_detail_id)->lockForUpdate()->first();
+          try {
+                $transaction = DB::transaction(function () use ($data, $user_detail_id) {
+                      $task = TaskModel::create([
+                            'id' => GenerateId::generateId('TSK', false),
+                            'kanban_id' => GenerateId::generateId('KBN', false),
+                            'client_id' => $user_detail_id,
+                            'detail_task_id' => GenerateId::generateId('DTK', false),
+                            'deadline' => $data['due_date']
+                      ]);
 
-
-            $task = TaskModel::create([
-                'id' => GenerateId::generateId('TSK', false),
-                'kanban_id' => GenerateId::generateId('KBN', false),
-                'client_id' => $user_detail_id,
-                'detail_task_id' => GenerateId::generateId('DTK', false),
-                'deadline' => $data['due_date']
-            ]);
-
-            $transaction = TransactionsModel::create([
-                    'user_id' => $data['email'],
-                    'product_id' => $data['product_code'],
-                    'task_id' => $task->id,
-                    'product_type' => $data['product_type'],
-                    'payment_method' => Constant::PAYMENT_BANK,
-                    'total_amount' => $data['price'],
-                    'status' => false,
-            ]);
-            DetailTaskModel::create([
-                'id' => $task->detail_task_id,
-                'title' => $data['title'],
-                'description' => $data['description'],
-                  'price' => $data['price'],
-            ]);
-            foreach ($data['uploaded_files'] as $file_path) {
-                TaskFilesModel::create([
-                    'task_id' => $task->id,
-                      'file_path' => $file_path,
-                      'file_name' => basename($file_path),
-                      'file_type' => Constant::FILE_TYPE_CHECKOUT,
-                      'mime_type' => mime_content_type($file_path),
-                      'file_size' => filesize($file_path),
-                ]);
-            }
-            return $transaction;
-        }, Constant::DB_ATTEMPT);
-
+                      $transaction = TransactionsModel::create([
+                            'id' => GenerateId::generateId(Constant::TRANS_ID, false),
+                            'task_id' => $task->id,
+                            'user_id' => $user_detail_id,
+                            'product_id' => $data['product_code'],
+                            'product_type' => $data['product_group_name'],
+                            'payment_method' => Constant::PAYMENT_BANK,
+                            'total_price' => $data['price'],
+                            'status' => false,
+                      ]);
+                      DetailTaskModel::create([
+                            'id' => $task->detail_task_id,
+                            'title' => $data['title'],
+                            'description' => $data['description'],
+                            'task_type' => Constant::TASK_TYPE_CATALOG_PRODUCT,
+                            'price' => $data['price'],
+                            'task_contract' => Constant::TASK_INQUIRY,
+                            'required_skills' => $data['skills']
+                      ]);
+                      if (!empty($data['uploaded_files'])) {
+                            foreach ($data['uploaded_files'] as $file_path) {
+                                  TaskFilesModel::create([
+                                        'task_id' => $task->id,
+                                        'file_path' => $file_path,
+                                        'file_name' => basename($file_path),
+                                        'file_type' => Constant::FILE_TYPE_CHECKOUT,
+                                        'mime_type' => mime_content_type($file_path),
+                                        'file_size' => filesize($file_path),
+                                  ]);
+                            }
+                      }
+                      return $transaction;
+                }, Constant::DB_ATTEMPT);
+          }catch (Throwable $th) {
+                return [
+                      'status' => false,
+                      'message' => $th->getMessage()
+                ];
+          }
         return [
             'status' => true,
-              'transaction' => $transaction
+              'transaction_id' => $transaction->id
         ];
     }
 

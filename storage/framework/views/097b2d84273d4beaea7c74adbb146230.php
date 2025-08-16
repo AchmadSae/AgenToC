@@ -37,14 +37,13 @@
     </div>
 
     <?php echo $__env->yieldPushContent('modals'); ?>
-    <?php echo $__env->yieldPushContent('scripts'); ?>
     <?php echo $__env->make('sweetalert::alert', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?>
     <!--begin::Global Javascript Bundle(mandatory for all pages)-->
     <script src="<?php echo e(asset('assets/plugins/global/plugins.bundle.js')); ?>"></script>
     <script src="<?php echo e(asset('assets/js/scripts.bundle.js')); ?>"></script>
     <!--end::Global Javascript Bundle-->
     <!--begin::Custom Javascript(used for this page only)-->
-    <script src="<?php echo e(asset('assets/js/custom/utilities/modals/checkout-product.js')); ?>"></script>
+    <?php echo $__env->yieldPushContent('scripts'); ?>
 
     <!--end::Custom Javascript-->
     <!--end::Javascript-->

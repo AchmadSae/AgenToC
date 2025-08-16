@@ -19,7 +19,6 @@ return new class extends Migration {
             $table->string('payment_method');
             $table->integer('quantity');
             $table->decimal('total_price', 10, 2);
-            $table->string('attachment')->nullable();
             $table->string('status')->default('pending');
             $table->timestamps();
         });
