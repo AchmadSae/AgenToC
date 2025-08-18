@@ -7,9 +7,11 @@ use Illuminate\Database\Eloquent\Model;
 class TransactionsModel extends Model
 {
     protected $table = 'transactions';
+    protected $primaryKey = 'id';
 
     #email we set for user_id
     protected $fillable = [
+          'id',
         'user_id',
         'product_id',
         'task_id',

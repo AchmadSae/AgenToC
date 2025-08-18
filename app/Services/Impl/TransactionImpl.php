@@ -2,11 +2,11 @@
 
 namespace App\Services\Impl;
 
-use App\Events\NotificationSent;
+use Illuminate\Support\Facades\Log;
 use App\Helpers\Constant;
 use App\Helpers\GenerateId;
 use App\Mail\Receipt;
-use App\Helpers\Log;
+use App\Helpers\LogConsole;
 use App\Models\DetailTaskModel;
 use App\Models\GlobalParam;
 use App\Models\TaskFilesModel;
@@ -73,37 +73,24 @@ class TransactionImpl implements TransactionsInterface
        */
       public function checkout($data): array
     {
-          #debug
 //        dd($data);
-          Log::browser($data, 'Begin TransactionImpl.checkout');
+          LogConsole::browser($data, 'Begin TransactionImpl.checkout');
           #prepare data for check register user
             $data['role'] = 'client';
             $data['password'] = GlobalParam::where("code", "=", Constant::DEFAULT_PASS)->value("value");
             $data['skills'] = '';
             $data['tag_line'] = '';
-          $userRegisterResponse = $this->authService->register($data, true);
-//          dd($userRegisterResponse);
-          if (!$userRegisterResponse['status']) {
-                $user = User::where('email', $data['email'])->first();
-
-                if (!$user) {
-                    throw new \Exception('User with email ' . $data['email'] . ' not found');
+            try {
+                  $user_detail_id = '';
+                  $userRegisterResponse = $this->authService->register($data, true);
+                  #get response for email user has been registered
+                if (!$userRegisterResponse['status']) {
+                      $user = User::where('email', $data['email'])->first();
+                      $user_detail_id = $user->user_detail_id;
+                } else {
+                      $user_detail_id = $userRegisterResponse['user']->user_detail_id;
                 }
-
-                if (empty($user->user_detail_id)) {
-                    throw new \Exception('User detail not found for this user');
-                }
-
-                $user_detail_id = $user->user_detail_id;
-          } else {
-                if (empty($userRegisterResponse['user']->user_detail_id)) {
-                    throw new \Exception('User detail not found in registration response');
-                }
-
-                $user_detail_id = $userRegisterResponse['user']->user_detail_id;
-          }
-          try {
-                $transaction = DB::transaction(function () use ($data, $user_detail_id) {
+                DB::beginTransaction();
                       $task = TaskModel::create([
                             'id' => GenerateId::generateId('TSK', false),
                             'kanban_id' => GenerateId::generateId('KBN', false),
@@ -122,7 +109,7 @@ class TransactionImpl implements TransactionsInterface
                             'total_price' => $data['price'],
                             'status' => false,
                       ]);
-                      DetailTaskModel::create([
+                      $detailTask = DetailTaskModel::create([
                             'id' => $task->detail_task_id,
                             'title' => $data['title'],
                             'description' => $data['description'],
@@ -131,28 +118,45 @@ class TransactionImpl implements TransactionsInterface
                             'task_contract' => Constant::TASK_INQUIRY,
                             'required_skills' => $data['skills']
                       ]);
+                      $isFilesInserted = true;
                       if (!empty($data['uploaded_files'])) {
                             foreach ($data['uploaded_files'] as $file_path) {
-                                  TaskFilesModel::create([
+                                  $absolute_path = public_path($file_path);
+                                  $created = TaskFilesModel::create([
                                         'task_id' => $task->id,
                                         'file_path' => $file_path,
-                                        'file_name' => basename($file_path),
+                                        'file_name' => basename($absolute_path) ?: 'application/octet-stream',
                                         'file_type' => Constant::FILE_TYPE_CHECKOUT,
-                                        'mime_type' => mime_content_type($file_path),
-                                        'file_size' => filesize($file_path),
+                                        'mime_type' => mime_content_type($absolute_path) ?: 'application/octet-stream',
+                                        'file_size' => filesize($absolute_path) ?: 'application/octet-stream',
                                   ]);
+                                  if (!$created) {
+                                        $isFilesInserted = false;
+                                        break;
+                                  }
                             }
                       }
-                      return $transaction;
-                }, Constant::DB_ATTEMPT);
+                      $status = $task && $detailTask && $isFilesInserted;
           }catch (Throwable $th) {
+                  Log::error('TransactionImpl.checkout', [$th->getMessage()]);
+                  DB::rollBack();
+                DB::rollBack();
+                #delete related user
+                  $this->authService->deleteRelatedUser($user_detail_id);
+                throw new InternalErrorException($th->getMessage());
+          }
+          if (!$status) {
+                DB::rollBack();
+                $this->authService->deleteRelatedUser($user_detail_id);
                 return [
                       'status' => false,
-                      'message' => $th->getMessage()
+                      'message' => 'Transaction Checkout failed status false'
                 ];
           }
+          DB::commit();
         return [
             'status' => true,
+              'message' => 'Transaction checkout success',
               'transaction_id' => $transaction->id
         ];
     }
@@ -221,4 +225,5 @@ class TransactionImpl implements TransactionsInterface
         }
         return TransactionsModel::with(['user', 'task'])->where('status', $status)->get();
     }
+
 }

@@ -3,8 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Helpers\Constant;
-use App\Helpers\Log;
-use App\Models\GlobalParam;
+use Illuminate\Support\Facades\Log;
 use App\Models\TransactionsModel;
 use App\Models\User;
 use App\Services\MethodServiceUtil;
@@ -12,22 +11,21 @@ use App\Services\TransactionsInterface;
 use ErrorException;
 use RealRashid\SweetAlert\Facades\Alert;
 use Illuminate\Http\Request;
-use RealRashid\SweetAlert\ToSweetAlert;
 
 class TransactionsController extends Controller
 {
 
-    protected TransactionsInterface $transactionService;
-    protected MethodServiceUtil $methodService;
+      protected TransactionsInterface $transactionService;
+      protected MethodServiceUtil $methodService;
 
-    public function __construct(TransactionsInterface $transactionService, MethodServiceUtil $methodService)
-    {
-        $this->transactionService = $transactionService;
-        $this->methodService = $methodService;
-    }
+      public function __construct(TransactionsInterface $transactionService, MethodServiceUtil $methodService)
+      {
+            $this->transactionService = $transactionService;
+            $this->methodService = $methodService;
+      }
 
-    public function checkout(Request $request)
-    {
+      public function checkout(Request $request)
+      {
         try {
             // Remove any spaces from card number
             if ($request->has('card_number')) {
@@ -47,7 +45,6 @@ class TransactionsController extends Controller
                 'due_date' => 'required|date_format:Y-m-d H:i',
                 'uploaded_files' => 'sometimes|array',
                 'uploaded_files.*' => 'sometimes|string',
-                'isSavedCardNumber' => 'sometimes|string',
               'product_group_name' => 'required|string',
               'price' => 'required|numeric',
             ];
@@ -55,12 +52,8 @@ class TransactionsController extends Controller
             $validator = \Validator::make($request->all(), $rules);
 
             if ($validator->fails()) {
-                \Log::error('Validation failed:', $validator->errors()->toArray());
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Validation failed',
-                    'errors' => $validator->errors()
-                ], 422);
+                Log::error('Validation failed:', $validator->errors()->toArray());
+                return redirect()->back()->withErrors($validator)->withInput();
             }
 
             // Get the validated data
@@ -82,39 +75,35 @@ class TransactionsController extends Controller
                 $data['uploaded_files'] = [];
             }
 
-            \Log::info('Processed data:', $data);
+            Log::info('Processed data:', $data);
 
             // Process the checkout using the service
             try {
                 $transaction = $this->transactionService->checkout($data);
                 if (!$transaction['status']) {
-                      Alert::error('Failed to process transaction', $transaction['message']);
-                      return redirect()->back()->withInput();
+                      Log::error($transaction['message']);
+                      Alert::warning('Warning', Constant::MESSAGE_WARNING);
+                      return redirect()->route('landing')->withInput();
                 }
-                Alert::success('Success', 'Transaction processed successfully!');
-                return redirect()->route('transactions.receipt', ['id' => $transaction['transaction_id'] ]);
-
+                  Alert::success('Success', 'Transaction checkout processed successfully!');
+                  return redirect()->route('receipt', ['id' => $transaction['transaction_id'] ]);
             } catch (\Exception $e) {
-                \Log::error('Checkout error: ' . $e->getMessage(), [
-                    'trace' => $e->getTraceAsString()
+                Log::error('Transaction Checkout error: ', [
+                      'error' => $e->getMessage(),
+                    'trace' => $e->getTraceAsString(),
                 ]);
-                Alert::error('Error', 'Transaction failed: ' . $e->getMessage());
-                return back()->withInput();
+                Alert::error('Error', Constant::MESSAGE_ERROR);
+                return redirect()->route('landing')->withInput();
             }
 
         } catch (\Exception $e) {
-            \Log::error('Checkout error:', [
+            Log::error('Transaction checkout process error:', [
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
                 'request' => $request->except(['card_number', '_token'])
             ]);
-            Alert::error('Failed to process transaction', 'Internal Server Error');
-            return redirect()->back()->status(500);
-//            return response()->json([
-//                'success' => false,
-//                'message' => 'An error occurred while processing your request: ' . $e->getMessage(),
-//                'error' => $e->getMessage()
-//            ], 500);
+            Alert::error('Failed', Constant::MESSAGE_ERROR);
+            return redirect()->route('landing')->withInput();
         }
     }
 
@@ -159,9 +148,14 @@ class TransactionsController extends Controller
        */
       public function receipt(string $id)
       {
-            $transaction = TransactionsModel::findOrFail($id);
-            $user = User::where('user_detail_id', $transaction->user_id)->first();
-            return view('transaction.receipt', compact('transaction', 'user'));
+            try{
+                  $transaction = TransactionsModel::findOrFail($id);
+                  $user = User::where('user_detail_id', $transaction->user_id)->first();
+                  return view('transaction.receipt', compact('transaction', 'user'));
+            }catch (ErrorException $e){
+                  \Log::error($e->getMessage());
+                  return view('errors.500');
+            }
       }
 
 }

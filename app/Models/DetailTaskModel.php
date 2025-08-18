@@ -6,13 +6,16 @@ use Illuminate\Database\Eloquent\Model;
 
 class DetailTaskModel extends Model
 {
-    protected $table = 'detail_tasks';
+    protected $table = 'task_detail';
+    protected $primaryKey = 'id';
 
     protected $fillable = [
+          'id',
           'title',
         'description',
+          'task_type',
         'price',
-        'required_skills',
         'task_contract',
+        'required_skills',
     ];
 }

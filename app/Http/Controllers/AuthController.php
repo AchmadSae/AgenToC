@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Helpers\Log;
+use App\Helpers\LogConsole;
 use App\Models\User;
 use Illuminate\Auth\Events\Verified;
 use Illuminate\Database\QueryException;
@@ -70,7 +70,7 @@ class AuthController extends Controller
     public function register(Request $request)
     {
         $response = [];
-        log::browser($request, 'Register User');
+        LogConsole::browser($request, 'Register User');
         $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],

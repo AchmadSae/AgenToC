@@ -12,7 +12,9 @@ interface AuthInterface
     public function reset($data): bool;
     public function ensureIsNotRateLimited($data);
     public function throttleKey($email);
-    public function hasVerifiedEmail($email): bool;
-    
+    public function hasVerifiedEmail($email);
+
+    public function deleteRelatedUser($userDetailId): bool;
+
 
 }

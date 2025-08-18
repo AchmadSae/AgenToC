@@ -17,7 +17,7 @@ return new class extends Migration {
             $table->string('product_id')->nullable();
             $table->string('product_type')->nullable();
             $table->string('payment_method');
-            $table->integer('quantity');
+            $table->integer('quantity')->default(1);
             $table->decimal('total_price', 10, 2);
             $table->string('status')->default('pending');
             $table->timestamps();

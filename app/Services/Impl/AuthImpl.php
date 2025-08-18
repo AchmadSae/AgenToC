@@ -7,19 +7,18 @@ use App\Services\AuthInterface;
 use App\Models\User;
 use App\Models\UserDetailModel;
 use App\Helpers\GenerateId;
-use App\Helpers\Log;
+use App\Helpers\LogConsole;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Auth\Events\PasswordReset;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Password;
 use Illuminate\Validation\ValidationException;
 use Illuminate\Support\Str;
-use illuminate\http\request;
-use App\Models\GlobalParam;
 use Illuminate\Cache\RateLimiter;
 use Illuminate\Auth\Events\Lockout;
-
-
+use Symfony\Component\CssSelector\Exception\InternalErrorException;
 
 
 class AuthImpl implements AuthInterface
@@ -27,13 +26,9 @@ class AuthImpl implements AuthInterface
 
     public function hasVerifiedEmail($email): bool
     {
-        $response = false;
-        $isExistVerified = User::where('email', $email)
-            ->exists();
-        if ($isExistVerified) {
-            $response = true;
-        }
-        return $response;
+          return User::where('email', $email)
+                ->where('email_verified_at', '!=', null)
+                ->exists();
     }
 
     public function login($data): bool
@@ -44,10 +39,10 @@ class AuthImpl implements AuthInterface
             ->where('roles.role_name', $data->role_name)
             ->where('user_detail_roles.is_active', true)
             ->exists();
-        Log::browser($data, 'Service Login User');
+        LogConsole::browser($data, 'Service Login User');
 
         $hasVerified = $this->hasVerifiedEmail($data->email);
-        if (!$hasRole && !$hasVerified) {
+        if (!$hasRole && !$hasVerified['status']) {
             return false;
         }
         return true;
@@ -59,7 +54,7 @@ class AuthImpl implements AuthInterface
       public function register($data, $isTransaction = false): array
     {
           #check email isUnique
-          $user = User::where('email', $data['email'])->first();
+          $user = User::where('email', $data['email'])->exists();
           if ($user) {
                 return [
                       'user' => null,
@@ -67,7 +62,7 @@ class AuthImpl implements AuthInterface
                       'message' => 'Your email and username is already registered.',
                 ];
           }
-          Log::browser($data, 'Begin AuthImpl.register() call');
+          LogConsole::browser($data, 'Begin AuthImpl.register() call');
           #local $user_Detail_id for prevent duplicate id
         $user_detail_id = GenerateId::generateId('UD', true);
         $role_id = match ($data['role']) {
@@ -76,44 +71,50 @@ class AuthImpl implements AuthInterface
             default => Constant::ROLE_CLIENT,
         };
         #debug
-        Log::browser($data, 'Register User role: ' . $role_id);
+        LogConsole::browser($data, 'Register User role: ' . $role_id);
 
+        try{
+              DB::beginTransaction();
+                    //code...
+                    $userDetail = UserDetailModel::create([
+                          'id' => $user_detail_id,
+                          'skills' => $data['skills'],
+                          'tag_line' => $data['tag_line'],
+                          'credit_number' => $data['card_number'],
+                    ]);
 
-          $registeredUser = DB::transaction(function () use ($user_detail_id, $role_id, $data, $isTransaction) {
-            //code...
-            $user_detail = UserDetailModel::create([
-                'id' => $user_detail_id,
-                'skills' => $data['skills'],
-                'tag_line' => $data['tag_line'],
-            ]);
+                    $registeredUser = User::create([
+                          'user_detail_id' => $userDetail->id,
+                          'name' => $data['name'],
+                          'email' => $data['email'],
+                          'password' => Hash::make($data['password'])
+                    ]);
 
-            $registeredUser = User::create([
-                'user_detail_id' => $user_detail->id,
-                'name' => $data['name'],
-                'email' => $data['email'],
-                'password' => Hash::make($data['password'])
-            ]);
-
-            DB::table('user_detail_roles')->insert([
-                'user_detail_id' => $user_detail->id,
-                'role_id' => $role_id,
-                  'is_active' => $isTransaction
-            ]);
-            #check isFromTransaction
-                if (!$isTransaction) {
-                      if ($data['isSavedCardNumber']= 1){
-                            $user_detail->update([
-                                  'credit_number' => $data['card_number'],
-                            ]);
-                      }
-                      $registeredUser->sendEmailVerificationNotification();
-                }
-            return $registeredUser;
-        }, Constant::DB_ATTEMPT);
+                    $userDetailRoles = DB::table('user_detail_roles')->insert([
+                          'user_detail_id' => $userDetail->id,
+                          'role_id' => $role_id,
+                          'is_active' => $isTransaction
+                    ]);
+                    #debug
+              LogConsole::browser('after db insert',  $registeredUser);
+                    #check isFromTransaction
+                    if (!$isTransaction) {
+                          $registeredUser->sendEmailVerificationNotification();
+                    }
+              $status = $registeredUser && $user_detail_id && $userDetailRoles;
+        }catch(\Throwable $e){
+              DB::rollBack();
+            throw new InternalErrorException("DB transaction failed :".$e->getMessage());
+        }
+        if (!$status) {
+              DB::rollBack();
+              throw new InternalErrorException("DB transaction status : false");
+        }
+        DB::commit();
         return [
               'status' => true,
-            'flag' => $role_id,
-            'user' => $registeredUser,
+              'message' => 'User register Success',
+              'user' => $registeredUser
         ];
     }
 
@@ -162,4 +163,19 @@ class AuthImpl implements AuthInterface
     {
         return Str::transliterate(Str::lower($email) . '|' . request()->ip());
     }
+
+      public function deleteRelatedUser($userDetailId): bool
+      {
+           try {
+                 DB::beginTransaction();
+                 $user = User::where('user_detail_id', $userDetailId)->delete();
+                 $userDetail = UserDetailModel::where('id', $userDetailId)->delete();
+                 $userDetailRoles = DB::table('user_detail_roles')->where('user_detail_id', $userDetailId)->delete();
+                 $status = $user && $userDetail && $userDetailRoles;
+                 DB::commit();
+                 return $status;
+           }catch (\Throwable $th) {
+                 return false;
+           }
+      }
 }

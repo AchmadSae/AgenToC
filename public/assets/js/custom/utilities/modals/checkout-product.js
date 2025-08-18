@@ -1,88 +1,40 @@
 "use strict";
-console.log("checkout-product.js loaded"); // Diagnostic log
 
 // Class definition
-var KTModalNewAddress = (function () {
-      var submitButton;
-      var cancelButton;
+var KTModalCheckout = (function () {
+      let submitButton;
+      let cancelButton;
       let closeButton;
-      var validator;
-      var form;
-      var modal;
-      var modalEl;
-
-      // Init form inputs
-      var initForm = function () {
-            var dueDate = $(form.querySelector('[name="due_date"]'));
-            dueDate.flatpickr({
-                  enableTime: true,
-                  dateFormat: "d, M Y, H:i",
-            });
-
-            // Function to update the file list UI
-
-            modalEl.addEventListener("show.bs.modal", function (event) {
-                  const button = event.relatedTarget;
-
-                  // Data dari tombol
-                  const data = {
-                        product_code: button.getAttribute("data-product-code"),
-                        product_name: button.getAttribute("data-product-name"),
-                        product_category: button.getAttribute(
-                              "data-product-category",
-                        ),
-                        product_price:
-                              button.getAttribute("data-product-price"),
-                        product_description: button.getAttribute(
-                              "data-product-description",
-                        ),
-                        product_image:
-                              button.getAttribute("data-product-image"),
-                  };
-
-                  Object.keys(data).forEach((key) => {
-                        modalEl
-                              .querySelectorAll(`[data-field="${key}"]`)
-                              .forEach((el) => {
-                                    if (
-                                          el.tagName === "INPUT" ||
-                                          el.tagName === "TEXTAREA"
-                                    ) {
-                                          el.value = data[key];
-                                    } else {
-                                          el.textContent = data[key];
-                                    }
-                              });
-                  });
-            });
-
-            // Upload multiple files
-            myDropzone.on("successmultiple", function (files, response) {
-                  const checkoutForm = document.querySelector(
-                        "#kt_modal_checkout_form",
-                  );
-                  if (response && Array.isArray(response.file_paths)) {
-                        response.file_paths.forEach(function (path) {
-                              let input = document.createElement("input");
-                              input.type = "hidden";
-                              input.name = "uploaded_files[]";
-                              input.value = path;
-                              checkoutForm.appendChild(input);
-                        });
-                  }
-                  // submit after all uploaded
-                  checkoutForm.submit();
-            });
-      };
-
+      let validator;
+      let form;
+      let modal;
+      let modalEl;
+      let dropzoneInstance;
+      let inputEmail;
+      let is_registered;
       let myDropzone = function () {
-            function updateFileList() {
+            Dropzone.autoDiscover = false;
+            // Initialize Dropzone
+            const dropzoneElement = document.querySelector(
+                  "#kt_modal_checkout_files_upload",
+            );
+            const checkoutForm = document.querySelector(
+                  "#kt_modal_checkout_form",
+            );
+            const submitButton = document.querySelector(
+                  "#kt_modal_checkout_submit",
+            );
+            function updateFileList(files) {
                   const fileListContainer = document.getElementById(
                         "kt_modal_uploaded_list",
                   );
                   fileListContainer.innerHTML = ""; // Clear current list
-
-                  myDropzone.files.forEach((file) => {
+                  if (!files || !files.length) {
+                        fileListContainer.innerHTML =
+                              "<li>No files uploaded yet.</li>";
+                        return;
+                  }
+                  files.forEach((file) => {
                         const fileSize = (file.size / 1024).toFixed(2) + " KB";
                         const fileExtension = file.name
                               .split(".")
@@ -130,53 +82,166 @@ var KTModalNewAddress = (function () {
                             </select>
                         </div>
                     `;
+                        fileListContainer.appendChild(fileElement);
+                  });
+                  // // Event Dropzone
+                  // myDropzone.on("addedfile", function() {
+                  //       updateFileList(dropzoneInstance.files); // Kirim daftar file
+                  // });
+                  //
+                  // myDropzone.on("removedfile", function() {
+                  //       updateFileList(dropzoneInstance.files); // Update lagi setelah remove
+                  // });
+            }
+            // Create a new Dropzone instance
+            dropzoneInstance = new Dropzone(dropzoneElement, {
+                  url: "/upload-file-checkout",
+                  paramName: "files",
+                  maxFiles: 3,
+                  maxFilesize: 10,
+                  addRemoveLinks: true,
+                  autoProcessQueue: false,
+                  uploadMultiple: true,
+                  parallelUploads: 10,
+                  acceptedFiles: ".jpg,.jpeg,.png,.pdf,.doc,.docx,.xls,.xlsx",
+                  headers: {
+                        "X-CSRF-TOKEN": document.querySelector(
+                              'meta[name="csrf-token"]',
+                        ).content,
+                  },
 
-                        // Add event listener for remove option
-                        const select = fileElement.querySelector("select");
-                        select.addEventListener("change", function () {
-                              if (this.value === "1") {
-                                    myDropzone.removeFile(file);
+                  init: function () {
+                        const dz = this;
+                        let uploadTimeout;
+                        dz.on("addedfile", function () {
+                              updateFileList(dz.files);
+                        });
+
+                        dz.on("removedfile", function () {
+                              updateFileList(dz.files);
+                        });
+
+                        dz.on("sendingmultiple", function () {
+                              console.log("Starting file upload...");
+                              uploadTimeout = setTimeout(function () {
+                                    if (dz.files.length > 0) {
+                                          dz.cancelUpload(
+                                                dz.getUploadingFiles()[0],
+                                          );
+                                          Swal.fire({
+                                                text: "Upload timed out. Please try again with a smaller file or better connection.",
+                                                icon: "error",
+                                                buttonsStyling: false,
+                                                confirmButtonText: "OK",
+                                          });
+                                          submitButton.removeAttribute(
+                                                "data-kt-indicator",
+                                          );
+                                          submitButton.disabled = false;
+                                    }
+                              }, 300000); // 5 minutes
+                        });
+
+                        dz.on("successmultiple", function (files, response) {
+                              console.log("Upload successful:", response);
+
+                              if (
+                                    response &&
+                                    response.status &&
+                                    response.file_paths
+                              ) {
+                                    // Remove any existing file inputs to prevent duplicates
+                                    checkoutForm
+                                          .querySelectorAll(
+                                                'input[name="uploaded_files[]"]',
+                                          )
+                                          .forEach((input) => input.remove());
+
+                                    // Add new file inputs
+                                    response.file_paths.forEach(
+                                          function (path) {
+                                                let input =
+                                                      document.createElement(
+                                                            "input",
+                                                      );
+                                                input.type = "hidden";
+                                                input.name = "uploaded_files[]";
+                                                input.value = path;
+                                                checkoutForm.appendChild(input);
+                                          },
+                                    );
+
+                                    console.log("Submitting form...");
+                                    checkoutForm.submit();
+                              } else {
+                                    console.error(
+                                          "Response not valid:",
+                                          response,
+                                    );
+                                    submitButton.removeAttribute(
+                                          "data-kt-indicator",
+                                    );
+                                    submitButton.disabled = false;
                               }
                         });
 
-                        fileListContainer.appendChild(fileElement);
-                  });
-            }
+                        dz.on("errormultiple", function (files, message) {
+                              console.error("Upload error:", message);
+                              submitButton.removeAttribute("data-kt-indicator");
+                              submitButton.disabled = false;
 
-            // DropzoneJS
-            // Please refer to the DropzoneJS plugin's official documentation for more information: https://www.dropzonejs.com/#usage
-            return (myDropzone = new Dropzone(
-                  "#kt_modal_checkout_files_upload",
-                  {
-                        url: "/upload-file-checkout",
-                        paramName: "files", // send as 'files' to match backend
-                        maxFiles: 3,
-                        maxFilesize: 10,
-                        addRemoveLinks: true,
-                        autoProcessQueue: false,
-                        uploadMultiple: true,
-                        parallelUploads: 10,
-                        acceptedFiles:
-                              ".jpg,.jpeg,.png,.pdf,.doc,.docx,.xls,.xlsx",
-                        headers: {
-                              "X-CSRF-TOKEN": document.querySelector(
-                                    'meta[name="csrf-token"]',
-                              ).content,
-                        },
-                        // When file is added
-                        addedfile: function (file) {
-                              updateFileList();
-                        },
-                        // When file is removed
-                        removedfile: function (file) {
-                              updateFileList();
-                              this.options.maxFiles = this.options.maxFiles + 1;
-                        },
-                        // Remove single-file success handler; rely on successmultiple to collect paths
+                              Swal.fire({
+                                    text: "Error uploading files. Please try again.",
+                                    icon: "error",
+                                    buttonsStyling: false,
+                                    confirmButtonText: "OK",
+                              });
+                        });
                   },
-            ));
+            });
+      };
+      // Init form inputs
+      var initForm = function () {
+            var dueDate = $(form.querySelector('[name="due_date"]'));
+            dueDate.flatpickr({
+                  enableTime: true,
+                  dateFormat: "Y-m-d H:i", // This matches the HTML5 datetime-local format
+                  time_24hr: true,
+                  altInput: true,
+                  altFormat: "d, M Y, H:i", // This is just for display
+                  defaultDate: new Date(), // Optional: set a default date
+                  minDate: "today",
+            });
+            // Function to update the file list UI
+
+            modalEl.addEventListener("show.bs.modal", function (event) {
+                  const button = event.relatedTarget;
+
+                  // Data dari tombol
+
+                  let product_code = button.getAttribute("data-product-code");
+                  let product_name = button.getAttribute("data-product-name");
+                  let product_category = button.getAttribute(
+                        "data-product-category",
+                  );
+                  let product_price = button.getAttribute("data-product-price");
+                  let product_description = button.getAttribute(
+                        "data-product-description",
+                  );
+                  let product_image = button.getAttribute("data-product-image");
+                  let product_group_name = button.getAttribute(
+                        "data-product-group-name",
+                  );
+                  $("#kt_modal_checkout_product_code").val(product_code);
+                  $("#kt_modal_checkout_title").text(product_name);
+                  $("#kt_modal_checkout_product_group_name").val(
+                        product_group_name,
+                  );
+                  $("#kt_modal_checkout_product_price").val(product_price);
+            });
       };
 
+      // Handle form validation and submittion
       var handleForm = function () {
             // Stepper custom navigation
 
@@ -195,6 +260,16 @@ var KTModalNewAddress = (function () {
                                     notEmpty: {
                                           message: "Email is required",
                                     },
+                                    emailAddress: {
+                                          message: "Please enter a valid email address",
+                                    },
+                              },
+                        },
+                        description: {
+                              validators: {
+                                    notEmpty: {
+                                          message: "descriptions is required",
+                                    },
                               },
                         },
                         name: {
@@ -204,89 +279,64 @@ var KTModalNewAddress = (function () {
                                     },
                               },
                         },
-                        description: {
-                              validators: {
-                                    notEmpty: {
-                                          message: "Description is required",
-                                    },
-                              },
-                        },
                         card_number: {
                               validators: {
                                     notEmpty: {
-                                          message: "Card number is required",
+                                          message: "card number is required",
                                     },
                               },
                         },
-                        plugins: {
-                              trigger: new FormValidation.plugins.Trigger(),
-                              bootstrap: new FormValidation.plugins.Bootstrap5({
-                                    rowSelector: ".fv-row",
-                                    eleInvalidClass: "",
-                                    eleValidClass: "",
-                              }),
-                        },
+                  },
+                  plugins: {
+                        trigger: new FormValidation.plugins.Trigger(),
+                        bootstrap: new FormValidation.plugins.Bootstrap5({
+                              rowSelector: ".fv-row",
+                              eleInvalidClass: "",
+                              eleValidClass: "",
+                        }),
                   },
             });
 
             // Action buttons
             submitButton.addEventListener("click", function (e) {
                   e.preventDefault();
-                  console.log("submit clicked. Default action prevented");
 
                   // Validate form before submit
                   if (validator) {
                         validator.validate().then(function (status) {
-                              console.log("Validation status: " + status);
+                              console.log("Form validation status:", status);
 
                               if (status === "Valid") {
-                                    if (
-                                          myDropzone.getQueuedFiles().length > 0
-                                    ) {
-                                          myDropzone.processQueue();
-                                    } else {
-                                          form.submit();
-                                    }
+                                    // Show loading state
                                     submitButton.setAttribute(
                                           "data-kt-indicator",
                                           "on",
                                     );
-
-                                    // Disable button to avoid multiple click
                                     submitButton.disabled = true;
 
-                                    // Simulate ajax process
-                                    setTimeout(function () {
-                                          submitButton.removeAttribute(
-                                                "data-kt-indicator",
+                                    // Check if there are files to upload
+                                    const filesToUpload =
+                                          dropzoneInstance.files;
+                                    console.log(
+                                          "Files to upload:",
+                                          filesToUpload.length,
+                                    );
+
+                                    if (filesToUpload.length > 0) {
+                                          console.log(
+                                                "Starting file upload process...",
                                           );
-
-                                          // Enable button
-                                          submitButton.disabled = false;
-
-                                          // Show success message.  For more info check the plugin's official documentation: https://sweetalert2.github.io/
-                                          Swal.fire({
-                                                text: "Form has been successfully submitted!",
-                                                icon: "success",
-                                                buttonsStyling: false,
-                                                confirmButtonText:
-                                                      "Ok, got it!",
-                                                customClass: {
-                                                      confirmButton:
-                                                            "btn btn-primary",
-                                                },
-                                          }).then(function (result) {
-                                                if (result.isConfirmed) {
-                                                      modal.hide();
-                                                }
-                                          });
-
-                                          //form.submit(); // Submit form
-                                    }, 5000);
+                                          dropzoneInstance.processQueue();
+                                    } else {
+                                          console.log(
+                                                "No files to upload, submitting form directly",
+                                          );
+                                          form.submit();
+                                    }
                               } else {
                                     // Show error message.
                                     Swal.fire({
-                                          text: "Please check your required fields.",
+                                          text: "Sorry, looks like there are some errors detected, please try again.",
                                           icon: "error",
                                           buttonsStyling: false,
                                           confirmButtonText: "Ok, got it!",
@@ -300,7 +350,9 @@ var KTModalNewAddress = (function () {
                   }
             });
 
-            let cancelForm = () => {
+            cancelButton.addEventListener("click", function (e) {
+                  e.preventDefault();
+
                   Swal.fire({
                         text: "Are you sure you would like to cancel?",
                         icon: "warning",
@@ -328,19 +380,101 @@ var KTModalNewAddress = (function () {
                               });
                         }
                   });
-            };
-
-            cancelButton.addEventListener("click", function (e) {
-                  e.preventDefault();
-
-                  cancelForm();
             });
-
             closeButton.addEventListener("click", function (e) {
-                  e.preventDefault();
-
-                  cancelForm();
+                  Swal.fire({
+                        text: "Are you sure you would like to cancel?",
+                        icon: "warning",
+                        showCancelButton: true,
+                        buttonsStyling: false,
+                        confirmButtonText: "Yes, cancel it!",
+                        cancelButtonText: "No, return",
+                        customClass: {
+                              confirmButton: "btn btn-primary",
+                              cancelButton: "btn btn-active-light",
+                        },
+                  }).then(function (result) {
+                        if (result.value) {
+                              form.reset(); // Reset form
+                              modal.hide(); // Hide modal
+                        } else if (result.dismiss === "cancel") {
+                              Swal.fire({
+                                    text: "Your form has not been cancelled!.",
+                                    icon: "error",
+                                    buttonsStyling: false,
+                                    confirmButtonText: "Ok, got it!",
+                                    customClass: {
+                                          confirmButton: "btn btn-primary",
+                                    },
+                              });
+                        }
+                  });
             });
+
+            // Add change event listener
+            is_registered.addEventListener("change", function () {
+                  this.value = this.checked ? "1" : "0";
+                  const email = inputEmail.value.trim();
+                  console.log("Checkbox value changed to:", this.value);
+                  if (!email || !isValidEmail(email) || !this.checked) {
+                        inputEmail.setCustomValidity("");
+                        return;
+                  }
+
+                  console.log("Checking email:", email, "flag:", this.value);
+
+                  $.ajax({
+                        type: "GET",
+                        url: "/isRegistered/" + email,
+                        success: function (response) {
+                              console.log("Email check response:", response);
+
+                              if (response && response.status) {
+                                    // Email exists
+                                    console.log(response.data, email);
+                                    // Set the card number and name from the response
+                                    $("#kt_modal_checkout_card_number").val(
+                                          response.data.card_number,
+                                    );
+                                    $("#kt_modal_checkout_name").val(
+                                          response.data.name,
+                                    );
+
+                                    inputEmail.setCustomValidity(
+                                          "Your is registered with us",
+                                    );
+                              } else {
+                                    // Email does not exist
+                                    Swal.fire({
+                                          text: response.data,
+                                          icon: "info",
+                                          buttonsStyling: false,
+                                          confirmButtonText: "Ok, got it!",
+                                          customClass: {
+                                                confirmButton:
+                                                      "btn btn-primary",
+                                          },
+                                    });
+                                    inputEmail.setCustomValidity("");
+                              }
+
+                              // Trigger validation UI update
+                              inputEmail.reportValidity();
+                        },
+                        error: function (xhr, status, error) {
+                              console.error("Email check failed:", {
+                                    status: status,
+                                    error: error,
+                                    responseText: xhr.responseText,
+                              });
+                        },
+                  });
+            });
+            // Helper function to validate email format
+            function isValidEmail(email) {
+                  const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                  return re.test(email);
+            }
       };
 
       return {
@@ -365,6 +499,12 @@ var KTModalNewAddress = (function () {
                   closeButton = document.getElementById(
                         "kt_modal_checkout_close",
                   );
+                  inputEmail = document.getElementById(
+                        "kt_modal_checkout_email",
+                  );
+                  is_registered = document.getElementById(
+                        "kt_modal_checkout_is_registered",
+                  );
                   myDropzone();
                   initForm();
                   handleForm();
@@ -374,5 +514,5 @@ var KTModalNewAddress = (function () {
 
 // On document ready
 KTUtil.onDOMContentLoaded(function () {
-      KTModalNewAddress.init();
+      KTModalCheckout.init();
 });

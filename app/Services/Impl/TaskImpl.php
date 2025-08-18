@@ -3,7 +3,7 @@
 namespace App\Services\Impl;
 
 use App\Helpers\Constant;
-use App\Helpers\Log;
+use App\Helpers\LogConsole;
 use App\Models\DetailTaskModel;
 use App\Models\KanbanModel;
 use App\Models\TaskModel;
@@ -257,7 +257,7 @@ class TaskImpl implements TaskInterface
                   );
                   $this->coinsBalanceByApproved(null, $data->user_detail_id, true);
             } catch (\throwable $e) {
-                  Log::browser($e->getMessage(), "Internal Error");
+                  LogConsole::browser($e->getMessage(), "Internal Error");
             }
 
             return [

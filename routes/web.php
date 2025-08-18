@@ -21,7 +21,8 @@ Route::get('/', [LandingController::class, 'index'])->name('landing');
 #checkout
 Route::post('/checkout', [TransactionsController::class, 'checkout'])->name('checkout');
 Route::post('/upload-file-checkout', [TransactionsController::class, 'uploadFileCheckout'])->name('upload-file-checkout');
-Route::get('/receipt{id}', [TransactionsController::class, 'receipt'])->name('transactions.receipt');
+Route::get('/receipt/{id}', [TransactionsController::class, 'receipt'])->name('receipt');
+Route::get('/isRegistered/{email}', [CommandController::class, 'hasVerifiedEmail'])->name('check.email.registered');
 
 Route::controller(AuthController::class)->group(function () {
     Route::get('signing/{flag}', 'showLoginForm')->name('sign-in')->defaults('flag', 'user');

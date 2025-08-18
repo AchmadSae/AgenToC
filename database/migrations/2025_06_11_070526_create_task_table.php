@@ -24,7 +24,7 @@ return new class extends Migration {
         });
 
         Schema::create('task_detail', function (Blueprint $table) {
-            $table->id();
+            $table->string('id');
             $table->string('title');
             $table->text('description');
             $table->text('task_type');

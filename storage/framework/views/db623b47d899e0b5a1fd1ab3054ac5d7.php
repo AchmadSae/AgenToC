@@ -83,6 +83,7 @@
                                                                 <!--begin::Select-->
                                                                 <a href="#" class="btn btn-primary"
                                                                    data-product-code="<?php echo e($product->product_code); ?>"
+                                                                   data-prduct-group-name="<?php echo e($product->productGroup->value); ?>"
                                                                    data-product-name="<?php echo e($product->product_name); ?>"
                                                                    data-product-price="<?php echo e($product->price); ?>"
                                                                    data-product-description="<?php echo e($product->product_description); ?>"
@@ -121,7 +122,7 @@
                         <!--begin::Modal header-->
                         <div class="modal-header" id="kt_modal_checkout_header">
                               <!--begin::Modal title-->
-                              <h4>Checkout <span data-field="product_name"></span></h4>
+                              <h4  class="fw-bold text-dark">Checkout <span id="kt_modal_checkout_title"></span> </h4>
                               <!--end::Modal title-->
                               <!--begin::Close-->
                               <div class="btn btn-sm btn-icon btn-active-color-primary" id="kt_modal_checkout_close">
@@ -148,14 +149,25 @@
                                                 <input type="text" class="form-control form-control-solid" placeholder="" name="title" />
                                                 <!--end::Input-->
                                           </div>
+                                          <!--begin::Input group-->
+                                          <div class="col-md-12 fv-row">
+                                                <!--begin::Label-->
+                                                <!--begin::Label-->
+                                                <label class="required fs-5 fw-semibold mb-2">Descriptions</label>
+                                                <!--end::Label-->
+                                                <textarea class="form-control form-control-solid" rows="3" name="description" placeholder="Tell us more about your plan project"></textarea>
+                                          </div>
+                                          <!--end::Input group-->
                                           <!--end::Col-->
                                           <!--end::Input-->
+                                    </div>
+                                    <hr>
+                                    <div id="kt_modal_checkout_product_hidden_input">
                                           <!--begin::hidden input-->
-                                          <input type="hidden" name="product_code" data-field="product_code" />
-                                          <input type="hidden" name="product_name" data-field="product_name" />
-                                          <input type="hidden" name="product_price" data-field="product_price" />
-                                          <input type="hidden" name="product_description" data-field="product_description" />
-                                          <input type="hidden" name="product_image" data-field="product_image" />
+                                          <input id="kt_modal_checkout_product_code" type="hidden" name="product_code" value="" />
+                                          <input id="kt_modal_checkout_product_group_name" type="hidden"  name="product_group_name" />
+                                          <input id="kt_modal_checkout_product_price" type="hidden" name="price" />
+
                                           <!--end::hidden input-->
                                     </div>
                                     <!--end::Input group-->
@@ -167,7 +179,8 @@
                                                 <label class="required fs-5 fw-semibold mb-2">Email</label>
                                                 <!--end::Label-->
                                                 <!--begin::Input-->
-                                                <input type="email" class="form-control form-control-solid" placeholder="" name="email" />
+                                                <input id="kt_modal_checkout_email" type="email" class="form-control form-control-solid" placeholder="" name="email" />
+
                                                 <!--end::Input-->
                                           </div>
                                           <!--end::Col-->
@@ -177,20 +190,48 @@
                                                 <label class="required fs-5 fw-semibold mb-2">Due date</label>
                                                 <!--end::Label-->
                                                 <!--begin::Datepicker-->
-                                                <input class="form-control form-control-solid ps-12" placeholder="Select a date" name="due_date" />
+                                                <input type="datetime-local"
+                                                       class="form-control form-control-solid ps-12"
+                                                       placeholder="Select a date and time"
+                                                       name="due_date"
+                                                       min="<?php echo e(now()->format('Y-m-d\TH:i')); ?>"
+                                                       step="300"
+                                                       required />
                                                 <!--end::Datepicker-->
+                                                <div class="fv-plugins-message-container invalid-feedback"></div>
+                                                <small class="text-muted">Please select a future date and time</small>
                                           </div>
                                           <!--end::Col-->
                                     </div>
-                                    <!--end::Input group-->
-                                    <!--begin::Input group-->
-                                    <div class="row mb-5">
-                                          <!--begin::Label-->
-                                          <!--begin::Label-->
-                                          <label class="required fs-5 fw-semibold mb-2">Descriptions</label>
-                                          <!--end::Label-->
-                                          <textarea class="form-control form-control-solid" rows="3" name="description" placeholder="Tell us more about your plan project"></textarea>
+
+                                    <div class="mb-5">
+
+                                          <!--begin::Wrapper-->
+                                          <div class="d-flex flex-stack">
+                                                <!--begin::Label-->
+                                                <div class="me-5">
+                                                      <!--begin::Label-->
+                                                      <label class="fs-5 fw-semibold">Have an account before?</label>
+                                                      <!--end::Label-->
+                                                      <!--begin::Input-->
+                                                      <div class="fs-7 fw-semibold text-muted">please unchecked if you don't have an account</div>
+                                                      <!--end::Input-->
+                                                </div>
+                                                <!--end::Label-->
+                                                <!--begin::Switch-->
+                                                <label class="form-check form-switch form-check-custom form-check-solid">
+                                                      <!--begin::Input-->
+                                                      <input id="kt_modal_checkout_is_registered" class="form-check-input" name="is_registered" type="checkbox" value="0">
+                                                      <!--end::Input-->
+                                                      <!--begin::Label-->
+                                                      <span class="form-check-label fw-semibold text-muted">Yes</span>
+                                                      <!--end::Label-->
+                                                </label>
+                                                <!--end::Switch-->
+                                          </div>
+                                          <!--begin::Wrapper-->
                                     </div>
+                                    <hr>
                                     <!--end::Input group-->
                                     <!--begin::Input group-->
                                     <div class="row mb-5">
@@ -207,7 +248,7 @@
                                                       <!--begin::Info-->
                                                       <div class="ms-4">
                                                             <h3 class="dfs-3 fw-bold text-gray-900 mb-1">Drop campaign files here or click to upload.</h3>
-                                                            <span class="fw-semibold fs-4 text-muted">Upload up to 10 files</span>
+                                                            <span class="fw-semibold fs-4 text-muted">Upload up to 3 files</span>
                                                       </div>
                                                       <!--end::Info-->
                                                 </div>
@@ -236,7 +277,7 @@
                                                 <label class="required fs-5 fw-semibold mb-2">Name in Card</label>
                                                 <!--end::Label-->
                                                 <!--begin::Input-->
-                                                <input type="text" class="form-control form-control-solid" placeholder="" name="name" />
+                                                <input id="kt_modal_checkout_name" type="text" class="form-control form-control-solid" placeholder="" name="name" />
                                                 <!--end::Input-->
                                           </div>
                                     </div>
@@ -248,7 +289,7 @@
                                           <!--begin::Input wrapper-->
                                           <div class="position-relative">
                                                 <!--begin::Input-->
-                                                <input type="text" class="form-control form-control-solid" placeholder="Enter card number" name="card_number" value="4111 1111 1111 1111" />
+                                                <input id="kt_modal_checkout_card_number" type="text" class="form-control form-control-solid" placeholder="Enter card number" name="card_number" value="4111 1111 1111 1111" />
                                                 <!--end::Input-->
                                                 <!--begin::Card logos-->
                                                 <div class="position-absolute translate-middle-y top-50 end-0 me-5">
@@ -259,34 +300,6 @@
                                                 <!--end::Card logos-->
                                           </div>
                                           <!--end::Input wrapper-->
-                                    </div>
-                                    <!--end::Input group-->
-                                    <!--begin::Input group-->
-                                    <div class="fv-row mb-5">
-                                          <!--begin::Wrapper-->
-                                          <div class="d-flex flex-stack">
-                                                <!--begin::Label-->
-                                                <div class="me-5">
-                                                      <!--begin::Label-->
-                                                      <label class="fs-5 fw-semibold">Use as a billing adderess?</label>
-                                                      <!--end::Label-->
-                                                      <!--begin::Input-->
-                                                      <div class="fs-7 fw-semibold text-muted">If you need more info, please check budget planning</div>
-                                                      <!--end::Input-->
-                                                </div>
-                                                <!--end::Label-->
-                                                <!--begin::Switch-->
-                                                <label class="form-check form-switch form-check-custom form-check-solid">
-                                                      <!--begin::Input-->
-                                                      <input class="form-check-input" name="billing" type="checkbox" value="1" checked="checked" />
-                                                      <!--end::Input-->
-                                                      <!--begin::Label-->
-                                                      <span class="form-check-label fw-semibold text-muted">Yes</span>
-                                                      <!--end::Label-->
-                                                </label>
-                                                <!--end::Switch-->
-                                          </div>
-                                          <!--begin::Wrapper-->
                                     </div>
                                     <!--end::Input group-->
                               </div>

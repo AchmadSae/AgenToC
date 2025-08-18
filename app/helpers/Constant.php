@@ -37,4 +37,6 @@ class Constant
       const FILE_TYPE_CHECKOUT = 'checkout';
       const DEFAULT_PASS = 'DEFAULT_PASS';
       const TASK_TYPE_CATALOG_PRODUCT = 'catalog_product';
+      const MESSAGE_ERROR = 'Sorry, an error has occurred, please try again later or contact us if the problem persists!';
+      const MESSAGE_WARNING = 'Some process have an failed, please try again later or contact us if the problem persists!';
 }

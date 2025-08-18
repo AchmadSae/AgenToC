@@ -864,7 +864,7 @@
 
                             <a href="#" class="menu-link px-5"
                                 onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
-                                {{ __('Log Out') }}
+                                {{ __('LogConsole Out') }}
                             </a>
 
 
