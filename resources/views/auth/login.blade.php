@@ -31,16 +31,16 @@
                 <div class="p-20">
                     <!--begin::Form-->
                     @if($flag == 'user')
-                    <x-form :form="'sign-in'" :directUrl="'test'" :title="'Sign In'"
+                    <x-form-auth :form="'sign-in'" :directUrl="'test'" :title="'Sign In'"
                         :description="'Get our flexibility and easy management business'" :id="'kt_sign_in_form'"
                         :action="'login'">
-                    </x-form>
+                    </x-form-auth>
                     @endif
                     @if($flag == 'worker')
-                    <x-form :form="'sign-in'" :directUrl="'home'" :title="'Sign In'"
+                    <x-form-auth :form="'sign-in'" :directUrl="'home'" :title="'Sign In'"
                         :description="'Get our flexibility and easy management business'" :id="'kt_sign_in_form'"
                         :action="'login'" :typeRegister="'worker'">
-                    </x-form>
+                    </x-form-auth>
                     @endif
                     <!--end::Form-->
                 </div>

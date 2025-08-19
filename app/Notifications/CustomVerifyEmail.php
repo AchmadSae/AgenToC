@@ -8,16 +8,17 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
-class CustomVerifyEmail extends VerifyEmail implements ShouldQueue
+class CustomVerifyEmail extends VerifyEmail
 {
     use Queueable;
+    protected mixed $user;
 
     /**
      * Create a new notification instance.
      */
-    public function __construct()
+    public function __construct($userData = [])
     {
-        //
+        $this->user = $userData;
     }
 
     /**
@@ -26,11 +27,10 @@ class CustomVerifyEmail extends VerifyEmail implements ShouldQueue
     public function toMail($notifiable): MailMessage
     {
           $verifyUrl = $this->verificationUrl($notifiable);
-        return (new MailMessage)
-              ->subject('Verify Email Address')
-              ->line('Please click the button below to verify your email address.')
-              ->action('Verify Email Address', $verifyUrl)
-              ->line('If you did not create an account, no further action is required.');
+          return (new MailMessage)
+                ->subject('Verify Your Email Address')
+                ->view('emails.verify-email', [
+                      'user' => $this->user, 'verifyUrl' => $verifyUrl]);
     }
 
     /**

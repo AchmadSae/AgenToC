@@ -6,7 +6,7 @@
 'title'=> 'Sign Up to our platform',
 'description' => '',
 'form',
-'typeRegister' => 'user'
+'typeRegister' => 'user',
 ])
 <form method="{{ $method }}" class="form w-100" novalidate="novalidate" id="{{ $id }}"
     data-kt-redirect-url="{{ route($directUrl) }}" action="{{ route($action) }}">
@@ -37,6 +37,8 @@
         </select>
     </div>
     @endif
+
+
     @if($typeRegister == 'user' && $form == 'sign-up')
     <input type="text" name="role" value="{{ $typeRegister }}" hidden>
     @endif
@@ -108,7 +110,12 @@
         @endif
     </div>
     <!--end::Input group=-->
-
+      <div class="d-flex flex-stack flex-wrap gap-3 fs-base fw-semibold mb-10">
+            <div></div>
+            <!--begin::Link-->
+            <a href="{{ route('show-pass-request') }}" class="link-primary" data-kt-translate="sign-in-forgot-password">Forgot Password ?</a>
+            <!--end::Link-->
+      </div>
     @if($form == 'sign-up')
     <!--begin::Input group-->
     <div class="fv-row mb-10">

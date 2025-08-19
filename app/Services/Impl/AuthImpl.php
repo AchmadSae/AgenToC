@@ -3,6 +3,7 @@
 namespace App\Services\Impl;
 
 use App\Helpers\Constant;
+use App\Notifications\CustomVerifyEmail;
 use App\Services\AuthInterface;
 use App\Models\User;
 use App\Models\UserDetailModel;
@@ -104,7 +105,13 @@ class AuthImpl implements AuthInterface
               LogConsole::browser('after db insert',  $registeredUser);
                     #check isFromTransaction
                     if (!$isTransaction) {
-                          $registeredUser->sendEmailVerificationNotification();
+                          $dataUser = [
+                                'name' => $registeredUser->name,
+                                'email' => $registeredUser->email,
+                                'password' => $registeredUser->password,
+                                'role' => $role_id
+                          ];
+                          $registeredUser->notify(new CustomVerifyEmail($dataUser));
                     }
               $status = $registeredUser && $user_detail_id && $userDetailRoles;
         }catch(\Throwable $e){

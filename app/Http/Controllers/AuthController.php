@@ -21,6 +21,11 @@ use TheSeer\Tokenizer\Token;
 class AuthController extends Controller
 {
     protected AuthInterface $authInterface;
+
+    public function __construct(AuthInterface $authInterface)
+    {
+        $this->authInterface = $authInterface;
+    }
     public function showLoginForm($flag)
     {
         return view('auth.login', ['flag' => $flag]);
@@ -124,17 +129,6 @@ class AuthController extends Controller
           return redirect('/');
     }
 
-    public function resendVerification(Request $request)
-    {
-
-    }
-
-    // Password reset
-    public function showLinkRequestForm(Request $request)
-    {
-
-    }
-
     public function sendResetLinkEmail(Request $request)
     {
           $request->validate(['email' => 'required|email']);
@@ -159,7 +153,7 @@ class AuthController extends Controller
       public function showResetForm()
     {
           $token = bin2hex(random_bytes(20));
-          return view('auth.password.form_reset_password_email', ['token' => $token]);
+          return view('auth.password.reset_password_email_token', ['token' => $token]);
     }
 
     public function reset(Request $request)

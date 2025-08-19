@@ -31,10 +31,9 @@ Route::controller(AuthController::class)->group(function () {
     Route::get('signup/{flag}', 'showRegistrationForm')->name('sign-up')->defaults('flag', 'user');
     Route::post('register', 'register')->name('register');
     # Email verification
-    Route::get('email/verify/{id}/{hash}', 'verifyEmail')->name('verification.verify');
-    Route::post('email/resend', 'resendVerification')->name('verification.resend');
+    Route::get('email/verify/{id}/{hash}', 'verifyEmail')->name('verification-verify');
       #Password reset
-      Route::post('password/reset', 'showRequestForm')->name('show-pass-request');
+      Route::get('password/reset', 'showRequestForm')->name('show-pass-request');
       Route::post('password/email', 'sendResetLinkEmail')->name('link-email');
       Route::get('password/reset/', 'showResetForm')->name('password-reset');
       Route::post('password/new', 'reset')->name('password-update');
