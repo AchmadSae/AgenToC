@@ -117,9 +117,7 @@ Route::middleware(['oAuth'])->group(function () {
             Route::post('/rate/{id}', 'rateTaskClient')->name('rate_task');
             Route::get('/download/{id}', 'downloadAttachment')->name('download->attachments');
         });
-
         #kanban
-
     });
     /**
      * end root group for customer

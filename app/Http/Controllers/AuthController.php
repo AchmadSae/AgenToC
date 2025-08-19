@@ -2,12 +2,14 @@
 
 namespace App\Http\Controllers;
 
+use App\Helpers\Constant;
 use App\Helpers\LogConsole;
 use App\Models\User;
 use Illuminate\Auth\Events\Verified;
 use Illuminate\Database\QueryException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Password;
 use Random\RandomException;
 use RealRashid\SweetAlert\Facades\Alert;
@@ -26,7 +28,6 @@ class AuthController extends Controller
 
     public function login(Request $request)
     {
-        $response = false;
         $credentials = $request->validate([
             'email' => ['required', 'email'],
             'password' => ['required'],
@@ -37,25 +38,25 @@ class AuthController extends Controller
             try {
                 #call the service
                 $response = $this->authInterface->login($request);
-            } catch (QueryException $e) {
+            } catch (\Throwable $e) {
                 return back()->withErrors([
-                    'error' => 'Ups! something went wrong!' . $e->getMessage(),
+                    'error' => Constant::MESSAGE_ERROR,
                 ]);
             }
 
             if (!$response) {
-                Alert::error('error', 'Ups! you are not allowed to login'); // If the login attempt was unsuccessful, redirect back with an error message
+                Alert::warning('warning', 'Ups! you are not allowed to login'); // If the login attempt was unsuccessful, redirect back with an error message
                 return back();
             }
             return match ($request->role) {
                 'admin' => redirect()->route('admin_dashboard'),
                 'user' => redirect()->route('client_dashboard'),
                 'worker' => redirect()->route('worker_dashboard'),
-                default => redirect()->route('home'),
+                default => redirect()->route('landing'),
             };
         }
 
-        Alert::error('error', 'Ups! password or email is incorrect'); // If the login attempt was unsuccessful, redirect back with an error message
+        Alert::error('error', Constant::MESSAGE_ERROR);
         return back();
     }
     public function showRegistrationForm($flag)
@@ -69,8 +70,6 @@ class AuthController extends Controller
 
     public function register(Request $request)
     {
-        $response = [];
-        LogConsole::browser($request, 'Register User');
         $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
@@ -101,27 +100,33 @@ class AuthController extends Controller
     }
 
     // Email verification
-    public function verifyEmail(Request $request, $id, $hash)
+    public function verifyEmail($id, $hash)
     {
-        $user = User::findOrFail($id);
+          try {
+              $user = User::findOrFail($id);
 
-        if (!hash_equals((string) $hash, sha1($user->getEmailForVerification()))) {
-            abort(403);
-        }
+              if (!hash_equals((string) $hash, sha1($user->getEmailForVerification()))) {
+                  abort(403);
+              }
 
-        if ($user->hasVerifiedEmail()) {
-            Alert::info('info', 'Email already verified!');
-            return redirect()->route('sign-in', ['flag' => 'user']);
-        }
+              if ($user->hasVerifiedEmail()) {
+                  Alert::info('info', 'Email already verified!');
+                  return redirect()->route('sign-in', ['flag' => 'user']);
+              }
 
-        $user->markEmailAsVerified();
-        event(new Verified($user));
-        Alert::success('success', 'Successfully verified!');
-        return redirect('/');
+              $user->markEmailAsVerified();
+              event(new Verified($user));
+              Alert::success('success', 'Successfully verified!');
+              return redirect('/');
+          }catch(\Throwable $th){
+                  Log::error('AuthController.verifyEmail() error: ' . $th->getMessage());
+          }
+          return redirect('/');
     }
 
     public function resendVerification(Request $request)
     {
+
     }
 
     // Password reset

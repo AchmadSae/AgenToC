@@ -26,7 +26,9 @@ class ClientController extends Controller
     protected UserInterface $userService;
 
     /**
-     * view current product or task in-progress(can chat the worker(no attachment)
+     * show the User profile highlight  ( in container have information the % user profile compleation, total coins, total task, total done task )
+     * view calendar all marked at due_date each task
+     * view current product or task in-progress ( @clik detail task for chat and status kanban)
      * -> this view same like detail task from list of task)
      * calendar set about due date off all task
      * @return mixed

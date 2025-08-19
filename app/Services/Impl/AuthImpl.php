@@ -33,19 +33,23 @@ class AuthImpl implements AuthInterface
 
     public function login($data): bool
     {
-        $hasRole = DB::table('user_detail_roles')
-            ->join('roles', 'roles.role_id', '=', 'user_detail_roles.role_id')
-            ->where('user_detail_roles.user_detail_id', $data->user_detail_id)
-            ->where('roles.role_name', $data->role_name)
-            ->where('user_detail_roles.is_active', true)
-            ->exists();
-        LogConsole::browser($data, 'Service Login User');
-
-        $hasVerified = $this->hasVerifiedEmail($data->email);
-        if (!$hasRole && !$hasVerified['status']) {
-            return false;
-        }
-        return true;
+          try {
+                $hasRole = DB::table('user_detail_roles')
+                      ->join('roles', 'roles.role_id', '=', 'user_detail_roles.role_id')
+                      ->where('user_detail_roles.user_detail_id', $data->user_detail_id)
+                      ->where('roles.role_name', $data->role_name)
+                      ->where('user_detail_roles.is_active', true)
+                      ->exists();
+                Log::info('AuthController.login hasRole: ' . $hasRole);
+                $hasVerified = $this->hasVerifiedEmail($data->email);
+                if (!$hasRole && !$hasVerified) {
+                      return false;
+                }
+                return true;
+          } catch (ModelNotFoundException $th) {
+                Log::error('AuthController.login ModelNotFoundException: ' . $th->getMessage());
+          }
+          return false;
     }
 
       /**
@@ -53,6 +57,7 @@ class AuthImpl implements AuthInterface
        */
       public function register($data, $isTransaction = false): array
     {
+          Log::info('Begin AuthImpl.register() call'. json_encode($data));
           #check email isUnique
           $user = User::where('email', $data['email'])->exists();
           if ($user) {
@@ -104,10 +109,12 @@ class AuthImpl implements AuthInterface
               $status = $registeredUser && $user_detail_id && $userDetailRoles;
         }catch(\Throwable $e){
               DB::rollBack();
+              Log::error('AuthImpl.register() error: ' . $e->getMessage());
             throw new InternalErrorException("DB transaction failed :".$e->getMessage());
         }
         if (!$status) {
               DB::rollBack();
+              Log::warning('AuthImpl.register() error: DB transaction status false');
               throw new InternalErrorException("DB transaction status : false");
         }
         DB::commit();
