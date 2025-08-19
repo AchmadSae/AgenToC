@@ -33,7 +33,7 @@ Route::controller(AuthController::class)->group(function () {
     # Email verification
     Route::get('email/verify/{id}/{hash}', 'verifyEmail')->name('verification-verify');
       #Password reset
-      Route::get('password/reset', 'showRequestForm')->name('show-pass-request');
+      Route::get('password/form', 'showRequestForm')->name('show-pass-request');
       Route::post('password/email', 'sendResetLinkEmail')->name('link-email');
       Route::get('password/reset/', 'showResetForm')->name('password-reset');
       Route::post('password/new', 'reset')->name('password-update');
