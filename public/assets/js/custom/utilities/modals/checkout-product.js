@@ -272,7 +272,7 @@ var KTModalCheckout = (function () {
                                     },
                               },
                         },
-                        name: {
+                        full_name: {
                               validators: {
                                     notEmpty: {
                                           message: "Name is required",

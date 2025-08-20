@@ -34,7 +34,7 @@ class AuthController extends Controller
     public function login(Request $request)
     {
         $credentials = $request->validate([
-            'email' => ['required', 'email'],
+            'username' => ['sometimes'],
             'password' => ['required'],
         ]);
 
@@ -42,7 +42,7 @@ class AuthController extends Controller
             $request->session()->regenerate();
             try {
                 #call the service
-                $response = $this->authInterface->login($request);
+                $response = $this->authInterface->login($credentials);
             } catch (\Throwable $e) {
                 return back()->withErrors([
                     'error' => Constant::MESSAGE_ERROR,
@@ -67,23 +67,34 @@ class AuthController extends Controller
     public function showRegistrationForm($flag)
     {
         if (!$flag == 'User') {
-            return view('auth.register', ['flag' => $flag]);
+            return view('auth.signup', ['flag' => $flag]);
         }
 
-        return view('auth.register', ['flag' => $flag]);
+        return view('auth.signup', ['flag' => $flag]);
     }
 
     public function register(Request $request)
     {
         $request->validate([
-            'name' => ['required', 'string', 'max:255'],
+            'username' => ['required', 'string', 'max:255'],
+            'first-name' => ['required', 'string', 'max:255'],
+            'last-name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
             'password' => ['required', 'confirmed'],
             'role' => ['required'],
         ]);
         try {
             //code...
-            $response = $this->authInterface->register($request);
+            $data = [
+                'username' => $request->username,
+                'first_name' => $request->first_name,
+                'last_name' => $request->last_name,
+                'email' => $request->email,
+                'password' => $request->password,
+                'role' => $request->role,
+                'full_name' => $request->first_name . ' ' . $request->last_name
+            ];
+            $response = $this->authInterface->register($data);
             Alert::success('success', $response['message']);
             return redirect()->route('sign-in', ['flag' => $response['flag']]);
         } catch (InternalErrorException $th) {

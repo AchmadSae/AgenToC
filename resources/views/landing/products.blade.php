@@ -276,7 +276,7 @@
                                                 <label class="required fs-5 fw-semibold mb-2">Name in Card</label>
                                                 <!--end::Label-->
                                                 <!--begin::Input-->
-                                                <input id="kt_modal_checkout_name" type="text" class="form-control form-control-solid" placeholder="" name="name" />
+                                                <input id="kt_modal_checkout_name" type="text" class="form-control form-control-solid" placeholder="" name="full_name" />
                                                 <!--end::Input-->
                                           </div>
                                     </div>

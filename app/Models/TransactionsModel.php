@@ -8,6 +8,8 @@ class TransactionsModel extends Model
 {
     protected $table = 'transactions';
     protected $primaryKey = 'id';
+    public $incrementing =false;
+    protected $keyType = 'string';
 
     #email we set for user_id
     protected $fillable = [

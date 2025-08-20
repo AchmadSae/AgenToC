@@ -36,7 +36,7 @@ class TransactionsController extends Controller
 
             // Validate the request
             $rules = [
-                'name' => 'required|string|max:255',
+                'full_name' => 'required|string|max:255',
                 'email' => 'required|email',
                 'title' => 'required|string|max:255',
                 'description' => 'required|string',
@@ -53,7 +53,8 @@ class TransactionsController extends Controller
 
             if ($validator->fails()) {
                 Log::error('Validation failed:', $validator->errors()->toArray());
-                return redirect()->back()->withErrors($validator)->withInput();
+                Alert::warning('Warning', Constant::MESSAGE_WARNING);
+                return redirect()->back();
             }
 
             // Get the validated data
@@ -85,8 +86,7 @@ class TransactionsController extends Controller
                       Alert::warning('Warning', Constant::MESSAGE_WARNING);
                       return redirect()->route('landing')->withInput();
                 }
-                  Alert::success('Success', 'Transaction checkout processed successfully!');
-                  return redirect()->route('receipt', ['id' => $transaction['transaction_id'] ]);
+                return redirect()->route('receipt', ['id' => $transaction['transaction_id']]);
             } catch (\Exception $e) {
                 Log::error('Transaction Checkout error: ', [
                       'error' => $e->getMessage(),

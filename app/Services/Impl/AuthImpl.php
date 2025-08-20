@@ -10,6 +10,7 @@ use App\Models\UserDetailModel;
 use App\Helpers\GenerateId;
 use App\Helpers\LogConsole;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Auth\Events\PasswordReset;
@@ -34,23 +35,30 @@ class AuthImpl implements AuthInterface
 
     public function login($data): bool
     {
+          Log::info('Begin AuthImpl.login() call'. json_encode($data));
           try {
+                $userDetailId = User::where('email', $data->username)
+                      ->orWhere('username', $data->username)
+                      ->value('user_detail_id');
+                if (!$userDetailId) {
+                      return false;
+                }
+
                 $hasRole = DB::table('user_detail_roles')
                       ->join('roles', 'roles.role_id', '=', 'user_detail_roles.role_id')
-                      ->where('user_detail_roles.user_detail_id', $data->user_detail_id)
+                      ->where('user_detail_roles.user_detail_id', $userDetailId)
                       ->where('roles.role_name', $data->role_name)
                       ->where('user_detail_roles.is_active', true)
                       ->exists();
-                Log::info('AuthController.login hasRole: ' . $hasRole);
                 $hasVerified = $this->hasVerifiedEmail($data->email);
                 if (!$hasRole && !$hasVerified) {
                       return false;
                 }
                 return true;
-          } catch (ModelNotFoundException $th) {
-                Log::error('AuthController.login ModelNotFoundException: ' . $th->getMessage());
+          } catch (QueryException $th) {
+                Log::error('AuthController.login QueryException: ' . $th->getMessage());
+                return false;
           }
-          return false;
     }
 
       /**
@@ -91,7 +99,8 @@ class AuthImpl implements AuthInterface
 
                     $registeredUser = User::create([
                           'user_detail_id' => $userDetail->id,
-                          'name' => $data['name'],
+                          'username' => $data['username'],
+                          'full_name' => $data['full_name'],
                           'email' => $data['email'],
                           'password' => Hash::make($data['password'])
                     ]);

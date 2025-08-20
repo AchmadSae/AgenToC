@@ -35,7 +35,7 @@
                               <!--begin::Sign Up link-->
                               <div class="m-0">
                                     <span class="text-gray-500 fw-bold fs-5 me-2" data-kt-translate="password-reset-head-desc">Already a member ?</span>
-                                    <a href="<?php echo e(route('sign-in',['flag' => 'user'])); ?>" class="link-primary fw-bold fs-5" data-kt-translate="password-reset-head-link">Sign In</a>
+                                    <a href="<?php echo e(route('sign-up',['flag' => 'user'])); ?>" class="link-primary fw-bold fs-5" data-kt-translate="password-reset-head-link">Sign In</a>
                               </div>
                               <!--end::Sign Up link=-->
                         </div>
@@ -72,7 +72,8 @@
 											<span class="spinner-border spinner-border-sm align-middle ms-2"></span></span>
                                                       <!--end::Indicator progress-->
                                                 </button>
-                                                <a href="authentication/layouts/fancy/sign-in.html" class="btn btn-lg btn-light-primary fw-bold" data-kt-translate="password-reset-cancel">Cancel</a>
+                                                <a href="
+                                                <?php echo e(route('sign-in', ['flag' => 'user'])); ?>" class="btn btn-lg btn-light-primary fw-bold" data-kt-translate="password-reset-cancel">Cancel</a>
                                           </div>
                                           <!--end::Link-->
                                     </div>
@@ -85,7 +86,7 @@
                         <div class="m-0">
                               <!--begin::Toggle-->
                               <button class="btn btn-flex btn-link rotate" data-kt-menu-trigger="click" data-kt-menu-placement="bottom-start" data-kt-menu-offset="0px, 0px">
-                                    <img data-kt-element="current-lang-flag" class="w-25px h-25px rounded-circle me-3" src="assets/media/flags/united-states.svg" alt="">
+                                    <img data-kt-element="current-lang-flag" class="w-25px h-25px rounded-circle me-3" src="<?php echo e(asset('assets/media/flags/united-states.svg')); ?>" alt="">
                                     <span data-kt-element="current-lang-name" class="me-2">English</span>
                                     <i class="ki-duotone ki-down fs-2 text-muted rotate-180 m-0"></i>
                               </button>
@@ -96,7 +97,7 @@
                                     <div class="menu-item px-3">
                                           <a href="#" class="menu-link d-flex px-5" data-kt-lang="English">
 										<span class="symbol symbol-20px me-4">
-											<img data-kt-element="lang-flag" class="rounded-1" src="assets/media/flags/united-states.svg" alt="">
+											<img data-kt-element="lang-flag" class="rounded-1" src= "<?php echo e(asset('assets/media/flags/united-states.svg')); ?>" alt="">
 										</span>
                                                 <span data-kt-element="lang-name">English</span>
                                           </a>
@@ -106,7 +107,7 @@
                                     <div class="menu-item px-3">
                                           <a href="#" class="menu-link d-flex px-5" data-kt-lang="Spanish">
 										<span class="symbol symbol-20px me-4">
-											<img data-kt-element="lang-flag" class="rounded-1" src="assets/media/flags/spain.svg" alt="">
+											<img data-kt-element="lang-flag" class="rounded-1" src="<?php echo e(asset('assets/media/flags/spain.svg')); ?>" alt="">
 										</span>
                                                 <span data-kt-element="lang-name">Spanish</span>
                                           </a>
@@ -151,7 +152,7 @@
             </div>
             <!--end::Aside-->
             <!--begin::Body-->
-            <div class="d-none d-lg-flex flex-lg-row-fluid w-50 bgi-size-cover bgi-position-y-center bgi-position-x-start bgi-no-repeat" style="background-image: url(assets/media/auth/bg11.png)"></div>
+            <div class="d-none d-lg-flex flex-lg-row-fluid w-50 bgi-size-cover bgi-position-y-center bgi-position-x-start bgi-no-repeat" style="background-image: url(<?php echo e(asset('assets/media/auth/bg11.png')); ?>)"></div>
             <!--begin::Body-->
       </div>
  <?php echo $__env->renderComponent(); ?>
