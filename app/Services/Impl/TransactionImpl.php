@@ -80,6 +80,7 @@ class TransactionImpl implements TransactionsInterface
             $data['password'] = GlobalParam::where("code", "=", Constant::DEFAULT_PASS)->value("value");
             $data['skills'] = '';
             $data['tag_line'] = '';
+            $data['username'] = $data['email'];
             try {
                   $user_detail_id = '';
                   $userRegisterResponse = $this->authService->register($data, true);

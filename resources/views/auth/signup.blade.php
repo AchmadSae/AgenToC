@@ -1,4 +1,4 @@
-<x-guest-layout :title="__('Register')">
+<x-guest-lay :title="__('Register')">
     <div class="d-flex flex-column flex-lg-row flex-column-fluid">
         <!--begin::Wrapper-->
         <div class="d-flex flex-column flex-column-fluid flex-center w-lg-50 p-10">
@@ -7,13 +7,13 @@
                 <div class="p-10">
                     <!--begin::Form-->
                     @if($flag == 'user')
-                        <x-form :form="'sign-up'" :directUrl="'home'" :title="'Join our partnership As User'" :description="'Get FLexibility and Easy Management Business'" :id="'kt_sign_up_form'" :action="'register'">
-                        </x-form>
+                        <x-form-auth :form="'sign-up'" :directUrl="'landing'" :title="'Join our partnership As User'" :description="'Get FLexibility and Easy Management Business'" :id="'kt_sign_up_form'" :action="'register'">
+                        </x-form-auth>
                     @endif
                     @if($flag == 'worker')
-                        <x-form :form="'sign-up'" :directUrl="'home'" :title="'Join our partnership As Worker'" :description="'Be our partners for your freelance business'" :id="'kt_sign_up_form'" :action="'register'"
+                        <x-form-auth :form="'sign-up'" :directUrl="'landing'" :title="'Join our partnership As Worker'" :description="'Be our partners for your freelance business'" :id="'kt_sign_up_form'" :action="'register'"
                             :typeRegister="'worker'">
-                        </x-form>
+                        </x-form-auth>
                     @endif
                     <!--end::Form-->
                 </div>
@@ -25,4 +25,4 @@
             style="background-image: url({{ asset('assets/media/auth/bg11.png') }})"></div>
         <!--begin::Body-->
     </div>
-</x-guest-layout>
+</x-guest-lay>

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Helpers\Constant;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use App\Models\TransactionsModel;
 use App\Models\User;
@@ -36,7 +37,7 @@ class TransactionsController extends Controller
 
             // Validate the request
             $rules = [
-                'name' => 'required|string|max:255',
+                'full_name' => 'required|string|max:255',
                 'email' => 'required|email',
                 'title' => 'required|string|max:255',
                 'description' => 'required|string',
@@ -53,7 +54,8 @@ class TransactionsController extends Controller
 
             if ($validator->fails()) {
                 Log::error('Validation failed:', $validator->errors()->toArray());
-                return redirect()->back()->withErrors($validator)->withInput();
+                Alert::warning('Warning', Constant::MESSAGE_WARNING);
+                return redirect()->back();
             }
 
             // Get the validated data
@@ -85,8 +87,7 @@ class TransactionsController extends Controller
                       Alert::warning('Warning', Constant::MESSAGE_WARNING);
                       return redirect()->route('landing')->withInput();
                 }
-                  Alert::success('Success', 'Transaction checkout processed successfully!');
-                  return redirect()->route('receipt', ['id' => $transaction['transaction_id'] ]);
+                return redirect()->route('receipt', ['id' => $transaction['transaction_id']]);
             } catch (\Exception $e) {
                 Log::error('Transaction Checkout error: ', [
                       'error' => $e->getMessage(),
@@ -149,8 +150,13 @@ class TransactionsController extends Controller
       public function receipt(string $id)
       {
             try{
-                  $transaction = TransactionsModel::findOrFail($id);
-                  $user = User::where('user_detail_id', $transaction->user_id)->first();
+                  $transaction = DB::table('transactions')
+                        ->join('products', 'transactions.product_id', '=', 'products.product_code')
+                        ->where('transactions.id', $id)
+                        ->select('transactions.*', 'products.*')
+                        ->first();
+                  $user = User::with('userDetail')->where('id', $transaction->user_id)->first();
+                  dd($user);
                   return view('transaction.receipt', compact('transaction', 'user'));
             }catch (ErrorException $e){
                   \Log::error($e->getMessage());

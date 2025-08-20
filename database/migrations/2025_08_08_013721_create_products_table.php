@@ -20,6 +20,8 @@ return new class extends Migration
             $table->string('product_description');
             $table->string('product_image')->nullable();
             $table->timestamps();
+            $table->foreign('product_group_code')->references('code')->on('product_groups');
+            $table->foreign('product_code')->references('code')->on('product_groups');
         });
 
         Schema::create('product_groups', function (Blueprint $table) {

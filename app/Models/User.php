@@ -15,7 +15,8 @@ class User extends Authenticatable implements MustVerifyEmail
 
     protected $fillable = [
         'user_detail_id',
-        'name',
+        'username',
+          'full_name',
         'email',
         'password',
         'profile_photo_path',
@@ -33,7 +34,7 @@ class User extends Authenticatable implements MustVerifyEmail
 
     public function userDetail(): \Illuminate\Database\Eloquent\Relations\BelongsTo
     {
-        return $this->belongsTo(UserDetailModel::class);
+        return $this->belongsTo(UserDetailModel::class, 'user_detail_id', 'id');
     }
 
     public function messages(): hasMany

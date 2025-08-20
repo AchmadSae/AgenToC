@@ -11,18 +11,19 @@ return new class extends Migration {
     public function up(): void
     {
         Schema::create('employees', function (Blueprint $table) {
-            $table->id();
+            $table->increments('id')->primary();
             $table->string('name');
-            $table->string('email');
+            $table->string('email')->unique();
             $table->string('phone');
             $table->string('department_id')->nullable();
             $table->string('position');
             $table->boolean('is_active')->default(true);
             $table->timestamps();
+            $table->foreign('department_id')->references('id')->on('departments');
         });
 
         Schema::create('departments', function (Blueprint $table) {
-            $table->id();
+            $table->string('id');
             $table->string('name');
             $table->string('location')->nullable();
             $table->string('manager_id')->nullable();

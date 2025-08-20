@@ -21,6 +21,7 @@ return new class extends Migration {
             $table->boolean('is_approved')->default(false);
             $table->dateTime('acceptance_deadline_time')->nullable();
             $table->timestamps();
+            $table->foreign('detail_task_id')->references('id')->on('task_detail');
         });
 
         Schema::create('task_detail', function (Blueprint $table) {
@@ -43,6 +44,7 @@ return new class extends Migration {
               $table->string('mime_type')->nullable();
               $table->integer('file_size')->nullable();
               $table->timestamps();
+              $table->foreign('task_id')->references('id')->on('tasks');
         });
         Schema::create('revision_history', function (Blueprint $table) {
             $table->id();
@@ -52,15 +54,18 @@ return new class extends Migration {
             $table->string('status')->default('pending');
             $table->string('attachment')->nullable();
             $table->timestamps();
+            $table->foreign('task_id')->references('id')->on('tasks');
         });
 
-        Schema::create('ticket_revisions', function (Blueprint $table) {
+        Schema::create('ticket_revision', function (Blueprint $table) {
               $table->string('id')->primary();
               $table->string('task_id');
               $table->string('title');
               $table->text('description');
               $table->string('status')->default('pending');
               $table->string('attachment_tmp')->nullable();
+              $table->timestamps();
+              $table->foreign('task_id')->references('id')->on('tasks');
         });
 
         Schema::create('feedback', function (Blueprint $table) {
@@ -71,6 +76,7 @@ return new class extends Migration {
             $table->text('message')->nullable();
             $table->integer('rating')->default(0);
             $table->timestamps();
+            $table->foreign('task_id')->references('id')->on('tasks');
         });
     }
 

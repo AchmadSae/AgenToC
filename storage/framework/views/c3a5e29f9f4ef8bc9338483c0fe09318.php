@@ -85,103 +85,104 @@ unset($__defined_vars); ?>
         <!--end::Link-->
     </div>
     <!--end::Heading-->
-    <?php if($form == 'sign-in'): ?>
-    <!-- begin::Input group Role -->
-    <div class="fv-row mb-10">
-        <select class="form-select form-control-lg form-control-solid" aria-label="role" style="cursor: pointer;"
-            name="role">
-            <option value="user">User</option>
-            <option value="worker">Worker</option>
-        </select>
-    </div>
-    <?php endif; ?>
+      <!-- begin::defin form auth -->
+      <?php switch($form):
+            case ('sign-in'): ?>
+                <!-- begin::Input group Role -->
+                <div class="fv-row mb-10">
+                    <select class="form-select form-control-lg form-control-solid" aria-label="role" style="cursor: pointer;"
+                        name="role">
+                        <option value="user">User</option>
+                        <option value="worker">Worker</option>
+                    </select>
+                </div>
+                <div class="fv-row mb-10">
+                        <input class="form-control form-control-lg form-control-solid" type="text" placeholder="Username" name="username"
+                             autocomplete="off" data-kt-translate="sign-in-input-username" />
+                </div>
+                <div class="position-relative mb-3">
+                        <input class="form-control form-control-lg form-control-solid" type="password" placeholder="Password"
+                               name="password" autocomplete="off" data-kt-translate="sign-in-input-password" />
+                        <span class="btn btn-sm btn-icon position-absolute translate-middle top-50 end-0 me-n2"
+                              data-kt-password-meter-control="visibility">
+                                          <i class="ki-duotone ki-eye-slash fs-2"></i>
+                                          <i class="ki-duotone ki-eye fs-2 d-none"></i>
+                                    </span>
+                </div>
+                <div class="d-flex flex-stack flex-wrap gap-3 fs-base fw-semibold mb-10">
+                        <div></div>
+                        <!--begin::Link-->
+                        <a href="<?php echo e(route('show-pass-request')); ?>" class="link-primary" data-kt-translate="sign-in-forgot-password">Forgot Password ?</a>
+                        <!--end::Link-->
+                </div>
+                  <?php break; ?>
+            <?php case ('sign-up'): ?>
+                  <input type="text" name="role" value="<?php echo e($typeRegister); ?>" hidden>
+                  <div class="row fv-row mb-7 fv-plugins-icon-container">
+                        <!--begin::Col-->
+                        <div class="col-xl-6">
+                              <input class="form-control form-control-lg form-control-solid" type="text" placeholder="First Name" name="first-name" autocomplete="off" data-kt-translate="sign-up-input-first-name">
+                              <div class="fv-plugins-message-container fv-plugins-message-container--enabled invalid-feedback"></div></div>
+                        <!--end::Col-->
+                        <!--begin::Col-->
+                        <div class="col-xl-6">
+                              <input class="form-control form-control-lg form-control-solid" type="text" placeholder="Last Name" name="last-name" autocomplete="off" data-kt-translate="sign-up-input-last-name">
+                              <div class="fv-plugins-message-container fv-plugins-message-container--enabled invalid-feedback"></div></div>
+                        <!--end::Col-->
+                  </div>
+                  <div class="fv-row mb-10">
+                        <input class="form-control form-control-lg form-control-solid" type="text" placeholder="Username" name="username"
+                               autocomplete="off" data-kt-translate="sign-up-input-first-name" />
+                  </div>
+                  <div class="fv-row mb-10">
+                        <input class="form-control form-control-lg form-control-solid" type="email" placeholder="Email" name="email"
+                               autocomplete="off" data-kt-translate="sign-up-input-email" />
+                  </div>
+                  <div class="fv-row mb-10" data-kt-password-meter="true">
+                        <!--begin::Wrapper-->
+                        <div class="mb-1">
+                              <!--begin::Input wrapper-->
+                              <div class="position-relative mb-3">
+                                    <input class="form-control form-control-lg form-control-solid" type="password" placeholder="Password"
+                                           name="password" autocomplete="off" data-kt-translate="sign-up-input-password" />
+                                    <span class="btn btn-sm btn-icon position-absolute translate-middle top-50 end-0 me-n2"
+                                          data-kt-password-meter-control="visibility">
+                                          <i class="ki-duotone ki-eye-slash fs-2"></i>
+                                          <i class="ki-duotone ki-eye fs-2 d-none"></i>
+                                    </span>
+                              </div>
+                              <!--end::Input wrapper-->
+                              <!--begin::Meter-->
+                              <div class="d-flex align-items-center mb-3" data-kt-password-meter-control="highlight">
+                                    <div class="flex-grow-1 bg-secondary bg-active-success rounded h-5px me-2"></div>
+                                    <div class="flex-grow-1 bg-secondary bg-active-success rounded h-5px me-2"></div>
+                                    <div class="flex-grow-1 bg-secondary bg-active-success rounded h-5px me-2"></div>
+                                    <div class="flex-grow-1 bg-secondary bg-active-success rounded h-5px"></div>
+                              </div>
+                              <!--end::Meter-->
+                        </div>
+                        <!--end::Wrapper-->
+                        <!--begin::Hint-->
+                        <div class="text-muted" data-kt-translate="sign-up-hint">Use 8 or more characters with a mix
+                              of
+                              letters,
+                              numbers & symbols.</div>
+                        <!--end::Hint-->
+                  </div>
+                  <div class="fv-row mb-10 fv-plugins-icon-container">
+                        <input class="form-control form-control-lg form-control-solid" type="password" placeholder="Confirm Password" name="confirm-password" autocomplete="off" data-kt-translate="sign-up-input-confirm-password">
+                  <div class="fv-plugins-message-container fv-plugins-message-container--enabled invalid-feedback"></div></div>
+                  <?php break; ?>
+            <?php default: ?>
+                  <div class="fv-row mb-10">
+                        <img src="<?php echo e(asset('assets/media/auth/404-error.png')); ?> " class="mw-100 mh-300px theme-light-show" alt="">
+                        <img src="<?php echo e(asset('assets/media/auth/404-error-dark.png')); ?> " class="mw-100 mh-300px theme-dark-show" alt="">
+                  </div>
+            <?php break; ?>
+      <?php endswitch; ?>
 
+    <!-- end::defin form auth -->
 
-    <?php if($typeRegister == 'user' && $form == 'sign-up'): ?>
-    <input type="text" name="role" value="<?php echo e($typeRegister); ?>" hidden>
-    <?php endif; ?>
-    <!-- end::Input group Role -->
-    <!--begin::Input group-->
-    <?php if($form == 'sign-up' ): ?>
-    <div class="fv-row mb-10">
-        <input class="form-control form-control-lg form-control-solid" type="text" placeholder="Username" name="name"
-            autocomplete="off" data-kt-translate="<?php echo e($form); ?>-input-first-name" />
-    </div>
-    <!--end::Input group-->
-    <?php endif; ?>
-    <!--begin::Input group-->
-
-    <div class="fv-row mb-10">
-        <input class="form-control form-control-lg form-control-solid" type="email" placeholder="Email" name="email"
-            autocomplete="off" data-kt-translate="<?php echo e($form); ?>-input-email" />
-    </div>
-    <!--end::Input group-->
-    <?php if($form == 'sign-up' && $typeRegister == 'worker'): ?>
-    <!--begin::Input group-->
-    <div class="fv-row mb-10">
-        <input class="form-control form-control-lg form-control-solid" type="text" placeholder="Skills Focus"
-            name="skill" autocomplete="off" />
-    </div>
-    <!--end::Input group-->
-    <!--begin::Input group-->
-    <div class="fv-row mb-10">
-        <input class="form-control form-control-lg form-control-solid" type="text" placeholder="Show Your Tag Line"
-            name="tagline" autocomplete="off" />
-    </div>
-    <?php endif; ?>
-    <!--end::Input group-->
-    <!--begin::Input group-->
-    <div class="fv-row mb-10" data-kt-password-meter="true">
-        <!--begin::Wrapper-->
-        <div class="mb-1">
-            <!--begin::Input wrapper-->
-            <div class="position-relative mb-3">
-                <input class="form-control form-control-lg form-control-solid" type="password" placeholder="Password"
-                    name="password" autocomplete="off" data-kt-translate="<?php echo e($form); ?>-input-password" />
-                <span class="btn btn-sm btn-icon position-absolute translate-middle top-50 end-0 me-n2"
-                    data-kt-password-meter-control="visibility">
-                    <i class="ki-duotone ki-eye-slash fs-2"></i>
-                    <i class="ki-duotone ki-eye fs-2 d-none"></i>
-                </span>
-            </div>
-            <?php if($form == 'sign-up'): ?>
-
-            <!--end::Input wrapper-->
-            <!--begin::Meter-->
-            <div class="d-flex align-items-center mb-3" data-kt-password-meter-control="highlight">
-                <div class="flex-grow-1 bg-secondary bg-active-success rounded h-5px me-2"></div>
-                <div class="flex-grow-1 bg-secondary bg-active-success rounded h-5px me-2"></div>
-                <div class="flex-grow-1 bg-secondary bg-active-success rounded h-5px me-2"></div>
-                <div class="flex-grow-1 bg-secondary bg-active-success rounded h-5px"></div>
-            </div>
-            <!--end::Meter-->
-            <?php endif; ?>
-        </div>
-        <!--end::Wrapper-->
-        <!--begin::Hint-->
-        <?php if($form == 'sign-up'): ?>
-        <div class="text-muted" data-kt-translate="<?php echo e($form); ?>-hint">Use 8 or more characters with a mix
-            of
-            letters,
-            numbers & symbols.</div>
-        <!--end::Hint-->
-        <?php endif; ?>
-    </div>
-    <!--end::Input group=-->
-      <div class="d-flex flex-stack flex-wrap gap-3 fs-base fw-semibold mb-10">
-            <div></div>
-            <!--begin::Link-->
-            <a href="<?php echo e(route('show-pass-request')); ?>" class="link-primary" data-kt-translate="sign-in-forgot-password">Forgot Password ?</a>
-            <!--end::Link-->
-      </div>
-    <?php if($form == 'sign-up'): ?>
-    <!--begin::Input group-->
-    <div class="fv-row mb-10">
-        <input class="form-control form-control-lg form-control-solid" type="password" placeholder="Confirm Password"
-            name="password_confirmation" autocomplete="off" data-kt-translate="<?php echo e($form); ?>-input-confirm-password" />
-    </div>
-    <?php endif; ?>
-    <!--end::Input group-->
     <!--begin::Actions-->
     <div class="d-flex flex-stack">
         <!--begin::Submit-->
