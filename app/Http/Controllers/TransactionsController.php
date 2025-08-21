@@ -155,7 +155,7 @@ class TransactionsController extends Controller
                         ->where('transactions.id', $id)
                         ->select('transactions.*', 'products.*')
                         ->first();
-                  $user = User::with('userDetail')->where('id', $transaction->user_id)->first();
+                  $user = User::with('UserDetail')->where('id', $transaction->user_id)->first();
                   dd($user);
                   return view('transaction.receipt', compact('transaction', 'user'));
             }catch (ErrorException $e){

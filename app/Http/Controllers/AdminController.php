@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Helpers\Constant;
-use App\Models\Assets;
+use App\Models\AssetsModel;
 use App\Models\TransactionsModel;
 use App\Services\TaskInterface;
 use App\Services\TransactionsInterface;
@@ -41,7 +41,7 @@ class AdminController extends Controller
     }
     /**
      * view  of register user (included unverified user), amount out of income and task almost get dateline
-     * view reference dashboards/projects.html 
+     * view reference dashboards/projects.html
      * @return \Illuminate\Contracts\View\Factory|\Illuminate\Contracts\View\View|\Illuminate\Http\RedirectResponse
      * @throws \Throwable
      * */
@@ -422,7 +422,7 @@ class AdminController extends Controller
     {
         $data = [];
         try {
-            $data = Assets::orderBy('created_at', 'desc')->paginate(10);
+            $data = AssetsModel::orderBy('created_at', 'desc')->paginate(10);
         } catch (\Throwable $th) {
             Alert::error('error', $th->getMessage());
         }
@@ -443,7 +443,7 @@ class AdminController extends Controller
                 return redirect()->route('assets');
             }
 
-            $data = new Assets();
+            $data = new AssetsModel();
             $data->name = $request->name;
             $data->type = $request->type;
             $data->path = $request->path;
@@ -469,7 +469,7 @@ class AdminController extends Controller
                 return redirect()->route('assets');
             }
 
-            $data = Assets::find($id);
+            $data = AssetsModel::find($id);
             if ($data) {
                 $data->name = $request->name;
                 $data->type = $request->type;

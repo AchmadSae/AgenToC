@@ -12,11 +12,12 @@ class RevisionHistoryModel extends Model
     protected $fillable = [
         'task_id',
         'changes',
-        'changed_by',
-        'attachment'
+          'description',
+        'attachment',
+          'status'
     ];
 
-    public function task(): \Illuminate\Database\Eloquent\Relations\BelongsTo
+    public function Task(): \Illuminate\Database\Eloquent\Relations\BelongsTo
     {
         return $this->belongsTo(TaskModel::class, 'task_id', 'id');
     }

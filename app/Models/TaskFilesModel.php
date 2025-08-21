@@ -16,4 +16,9 @@ class TaskFilesModel extends Model
             'mime_type',
             'file_size',
       ];
+
+      public function Task(): \Illuminate\Database\Eloquent\Relations\BelongsTo
+      {
+            return $this->belongsTo(TaskModel::class, 'task_id', 'id');
+      }
 }

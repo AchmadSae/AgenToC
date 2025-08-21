@@ -1,26 +1,27 @@
 <?php
 
-namespace App\Models;
+namespace App\Models\Users;
 
+use App\Models\MessageModel;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\Model;
 
 
 class User extends Authenticatable implements MustVerifyEmail
 {
     use Notifiable;
+    protected $table = 'users';
 
     protected $fillable = [
         'user_detail_id',
         'username',
-          'full_name',
         'email',
         'password',
         'profile_photo_path',
         'email_verified_at',
+        'remember_token',
     ];
 
     protected $hidden = [
@@ -32,9 +33,9 @@ class User extends Authenticatable implements MustVerifyEmail
         'email_verified_at' => 'datetime',
     ];
 
-    public function userDetail(): \Illuminate\Database\Eloquent\Relations\BelongsTo
+    public function UserDetail(): \Illuminate\Database\Eloquent\Relations\BelongsTo
     {
-        return $this->belongsTo(UserDetailModel::class, 'user_detail_id', 'id');
+        return $this->belongsTo(UserDetailModel::class, 'user_detail_id', 'user_detail_id');
     }
 
     public function messages(): hasMany

@@ -52,7 +52,7 @@ class TaskController extends Controller
              * show the all task posted
              * @return view
              **/
-            $allTask = TaskModel::with('detailTask')->status(Constant::TASK_PENDING)->get();
+            $allTask = TaskModel::with('DetailTask')->status(Constant::TASK_PENDING)->get();
             return view('worker.task', compact('allTask'));
         }
     }
@@ -80,7 +80,7 @@ class TaskController extends Controller
 
     /**
      * approval task
-     * 
+     *
      * @param string $value
      * @param string $id
      * @return RedirectResponse

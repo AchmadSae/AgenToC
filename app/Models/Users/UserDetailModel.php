@@ -1,15 +1,13 @@
 <?php
 
-namespace App\Models;
+namespace App\Models\Users;
+
 
 use Illuminate\Database\Eloquent\Model;
 
 class UserDetailModel extends Model
 {
     protected $table = 'user_detail';
-    protected $primaryKey = 'id';
-    protected $keyType = 'string';
-    public $incrementing = false;
 
     protected $fillable = [
         'id',

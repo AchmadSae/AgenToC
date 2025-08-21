@@ -6,20 +6,18 @@ use Illuminate\Database\Eloquent\Model;
 
 class KanbanModel extends Model
 {
-    protected $table = 'kanban';
+    protected $table = 'kanbans';
     protected $primaryKey = 'id'; //each id in kanban represent sub task relations with task_id
 
     protected $fillable = [
         'task_id',
         'name',
-        'enum',
         'status',
-        'created_at',
-        'updated_at',
+        'order'
     ];
 
-    public function task()
+    public function Task(): \Illuminate\Database\Eloquent\Relations\BelongsTo
     {
-        return $this->belongsTo(TaskModel::class, 'task_id');
+        return $this->belongsTo(TaskModel::class, 'task_id', 'id');
     }
 }

@@ -182,7 +182,7 @@ class WorkerController extends Controller
             $taskChat = [];
             $ticketShowList = [];
             $task = TaskModel::findOrFail($id);
-            $subTask = TaskModel::with('detailTask')->where('id', $id)->first();
+            $subTask = TaskModel::with('DetailTask')->where('id', $id)->first();
             $isHaveTicketRev = TicketRevisionModel::with('task')->where('task_id', $id)->exists();
             if($isHaveTicketRev){
                   $ticketShowList = TicketRevisionModel::with('task')->where('task_id', $id)->orderBy('created_at', 'desc')->get();

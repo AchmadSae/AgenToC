@@ -9,6 +9,8 @@ class DetailTaskModel extends Model
     protected $table = 'task_detail';
     protected $primaryKey = 'id';
 
+    protected $keyType = 'string';
+
     protected $fillable = [
           'id',
           'title',

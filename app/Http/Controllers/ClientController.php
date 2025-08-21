@@ -139,7 +139,7 @@ class ClientController extends Controller
     public function detailTask($id){
           $taskChat = [];
           $task = TaskModel::findOrFail($id);
-          $subTask = TaskModel::with(['detailTask'])->where('id', $id)->first();
+          $subTask = TaskModel::with(['DetailTask'])->where('id', $id)->first();
           if ($task->status == 'in-progress') {
                 $taskChat = $this->methodServiceUtil->fetchMassageByTaskId($task->id);
           }

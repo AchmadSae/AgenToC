@@ -12,15 +12,15 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('kanban', function (Blueprint $table) {
+        Schema::create('kanbans', function (Blueprint $table) {
             $table->increments('id')->primary();
-            $table->string('kanban_id')->unique();
+            $table->string('task_id');
             $table->string('name');
             $table->enum('status', [Constant::SUBTASK_STATUS_TODO, Constant::TASK_STATUS_IN_PROGRESS, Constant::TASK_STATUS_COMPLETED])->default(Constant::SUBTASK_STATUS_TODO);
             $table->integer('order')->default(0);
             $table->timestamps();
 
-            $table->foreign('kanban_id')->references('kanban_id')->on('tasks');
+            $table->foreign('task_id')->references('id')->on('tasks');
         });
     }
 

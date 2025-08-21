@@ -11,17 +11,17 @@ return new class extends Migration {
     public function up(): void
     {
         Schema::create('tasks', function (Blueprint $table) {
-            $table->string('id');
+            $table->string('id')->unique();
             $table->string('client_id');
             $table->string('worker_id')->nullable();
             $table->string('kanban_id')->nullable();
-            $table->string('detail_task_id');
+            $table->string('task_detail_id');
             $table->string('status')->default(\App\Helpers\Constant::TASK_STATUS_OPEN);
-            $table->dateTime('deadline');
+            $table->dateTime('deadline')->default(now()->addDays(30));
             $table->boolean('is_approved')->default(false);
             $table->dateTime('acceptance_deadline_time')->nullable();
             $table->timestamps();
-            $table->foreign('detail_task_id')->references('id')->on('task_detail');
+            $table->foreign('task_detail_id')->references('id')->on('task_detail');
         });
 
         Schema::create('task_detail', function (Blueprint $table) {
@@ -58,7 +58,7 @@ return new class extends Migration {
         });
 
         Schema::create('ticket_revision', function (Blueprint $table) {
-              $table->string('id')->primary();
+              $table->string('id');
               $table->string('task_id');
               $table->string('title');
               $table->text('description');

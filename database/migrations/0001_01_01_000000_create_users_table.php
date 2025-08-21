@@ -14,10 +14,9 @@ return new class extends Migration {
             $table->id()->primary();
             $table->string('user_detail_id')->unique();
             $table->string('username')->unique();
-            $table->string('full_name');
             $table->string('email')->unique();
-            $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
+            $table->timestamp('email_verified_at')->nullable();
             $table->rememberToken();
             $table->string('profile_photo_path', 2048)->nullable();
             $table->timestamps();
@@ -25,7 +24,8 @@ return new class extends Migration {
 
         Schema::create('user_detail', function (Blueprint $table) {
                 $table->string("id")->primary();
-                $table->foreign('user_detail_id')->references('user_detail_id')->on('users')->onDelete('cascade');
+                $table->string("user_detail_id")->unique();
+                $table->string('full_name');
                 $table->string("skills")->nullable();
                 $table->string("tag_line")->nullable();
                 $table->string("address_detail")->nullable();
@@ -34,6 +34,8 @@ return new class extends Migration {
                 $table->string("credit_number")->nullable();
                 $table->integer("balance_coins")->default(0);
                 $table->timestamps();
+              $table->foreign('user_detail_id')->references('user_detail_id')->on('users')->onDelete('cascade');
+
         });
 
           Schema::create('roles', function (Blueprint $table) {
@@ -45,12 +47,12 @@ return new class extends Migration {
 
           Schema::create('user_detail_roles', function (Blueprint $table) {
                 $table->id()->primary();
-                $table->string('user_detail_id');
                 $table->string('role_id');
-                $table->foreign('user_detail_id')->references('user_detail_id')->on('user_detail')->onDelete('cascade');
+                $table->string('user_detail_id');
                 $table->foreign('role_id')->references('role_id')->on('roles')->onDelete('cascade');
                 $table->boolean("is_active")->default(false);
                 $table->timestamps();
+                $table->foreign('user_detail_id')->references('user_detail_id')->on('user_detail')->onDelete('cascade');
           });
 
         Schema::create('password_reset_tokens', function (Blueprint $table) {
