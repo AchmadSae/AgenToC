@@ -1,2 +1,0 @@
-export declare function AutoBind<T extends (...args: any[]) => any>(originalMethod: T, { name, addInitializer }: ClassMethodDecoratorContext<ThisParameterType<T>, T>): void;
-//# sourceMappingURL=AutoBind.d.ts.map

@@ -1,0 +1,1 @@
+components.guest-lay<?php /**PATH D:\development\CollaborateAgenToC\AgentC\storage\framework\views/4ded5c6c954cdf86c4f0993bf27b64a8.blade.php ENDPATH**/ ?>

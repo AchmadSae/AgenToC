@@ -1,19 +1,30 @@
-let mix = require("laravel-mix");
+const mix = require('laravel-mix');
+const path = require('path');
 
-// Kompilasi semua SCSS menjadi satu file CSS
-mix.sass(
-    "_keenthemes/src/sass/style.scss",
-    "public/assets/css/style.bundle.css",
-    {
-        sassOptions: {
-            quietDeps: true,
-            includePaths: ["_keenthemes/src/sass/core"],
-        },
+// Configure webpack to resolve @ as resources/js
+mix.webpackConfig({
+    resolve: {
+        alias: {
+            '@': path.resolve('resources')
+        }
     }
-).options({
-    processCssUrls: false,
-    postCss: [require("autoprefixer")],
 });
+
+// Compile SCSS
+mix.sass('resources/sass/style.scss', 'public/assets/css')
+   .options({
+      processCssUrls: false,
+      postCss: [
+         require('autoprefixer')
+      ],
+      sassOptions: {
+         quietDeps: true,
+         includePaths: [
+            'node_modules',
+            'resources/sass'
+         ]
+      }
+   });
 
 // // Copy file statis Please uncomment to compile the assets
 // mix.copyDirectory("_keenthemes/src/js/custom", "public/assets/js/custom");
@@ -23,10 +34,10 @@ mix.sass(
 
 // Aktifkan sourcemaps untuk development
 if (!mix.inProduction()) {
-    mix.sourceMaps();
+      mix.sourceMaps();
 }
 
 // Versioning untuk production
 if (mix.inProduction()) {
-    mix.version();
+      mix.version();
 }
