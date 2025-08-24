@@ -5,11 +5,10 @@ namespace App\Services\Impl;
 use App\Helpers\Constant;
 use App\Notifications\CustomVerifyEmail;
 use App\Services\AuthInterface;
-use App\Models\User;
-use App\Models\UserDetailModel;
+use App\Models\Users\User;
+use App\Models\Users\UserDetailModel;
 use App\Helpers\GenerateId;
 use App\Helpers\LogConsole;
-use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
@@ -91,22 +90,22 @@ class AuthImpl implements AuthInterface
               DB::beginTransaction();
                     //code...
                     $userDetail = UserDetailModel::create([
-                          'id' => $user_detail_id,
+                          'user_detail_id' => $user_detail_id,
+                          'full_name' => $data['full_name'],
                           'skills' => $data['skills'],
                           'tag_line' => $data['tag_line'],
                           'credit_number' => $data['card_number'],
                     ]);
 
                     $registeredUser = User::create([
-                          'user_detail_id' => $userDetail->id,
+                          'user_detail_id' => $userDetail->user_detail_id,
                           'username' => $data['username'],
-                          'full_name' => $data['full_name'],
                           'email' => $data['email'],
                           'password' => Hash::make($data['password'])
                     ]);
 
                     $userDetailRoles = DB::table('user_detail_roles')->insert([
-                          'user_detail_id' => $userDetail->id,
+                          'user_detail_id' => $userDetail->user_detail_id,
                           'role_id' => $role_id,
                           'is_active' => $isTransaction
                     ]);

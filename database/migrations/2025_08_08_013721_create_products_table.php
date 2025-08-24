@@ -13,22 +13,24 @@ return new class extends Migration
     {
         Schema::create('products', function (Blueprint $table) {
             $table->increments('id');
+            $table->string('product_code')->unique();
             $table->string('product_group_code');
-            $table->string('product_code');
             $table->string('product_name');
             $table->integer('price')->nullable();
             $table->string('product_description');
             $table->string('product_image')->nullable();
             $table->timestamps();
             $table->foreign('product_group_code')->references('code')->on('product_groups');
-            $table->foreign('product_code')->references('code')->on('product_groups');
+
+            $table->index('product_code');
+            $table->index(['product_code','product_group_code','created_at'], 'products_index');
         });
 
         Schema::create('product_groups', function (Blueprint $table) {
               $table->increments('id');
-              $table->string('code');
+              $table->string('code')->unique();
               $table->string('value');
-              $table->string('terms_and_policy');
+              $table->string('terms_and_policy')->nullable();
               $table->string('note')->nullable();
               $table->timestamps();
         });

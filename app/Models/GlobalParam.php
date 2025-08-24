@@ -10,6 +10,7 @@ class GlobalParam extends Model
     protected $fillable = [
         'code',
         'value',
-        'description'
+        'description',
+        'updated_by'
     ];
 }

@@ -10,7 +10,8 @@ class UserDetailModel extends Model
     protected $table = 'user_detail';
 
     protected $fillable = [
-        'id',
+        'user_detail_id',
+        'full_name',
         'skills',
         'tag_line',
         'address_detail',

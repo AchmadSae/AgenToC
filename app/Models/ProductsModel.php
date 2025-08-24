@@ -17,7 +17,7 @@ class ProductsModel extends Model
           'product_image',
     ];
 
-    public function productGroup(): \Illuminate\Database\Eloquent\Relations\BelongsTo
+    public function ProductGroupCode(): \Illuminate\Database\Eloquent\Relations\BelongsTo
     {
           return $this->belongsTo(ProductGroupModel::class, 'product_group_code', 'code');
     }

@@ -8,6 +8,8 @@ class DepartmentsModel extends Model
 {
     protected $table = 'departments';
 
+    protected $primaryKey = 'id';
+
     protected $fillable = [
         'name',
         'location',

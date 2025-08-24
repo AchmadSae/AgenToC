@@ -2,18 +2,17 @@
 
 namespace App\Services\Impl;
 
+use App\Models\Users\User;
 use Illuminate\Support\Facades\Log;
 use App\Helpers\Constant;
 use App\Helpers\GenerateId;
 use App\Mail\Receipt;
-use App\Helpers\LogConsole;
-use App\Models\DetailTaskModel;
+use App\Models\Tasks\DetailTaskModel;
 use App\Models\GlobalParam;
-use App\Models\TaskFilesModel;
-use App\Models\TaskModel;
+use App\Models\Tasks\TaskFilesModel;
+use App\Models\Tasks\TaskModel;
 use App\Models\TransactionsModel;
-use App\Models\User;
-use App\Models\UserDetailModel;
+use App\Models\Users\UserDetailModel;
 use App\Services\AuthInterface;
 use App\Services\TransactionsInterface;
 use Exception;
@@ -74,7 +73,7 @@ class TransactionImpl implements TransactionsInterface
       public function checkout($data): array
     {
 //        dd($data);
-          LogConsole::browser($data, 'Begin TransactionImpl.checkout');
+          Log::info('Begin TransactionImpl.checkout');
           #prepare data for check register user
             $data['role'] = 'client';
             $data['password'] = GlobalParam::where("code", "=", Constant::DEFAULT_PASS)->value("value");
@@ -92,11 +91,20 @@ class TransactionImpl implements TransactionsInterface
                       $user_detail_id = $userRegisterResponse['user']->user_detail_id;
                 }
                 DB::beginTransaction();
+                        $detailTask = DetailTaskModel::create([
+                              'id' => GenerateId::generateId('DTK', false),
+                              'title' => $data['title'],
+                              'description' => $data['description'],
+                              'task_type' => Constant::TASK_TYPE_CATALOG_PRODUCT,
+                              'price' => $data['price'],
+                              'task_contract' => Constant::TASK_INQUIRY,
+                              'required_skills' => $data['skills']
+                        ]);
                       $task = TaskModel::create([
                             'id' => GenerateId::generateId('TSK', false),
                             'kanban_id' => GenerateId::generateId('KBN', false),
                             'client_id' => $user_detail_id,
-                            'detail_task_id' => GenerateId::generateId('DTK', false),
+                            'detail_task_id' => $detailTask->id,
                             'deadline' => $data['due_date']
                       ]);
 
@@ -110,15 +118,7 @@ class TransactionImpl implements TransactionsInterface
                             'total_price' => $data['price'],
                             'status' => false,
                       ]);
-                      $detailTask = DetailTaskModel::create([
-                            'id' => $task->detail_task_id,
-                            'title' => $data['title'],
-                            'description' => $data['description'],
-                            'task_type' => Constant::TASK_TYPE_CATALOG_PRODUCT,
-                            'price' => $data['price'],
-                            'task_contract' => Constant::TASK_INQUIRY,
-                            'required_skills' => $data['skills']
-                      ]);
+
                       $isFilesInserted = true;
                       if (!empty($data['uploaded_files'])) {
                             foreach ($data['uploaded_files'] as $file_path) {

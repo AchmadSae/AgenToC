@@ -15,8 +15,12 @@ return new class extends Migration
             $table->id();
             $table->string('name');
             $table->string('type');
-            $table->string('path');
+            $table->integer('quantity')->default(0);
+            $table->string('path')->nullable();
+            $table->string('created_by');
             $table->timestamps();
+
+            $table->index(['created_at','name','type','quantity'], 'assets_index');
         });
 
 

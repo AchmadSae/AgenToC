@@ -13,7 +13,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('kanbans', function (Blueprint $table) {
-            $table->increments('id')->primary();
+            $table->increments('id');
             $table->string('task_id');
             $table->string('name');
             $table->enum('status', [Constant::SUBTASK_STATUS_TODO, Constant::TASK_STATUS_IN_PROGRESS, Constant::TASK_STATUS_COMPLETED])->default(Constant::SUBTASK_STATUS_TODO);
@@ -21,6 +21,8 @@ return new class extends Migration
             $table->timestamps();
 
             $table->foreign('task_id')->references('id')->on('tasks');
+
+            $table->index(['task_id','created_at'], 'kanban_index');
         });
     }
 

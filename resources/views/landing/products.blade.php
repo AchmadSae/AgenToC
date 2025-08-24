@@ -24,7 +24,7 @@
                                 <li class="nav-item">
                                       <a class="nav-link text-gray-500 text-active-primary px-3 px-lg-6 active" href="#"
                                          data-bs-toggle="tab" data-bs-target="#kt_landing_{{ $product->product_group_code }}">
-                                           {{ $product->productGroup->value }}
+                                           {{ $product->ProductGroupCode->value }}
                                       </a>
                                 </li>
                           @endforeach
@@ -82,11 +82,11 @@
                                                                 <!--begin::Select-->
                                                                 <a href="#" class="btn btn-primary"
                                                                    data-product-code="{{ $product->product_code }}"
-                                                                   data-prduct-group-name="{{ $product->productGroup->value }}"
+                                                                   data-prduct-group-name="{{ $product->ProductGroupCode->value }}"
                                                                    data-product-name="{{ $product->product_name }}"
                                                                    data-product-price="{{ $product->price }}"
                                                                    data-product-description="{{ $product->product_description }}"
-                                                                   data-product-group-name="{{ $product->productGroup->value }}"
+                                                                   data-product-group-name="{{ $product->ProductGroupCode->value }}"
                                                                    data-product-image="{{ $product->product_image }}"
                                                                    data-bs-toggle="modal"
                                                                    data-bs-target="#kt_modal_checkout">Select</a>

@@ -8,19 +8,20 @@ use App\Models\DepartmentsModel;
 class EmployeeModel extends Model
 {
     protected $table = 'employees';
-    protected $primaryKey = 'employee_id';
-    public $timestamps = true;
+    protected $primaryKey = 'id';
 
     protected $fillable = [
+        'id',
         'name',
         'email',
         'phone_number',
+        'department_id',
         'position',
         'is_active',
     ];
 
-    public function department()
+    public function Departments(): \Illuminate\Database\Eloquent\Relations\BelongsTo
     {
-        return $this->belongsTo(DepartmentsModel::class, 'department_id', 'department_id');
+        return $this->belongsTo(DepartmentsModel::class, 'department_id', 'id');
     }
 }

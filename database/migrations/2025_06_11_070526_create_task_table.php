@@ -15,13 +15,15 @@ return new class extends Migration {
             $table->string('client_id');
             $table->string('worker_id')->nullable();
             $table->string('kanban_id')->nullable();
-            $table->string('task_detail_id');
+            $table->string('task_detail_id')->unique();
             $table->string('status')->default(\App\Helpers\Constant::TASK_STATUS_OPEN);
             $table->dateTime('deadline')->default(now()->addDays(30));
             $table->boolean('is_approved')->default(false);
             $table->dateTime('acceptance_deadline_time')->nullable();
             $table->timestamps();
             $table->foreign('task_detail_id')->references('id')->on('task_detail');
+
+            $table->index(['client_id','status','deadline','created_at'], 'tasks_index');
         });
 
         Schema::create('task_detail', function (Blueprint $table) {
@@ -45,6 +47,8 @@ return new class extends Migration {
               $table->integer('file_size')->nullable();
               $table->timestamps();
               $table->foreign('task_id')->references('id')->on('tasks');
+
+              $table->index(['task_id','created_at'], 'task_file_index');
         });
         Schema::create('revision_history', function (Blueprint $table) {
             $table->id();
@@ -55,6 +59,8 @@ return new class extends Migration {
             $table->string('attachment')->nullable();
             $table->timestamps();
             $table->foreign('task_id')->references('id')->on('tasks');
+
+            $table->index(['task_id','created_at'], 'revision_history_index');
         });
 
         Schema::create('ticket_revision', function (Blueprint $table) {
@@ -66,6 +72,8 @@ return new class extends Migration {
               $table->string('attachment_tmp')->nullable();
               $table->timestamps();
               $table->foreign('task_id')->references('id')->on('tasks');
+
+              $table->index(['task_id','created_at'], 'ticket_revision_index');
         });
 
         Schema::create('feedback', function (Blueprint $table) {
@@ -77,6 +85,8 @@ return new class extends Migration {
             $table->integer('rating')->default(0);
             $table->timestamps();
             $table->foreign('task_id')->references('id')->on('tasks');
+
+            $table->index(['task_id','user_id','created_at'], 'feedback_index');
         });
     }
 

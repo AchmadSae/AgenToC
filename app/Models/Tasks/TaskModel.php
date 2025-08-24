@@ -1,6 +1,7 @@
 <?php
 
-namespace App\Models;
+namespace App\Models\Tasks;
+
 
 use Illuminate\Database\Eloquent\Model;
 use App\Models\DetailTaskModel;

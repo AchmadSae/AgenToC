@@ -94,7 +94,7 @@ class TransactionsController extends Controller
                     'trace' => $e->getTraceAsString(),
                 ]);
                 Alert::error('Error', Constant::MESSAGE_ERROR);
-                return redirect()->route('landing')->withInput();
+                return redirect()->back();
             }
 
         } catch (\Exception $e) {
@@ -104,7 +104,7 @@ class TransactionsController extends Controller
                 'request' => $request->except(['card_number', '_token'])
             ]);
             Alert::error('Failed', Constant::MESSAGE_ERROR);
-            return redirect()->route('landing')->withInput();
+            return redirect()->back();
         }
     }
 

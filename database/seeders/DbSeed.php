@@ -2,12 +2,11 @@
 
 namespace Database\Seeders;
 
-use App\Helpers\Constant;
 use App\Helpers\GenerateId;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Database\Seeder;
 
-class dbSeed extends Seeder
+class DbSeed extends Seeder
 {
 
     /**
@@ -16,8 +15,9 @@ class dbSeed extends Seeder
 
     public function run(): void
     {
+          $productGroup = GenerateId::generateId("VGD", false);
           DB::table('product_groups')->insert([
-                'code' => Constant::PRODUCT_GRAPHIC,
+                'code' => $productGroup,
                 'value' => 'Visual Graphic Design',
                 'terms_and_policy' => 'Layanan
                   Kami menyediakan jasa desain grafis seperti logo, poster, konten sosial media, dan lainnya berdasarkan brief dari klien.
@@ -53,12 +53,12 @@ class dbSeed extends Seeder
           ]);
 
           DB::table('products')->insert([
-                  'product_group_code' => Constant::PRODUCT_GRAPHIC,
+                  'product_group_code' => $productGroup,
                   'product_code' => GenerateId::generateId('GD', false),
                   'product_name' => 'Logo Design Brand Company',
                   'price' => 230000,
                   'product_description' => '1. sample product description is unique
-2. Unlimited revision'
+                  2. Unlimited revision'
           ]);
           DB::table('roles')->insert([
                 ['role_id' => 'RADMIN', 'role_name' => 'admin', 'created_at' => now(), 'updated_at' => now()],
