@@ -19,9 +19,6 @@ return new class extends Migration
             $table->enum('status', [Constant::SUBTASK_STATUS_TODO, Constant::TASK_STATUS_IN_PROGRESS, Constant::TASK_STATUS_COMPLETED])->default(Constant::SUBTASK_STATUS_TODO);
             $table->integer('order')->default(0);
             $table->timestamps();
-
-            $table->foreign('task_id')->references('id')->on('tasks');
-
             $table->index(['task_id','created_at'], 'kanban_index');
         });
     }

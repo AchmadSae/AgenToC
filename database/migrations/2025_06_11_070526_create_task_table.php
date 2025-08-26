@@ -21,8 +21,6 @@ return new class extends Migration {
             $table->boolean('is_approved')->default(false);
             $table->dateTime('acceptance_deadline_time')->nullable();
             $table->timestamps();
-            $table->foreign('task_detail_id')->references('id')->on('task_detail');
-
             $table->index(['client_id','status','deadline','created_at'], 'tasks_index');
         });
 
@@ -35,6 +33,8 @@ return new class extends Migration {
             $table->string('task_contract')->nullable();
             $table->text('required_skills')->nullable();
             $table->timestamps();
+
+            $table->foreign('id')->references('task_detail_id')->on('tasks')->cascadeOnDelete();
         });
 
         Schema::create('task_file', function (Blueprint $table) {
@@ -46,8 +46,6 @@ return new class extends Migration {
               $table->string('mime_type')->nullable();
               $table->integer('file_size')->nullable();
               $table->timestamps();
-              $table->foreign('task_id')->references('id')->on('tasks');
-
               $table->index(['task_id','created_at'], 'task_file_index');
         });
         Schema::create('revision_history', function (Blueprint $table) {
@@ -58,8 +56,6 @@ return new class extends Migration {
             $table->string('status')->default('pending');
             $table->string('attachment')->nullable();
             $table->timestamps();
-            $table->foreign('task_id')->references('id')->on('tasks');
-
             $table->index(['task_id','created_at'], 'revision_history_index');
         });
 
@@ -71,8 +67,6 @@ return new class extends Migration {
               $table->string('status')->default('pending');
               $table->string('attachment_tmp')->nullable();
               $table->timestamps();
-              $table->foreign('task_id')->references('id')->on('tasks');
-
               $table->index(['task_id','created_at'], 'ticket_revision_index');
         });
 

@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Tasks\TaskModel;
 use App\Models\Users\User;
 use Illuminate\Database\Eloquent\Model;
 
@@ -24,14 +25,4 @@ class TransactionsModel extends Model
         'total_price',
         'status',
     ];
-
-    public function user(): \Illuminate\Database\Eloquent\Relations\BelongsTo
-    {
-        return $this->belongsTo(User::class, 'email');
-    }
-
-    public function task(): \Illuminate\Database\Eloquent\Relations\BelongsTo
-    {
-        return $this->belongsTo(TaskModel::class, 'task_id');
-    }
 }

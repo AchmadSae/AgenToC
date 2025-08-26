@@ -20,8 +20,6 @@ return new class extends Migration
             $table->string('product_description');
             $table->string('product_image')->nullable();
             $table->timestamps();
-            $table->foreign('product_group_code')->references('code')->on('product_groups');
-
             $table->index('product_code');
             $table->index(['product_code','product_group_code','created_at'], 'products_index');
         });

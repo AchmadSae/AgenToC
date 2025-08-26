@@ -17,14 +17,12 @@ return new class extends Migration
             $table->string('user_detail_id');
             $table->text('message')->nullable();
             $table->timestamps();
-            $table->foreign('task_id')->references('id')->on('tasks');
-
             $table->index(['task_id','user_detail_id','created_at'], 'tasks_chats_tmp_index');
         });
 
         Schema::create('notification_tmp', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('user_detail_id')->references('user_detail_id')->on('users');
+            $table->string('user_detail_id');
             $table->string('title');
             $table->text('message');
             $table->boolean('is_read')->default(false);

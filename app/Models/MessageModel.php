@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Tasks\TaskModel;
 use App\Models\Users\User;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -16,14 +17,4 @@ class MessageModel extends Model
         'user_id',
         'message',
     ];
-
-    public function Task(): BelongsTo
-    {
-        return $this->belongsTo(TaskModel::class, 'task_id', 'id');
-    }
-
-    public function User(): BelongsTo
-    {
-        return $this->belongsTo(User::class, 'user_id', 'user_detail_id');
-    }
 }

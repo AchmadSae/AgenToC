@@ -3,8 +3,11 @@
 namespace App\Models\Tasks;
 
 
+use App\Models\KanbanModel;
+use App\Models\MessageModel;
+use App\Models\RevisionHistoryModel;
 use Illuminate\Database\Eloquent\Model;
-use App\Models\DetailTaskModel;
+use App\Models\Tasks\DetailTaskModel;
 
 class TaskModel extends Model
 {
@@ -23,44 +26,22 @@ class TaskModel extends Model
         'is_approved'
     ];
 
+/* <<<<<<<<<<<<<<  ✨ Windsurf Command ⭐ >>>>>>>>>>>>>>>> */
+    /**
+     * Detail task relationship.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     */
+/* <<<<<<<<<<  978ea972-cfce-4004-92c3-3654fb304f09  >>>>>>>>>>> */
     public function DetailTask(): \Illuminate\Database\Eloquent\Relations\BelongsTo
     {
         return $this->belongsTo(DetailTaskModel::class, 'task_detail_id', 'id');
     }
-    public function SubTaskKanban(): TaskModel|\Illuminate\Database\Eloquent\Relations\HasMany
-    {
-        return $this->hasMany(KanbanModel::class, 'task_id');
-    }
 
-    public function Chats(): TaskModel|\Illuminate\Database\Eloquent\Relations\HasMany
-    {
-        return $this->hasMany(MessageModel::class, 'task_id');
-    }
-
-    public function RevisionHistory(): TaskModel|\Illuminate\Database\Eloquent\Relations\HasMany
-    {
-        return $this->hasMany(RevisionHistoryModel::class, 'task_id');
-    }
-
-    public function TaskFiles(): TaskModel|\Illuminate\Database\Eloquent\Relations\HasMany
-    {
-        return $this->hasMany(TaskFilesModel::class, 'task_id');
-    }
 
     public function getTask($id)
     {
         return $this->belongsTo(DetailTaskModel::class, 'detail_task_id', 'id')->where('id', $id)->first();
     }
 
-
-
-
-    /**
-     * search by any field and value
-     **/
-
-    public function searchAny($field, $value): \LaravelIdea\Helper\App\Models\_IH_TaskModel_C|array
-    {
-        return $this->where($field, 'like', '%' . $value . '%')->get();
-    }
 }

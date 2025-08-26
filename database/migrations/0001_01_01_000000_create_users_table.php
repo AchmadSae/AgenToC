@@ -42,6 +42,7 @@ return new class extends Migration {
                 $table->integer("balance_coins")->default(0);
                 $table->timestamps();
 
+                $table->foreign('user_detail_id')->references('user_detail_id')->on('users')->onDelete('cascade');
                 #indexin
                 $table->index('user_detail_id');
         });
@@ -57,11 +58,8 @@ return new class extends Migration {
                 $table->id();
                 $table->string('role_id');
                 $table->string('user_detail_id');
-                $table->foreign('role_id')->references('role_id')->on('roles')->onDelete('cascade');
                 $table->boolean("is_active")->default(false);
                 $table->timestamps();
-                $table->foreign('user_detail_id')->references('user_detail_id')->on('user_detail')->onDelete('cascade');
-
                 $table->index(['user_detail_id','is_active', 'created_at'],'user_detail_roles_index');
           });
 

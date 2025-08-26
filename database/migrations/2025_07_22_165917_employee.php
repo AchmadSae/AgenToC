@@ -19,8 +19,6 @@ return new class extends Migration {
             $table->string('position');
             $table->boolean('is_active')->default(true);
             $table->timestamps();
-            $table->foreign('department_id')->references('id')->on('departments');
-
             $table->index('email');
             $table->index(['department_id','is_active','created_at'], 'employees_index');
         });

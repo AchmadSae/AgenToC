@@ -15,9 +15,4 @@ class KanbanModel extends Model
         'status',
         'order'
     ];
-
-    public function Task(): \Illuminate\Database\Eloquent\Relations\BelongsTo
-    {
-        return $this->belongsTo(TaskModel::class, 'task_id', 'id');
-    }
 }

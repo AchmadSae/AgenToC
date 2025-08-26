@@ -19,9 +19,4 @@ class EmployeeModel extends Model
         'position',
         'is_active',
     ];
-
-    public function Departments(): \Illuminate\Database\Eloquent\Relations\BelongsTo
-    {
-        return $this->belongsTo(DepartmentsModel::class, 'department_id', 'id');
-    }
 }

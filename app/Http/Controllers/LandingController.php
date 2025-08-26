@@ -9,11 +9,9 @@ use App\Models\ProductsModel;
 class LandingController extends Controller
 {
     public function index(){
-          $products = ProductsModel::with([
-                'ProductGroupCode:id,code,value'
-                ])
-                ->select('id', 'product_name','product_code', 'price', 'product_description', 'product_image', 'product_group_code')
-                ->orderBy('product_group_code', 'DESC')
+          $products = ProductsModel::join('product_groups', 'products.product_group_code', '=', 'product_groups.code')
+                ->select('products.*', 'product_groups.value')
+                ->orderBy('product_groups.value', 'DESC')
                 ->get();
 //          dd($products->toArray());
           $feedBack = FeedBackModel::where('message', '!=', null)->orderBy('created_at', 'DESC')->get();

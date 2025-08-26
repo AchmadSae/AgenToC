@@ -4,6 +4,7 @@ namespace App\Models\Tasks;
 
 
 use Illuminate\Database\Eloquent\Model;
+use App\Models\Tasks\TaskModel;
 
 class TaskFilesModel extends Model
 {

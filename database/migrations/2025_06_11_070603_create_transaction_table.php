@@ -21,10 +21,6 @@ return new class extends Migration {
             $table->decimal('total_price', 10, 2);
             $table->string('status')->default('pending');
             $table->timestamps();
-            $table->foreign('task_id')->references('id')->on('tasks');
-            $table->foreign('user_detail_id')->references('user_detail_id')->on('users');
-            $table->foreign('product_code')->references('product_code')->on('products');
-
             $table->index(['task_id','user_detail_id','product_code','created_at'], 'transactions_index');
         });
     }

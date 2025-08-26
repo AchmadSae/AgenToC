@@ -35,11 +35,6 @@ class User extends Authenticatable implements MustVerifyEmail
 
     public function UserDetail(): \Illuminate\Database\Eloquent\Relations\BelongsTo
     {
-        return $this->belongsTo(UserDetailModel::class, 'user_detail_id', 'user_detail_id');
-    }
-
-    public function messages(): hasMany
-    {
-        return $this->hasMany(MessageModel::class);
+        return $this->belongsTo(UserDetailModel::class, 'user_detail_id', 'user_detail_id', 'id');
     }
 }
