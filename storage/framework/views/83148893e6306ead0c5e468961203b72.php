@@ -1,0 +1,1 @@
+<?php /**PATH E:\iseng\AgenToC\resources\views/errors/500.blade.php ENDPATH**/ ?>
