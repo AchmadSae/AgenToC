@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 class UserDetailModel extends Model
 {
     protected $table = 'user_detail';
+    protected $primaryKey = 'id';
 
     protected $fillable = [
         'user_detail_id',

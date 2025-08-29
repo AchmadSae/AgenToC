@@ -4,6 +4,9 @@ namespace App\Services;
 
 use App\Events\ChatTaskSent;
 use App\Helpers\Constant;
+use App\Models\OrdersModel;
+use App\Models\ProductsModel;
+use App\Models\Tasks\TaskModel;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
 use App\Models\MessageModel;
@@ -118,6 +121,33 @@ class MethodServiceUtil
 
             return [
                 'file_paths' => $filePaths
+            ];
+      }
+
+      public function getReceipt($id): ?array
+      {
+            $order = OrdersModel::where('order_id', $id)->first();
+            $task = TaskModel::select('task_type', 'task_contract', 'deadline')
+                  ->join('task_detail', 'tasks.task_detail_id', '=', 'task_detail.id')
+                  ->where('tasks.task_id', $order->task_id)
+                  ->first();
+            $product = ProductsModel::select('products.*', 'product_groups.*')
+                  ->join('product_groups', 'products.product_group_code', '=', 'product_groups.code')
+                  ->where('product_code', $order->product_code)
+                  ->first();
+            $user = \App\Models\Users\User::select('users.*', 'user_detail.*')
+                  ->join('user_detail', 'users.user_detail_id', '=', 'user_detail.user_detail_id')
+                  ->where('user_detail.user_detail_id', $order->user_detail_id)
+                  ->first();
+            $status = $task && $product && $user;
+            if (!$status) {
+                  return null;
+            }
+            return [
+                  'order' => $order,
+                  'task' => $task,
+                  'product' => $product,
+                  'user' => $user
             ];
       }
 }

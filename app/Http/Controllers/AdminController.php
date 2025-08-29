@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Helpers\Constant;
 use App\Models\AssetsModel;
-use App\Models\TransactionsModel;
+use App\Models\OrdersModel;
 use App\Services\TaskInterface;
 use App\Services\TransactionsInterface;
 use App\Services\UserInterface;
@@ -72,7 +72,7 @@ class AdminController extends Controller
         $data = [];
         try {
             //code...
-            $data = TransactionsModel::orderBy('created_at', 'desc')->paginate(10);
+            $data = OrdersModel::orderBy('created_at', 'desc')->paginate(10);
         } catch (\Throwable $th) {
             Alert::error('error', $th->getMessage());
         }
@@ -91,7 +91,7 @@ class AdminController extends Controller
         $data = [];
         try {
             //code...
-            $data = TransactionsModel::find($id);
+            $data = OrdersModel::find($id);
         } catch (\Throwable $th) {
             Alert::error('error', $th->getMessage());
         }

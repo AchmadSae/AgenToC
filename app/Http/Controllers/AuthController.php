@@ -3,8 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Helpers\Constant;
-use App\Helpers\LogConsole;
-use App\Models\User;
+use App\Models\Users\User;
 use Illuminate\Auth\Events\Verified;
 use Illuminate\Database\QueryException;
 use Illuminate\Http\Request;

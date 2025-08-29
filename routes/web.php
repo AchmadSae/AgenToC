@@ -6,6 +6,7 @@ use App\Http\Controllers\LandingController;
 use App\Http\Controllers\WorkerController;
 use App\Http\Controllers\KanbanController;
 use App\Http\Controllers\ClientController;
+use App\Services\MethodServiceUtil;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\TransactionsController;
@@ -21,7 +22,10 @@ Route::get('/', [LandingController::class, 'index'])->name('landing');
 #checkout
 Route::post('/checkout', [TransactionsController::class, 'checkout'])->name('checkout');
 Route::post('/upload-file-checkout', [TransactionsController::class, 'uploadFileCheckout'])->name('upload-file-checkout');
+# begin receipt
 Route::get('/receipt/{id}', [TransactionsController::class, 'receipt'])->name('receipt');
+Route::get('/download-pdf/{id}', [TransactionsController::class, 'downloadReceipt'])->name('download.receipt');
+# end receipt
 #json return for js
 Route::get('/isRegistered/{email}', [CommandController::class, 'hasVerifiedEmail'])->name('check.email.registered');
 
