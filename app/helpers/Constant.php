@@ -32,7 +32,8 @@ class Constant
       const TASK_STATUS_REVISION = 'revision';
       const SUBTASK_STATUS_TODO = 'todo';
       const SUBTASK_STATUS_DONE = 'done';
-      const TRANS_ID = 'INV';
+      const TRANS_ID = 'TRS';
+      const INV_ID = 'INV';
       const PRODUCT_GRAPHIC = 'design_graphic';
       const FILE_TYPE_CHECKOUT = 'checkout';
       const DEFAULT_PASS = 'DEFAULT_PASS';

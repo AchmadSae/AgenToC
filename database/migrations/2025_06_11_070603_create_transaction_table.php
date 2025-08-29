@@ -10,8 +10,10 @@ return new class extends Migration {
      */
     public function up(): void
     {
-        Schema::create('transactions', function (Blueprint $table) {
-            $table->string('id');
+        Schema::create('orders', function (Blueprint $table) {
+            $table->string('order_id')->primary();
+            $table->string('order_number')->unique();
+            $table->string('invoice_id')->unique();
             $table->string('task_id')->nullable();
             $table->string('user_detail_id');
             $table->string('product_code')->nullable();
@@ -31,5 +33,7 @@ return new class extends Migration {
     public function down(): void
     {
         Schema::dropIfExists('payment');
+        Schema::dropIfExists('orders');
+        Schema::dropIfExists('transactions');
     }
 };

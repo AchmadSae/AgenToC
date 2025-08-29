@@ -12,10 +12,8 @@ use App\Models\Tasks\DetailTaskModel;
 class TaskModel extends Model
 {
     protected $table = 'tasks';
-    protected $primaryKey = 'id';
-    protected $keyType = 'string';
     protected $fillable = [
-        'id',
+        'task_id',
         'kanban_id',
         'client_id',
         'worker_id',

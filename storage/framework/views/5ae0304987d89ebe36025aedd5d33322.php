@@ -4,8 +4,8 @@
             <!--begin::Copyright-->
             <div class="d-flex align-items-center order-2 order-md-1">
                   <!--begin::Logo-->
-                  <a href="{{ route('landing') }}">
-                        <img alt="Logo" src="{{ asset('assets/media/logos/landing.svg') }} " class="h-15px h-md-20px">
+                  <a href="<?php echo e(route('landing')); ?>">
+                        <img alt="Logo" src="<?php echo e(asset('assets/media/logos/landing.svg')); ?> " class="h-15px h-md-20px">
                   </a>
                   <!--end::Logo image-->
                   <!--begin::Logo image-->
@@ -29,3 +29,4 @@
       </div>
       <!--end::Wrapper-->
 </div>
+<?php /**PATH D:\development\CollaborateAgenToC\AgentC\resources\views/template/footer.blade.php ENDPATH**/ ?>

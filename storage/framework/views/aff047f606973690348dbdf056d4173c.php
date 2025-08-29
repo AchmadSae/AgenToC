@@ -1,0 +1,1 @@
+<?php /**PATH D:\development\CollaborateAgenToC\AgentC\resources\views/errors/500.blade.php ENDPATH**/ ?>

@@ -76,8 +76,6 @@ class AuthImpl implements AuthInterface
                 ];
           }
           LogConsole::browser($data, 'Begin AuthImpl.register() call');
-          #local $user_Detail_id for prevent duplicate id
-        $user_detail_id = GenerateId::generateId('UD', true);
         $role_id = match ($data['role']) {
             'admin' => Constant::ROLE_ADMIN,
             'worker' => Constant::ROLE_WORKER,
@@ -86,25 +84,30 @@ class AuthImpl implements AuthInterface
         #debug
         LogConsole::browser($data, 'Register User role: ' . $role_id);
 
-        try{
-              DB::beginTransaction();
-                    //code...
-                    $userDetail = UserDetailModel::create([
-                          'user_detail_id' => $user_detail_id,
-                          'full_name' => $data['full_name'],
-                          'skills' => $data['skills'],
-                          'tag_line' => $data['tag_line'],
-                          'credit_number' => $data['card_number'],
-                    ]);
+        try {
+            DB::beginTransaction();
 
-                    $registeredUser = User::create([
-                          'user_detail_id' => $userDetail->user_detail_id,
-                          'username' => $data['username'],
-                          'email' => $data['email'],
-                          'password' => Hash::make($data['password'])
-                    ]);
+            // Create User record first
+            $registeredUser = User::create([
+                'user_detail_id' => GenerateId::generateId('UD', true),
+                'username' => $data['username'],
+                'email' => $data['email'],
+                'password' => Hash::make($data['password']),
+                'email_verified_at' => now() // or null if you need email verification
+            ]);
 
-                    $userDetailRoles = DB::table('user_detail_roles')->insert([
+            // Then create UserDetail record
+            $userDetail = UserDetailModel::create([
+                'user_detail_id' => $registeredUser->user_detail_id,
+                'full_name' => $data['full_name'],
+                'skills' => $data['skills'] ?? null,
+                'tag_line' => $data['tag_line'] ?? null,
+                'credit_number' => $data['card_number'] ?? null,
+            ]);
+            Log::info('userDetail', (array) $userDetail);
+
+            // Assign role to user
+            $userDetailRoles = DB::table('user_detail_roles')->insert([
                           'user_detail_id' => $userDetail->user_detail_id,
                           'role_id' => $role_id,
                           'is_active' => $isTransaction
@@ -121,7 +124,7 @@ class AuthImpl implements AuthInterface
                           ];
                           $registeredUser->notify(new CustomVerifyEmail($dataUser));
                     }
-              $status = $registeredUser && $user_detail_id && $userDetailRoles;
+              $status = $registeredUser && $userDetail && $userDetailRoles;
         }catch(\Throwable $e){
               DB::rollBack();
               Log::error('AuthImpl.register() error: ' . $e->getMessage());

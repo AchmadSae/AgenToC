@@ -11,7 +11,7 @@ use App\Models\Tasks\DetailTaskModel;
 use App\Models\GlobalParam;
 use App\Models\Tasks\TaskFilesModel;
 use App\Models\Tasks\TaskModel;
-use App\Models\TransactionsModel;
+use App\Models\OrdersModel;
 use App\Models\Users\UserDetailModel;
 use App\Services\AuthInterface;
 use App\Services\TransactionsInterface;
@@ -41,7 +41,7 @@ class TransactionImpl implements TransactionsInterface
         try {
               UserDetailModel::where('id', $this->user_detail_id)->lockForUpdate()->first();
             DB::transaction(function () use ($data) {
-                TransactionsModel::create($data);
+                OrdersModel::create($data);
             }, Constant::DB_ATTEMPT);
         } catch (Throwable $th) {
             throw new InternalErrorException($th->getMessage());
@@ -91,8 +91,16 @@ class TransactionImpl implements TransactionsInterface
                       $user_detail_id = $userRegisterResponse['user']->user_detail_id;
                 }
                 DB::beginTransaction();
+
+                      $task = TaskModel::create([
+                            'task_id' => GenerateId::generateId('TSK', false),
+                            'kanban_id' => GenerateId::generateId('KBN', false),
+                            'client_id' => $user_detail_id,
+                            'task_detail_id' => GenerateId::generateId('DTK', false),
+                            'deadline' => $data['due_date']
+                      ]);
                         $detailTask = DetailTaskModel::create([
-                              'id' => GenerateId::generateId('DTK', false),
+                              'id' => $task->task_detail_id,
                               'title' => $data['title'],
                               'description' => $data['description'],
                               'task_type' => Constant::TASK_TYPE_CATALOG_PRODUCT,
@@ -100,19 +108,14 @@ class TransactionImpl implements TransactionsInterface
                               'task_contract' => Constant::TASK_INQUIRY,
                               'required_skills' => $data['skills']
                         ]);
-                      $task = TaskModel::create([
-                            'id' => GenerateId::generateId('TSK', false),
-                            'kanban_id' => GenerateId::generateId('KBN', false),
-                            'client_id' => $user_detail_id,
-                            'detail_task_id' => $detailTask->id,
-                            'deadline' => $data['due_date']
-                      ]);
 
-                      $transaction = TransactionsModel::create([
-                            'id' => GenerateId::generateId(Constant::TRANS_ID, false),
-                            'task_id' => $task->id,
-                            'user_id' => $user_detail_id,
-                            'product_id' => $data['product_code'],
+                      $orders = OrdersModel::create([
+                            'order_id' => GenerateId::generateId('100', false),
+                            'order_number' => GenerateId::generateId('13', false),
+                            'invoice_id' => GenerateId::generateId('INV', false),
+                            'task_id' => $task->task_id,
+                            'user_detail_id' => $user_detail_id,
+                            'product_code' => $data['product_code'],
                             'product_type' => $data['product_group_name'],
                             'payment_method' => Constant::PAYMENT_BANK,
                             'total_price' => $data['price'],
@@ -124,7 +127,7 @@ class TransactionImpl implements TransactionsInterface
                             foreach ($data['uploaded_files'] as $file_path) {
                                   $absolute_path = public_path($file_path);
                                   $created = TaskFilesModel::create([
-                                        'task_id' => $task->id,
+                                        'task_id' => $task->task_id,
                                         'file_path' => $file_path,
                                         'file_name' => basename($absolute_path) ?: 'application/octet-stream',
                                         'file_type' => Constant::FILE_TYPE_CHECKOUT,
@@ -137,7 +140,7 @@ class TransactionImpl implements TransactionsInterface
                                   }
                             }
                       }
-                      $status = $task && $detailTask && $isFilesInserted;
+                      $status = $task && $detailTask && $isFilesInserted && $orders;
           }catch (Throwable $th) {
                   Log::error('TransactionImpl.checkout', [$th->getMessage()]);
                   DB::rollBack();
@@ -158,7 +161,7 @@ class TransactionImpl implements TransactionsInterface
         return [
             'status' => true,
               'message' => 'Transaction checkout success',
-              'transaction_id' => $transaction->id
+              'order_id' => $orders->order_id
         ];
     }
 
@@ -172,7 +175,7 @@ class TransactionImpl implements TransactionsInterface
                 $user_detail = UserDetailModel::where('id', $this->user_detail_id)->lockForUpdate()->first();
                 #validation amount of coins will be handle in controller or view
                 $user_detail->update(['balance' => $user_detail->balance_coins - $data['amount']]);
-                $this->transactionService = TransactionsModel::create($data);
+                $this->transactionService = OrdersModel::create($data);
             }, Constant::DB_ATTEMPT);
         } catch (Throwable $th) {
             throw new InternalErrorException($th->getMessage());
@@ -187,7 +190,7 @@ class TransactionImpl implements TransactionsInterface
 
     public function approvedWithdrawCoins($id): bool
     {
-        $transaction = TransactionsModel::find($id);
+        $transaction = OrdersModel::find($id);
         $transaction->status = true;
         $transaction->save();
         return true;
@@ -198,7 +201,7 @@ class TransactionImpl implements TransactionsInterface
        */
       public function approvedPayment($id): array
     {
-          $transaction = TransactionsModel::find($id)->lockForUpdate()->first();
+          $transaction = OrdersModel::find($id)->lockForUpdate()->first();
         DB::transaction(function () use ($transaction) {
             $transaction->status = true;
             $transaction->save();
@@ -222,9 +225,9 @@ class TransactionImpl implements TransactionsInterface
     {
         if ($status != 'done') {
             # code...
-              return  TransactionsModel::with(['user', 'task'])->get();
+              return  OrdersModel::with(['user', 'task'])->get();
         }
-        return TransactionsModel::with(['user', 'task'])->where('status', $status)->get();
+        return OrdersModel::with(['user', 'task'])->where('status', $status)->get();
     }
 
 }

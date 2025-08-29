@@ -3,10 +3,13 @@
 namespace App\Http\Controllers;
 
 use App\Helpers\Constant;
+use App\Models\ProductsModel;
+use App\Models\OrdersModel;
+use App\Models\Tasks\DetailTaskModel;
+use App\Models\Tasks\TaskModel;
+use App\Models\Users\User;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
-use App\Models\TransactionsModel;
-use App\Models\User;
 use App\Services\MethodServiceUtil;
 use App\Services\TransactionsInterface;
 use ErrorException;
@@ -87,7 +90,7 @@ class TransactionsController extends Controller
                       Alert::warning('Warning', Constant::MESSAGE_WARNING);
                       return redirect()->route('landing')->withInput();
                 }
-                return redirect()->route('receipt', ['id' => $transaction['transaction_id']]);
+                return redirect()->route('receipt', ['id' => $transaction['order_id']]);
             } catch (\Exception $e) {
                 Log::error('Transaction Checkout error: ', [
                       'error' => $e->getMessage(),
@@ -150,14 +153,25 @@ class TransactionsController extends Controller
       public function receipt(string $id)
       {
             try{
-                  $transaction = DB::table('transactions')
-                        ->join('products', 'transactions.product_id', '=', 'products.product_code')
-                        ->where('transactions.id', $id)
-                        ->select('transactions.*', 'products.*')
+                  $order = OrdersModel::where('order_id', $id)->first();
+                  $task = TaskModel::select('task_type','task_contract', 'deadline')
+                        ->join('task_detail', 'tasks.task_detail_id', '=','task_detail.id')
+                        ->where('tasks.task_id', $order->task_id)
                         ->first();
-                  $user = User::with('UserDetail')->where('id', $transaction->user_id)->first();
-                  dd($user);
-                  return view('transaction.receipt', compact('transaction', 'user'));
+                  $product = ProductsModel::select('products.*','product_groups.*')
+                        ->join('product_groups', 'products.product_group_code', '=', 'product_groups.code')
+                        ->where('product_code', $order->product_code)
+                        ->first();
+                  $user = User::select('users.*', 'user_detail.*')
+                        ->join('user_detail', 'users.user_detail_id', '=', 'user_detail.user_detail_id')
+                        ->where('user_detail.user_detail_id', $order->user_detail_id)
+                        ->first();
+                  $status = $task && $product && $user;
+                  if (!$status) {
+                        return view('errors.404');
+                  }
+//                  dd($task);
+                  return view('transaction.receipt', compact('order','product', 'user', 'task'));
             }catch (ErrorException $e){
                   \Log::error($e->getMessage());
                   return view('errors.500');
