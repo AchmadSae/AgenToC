@@ -3,7 +3,6 @@
 namespace App\Mail;
 
 use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
@@ -29,7 +28,7 @@ class Receipt extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'Your Receipt',
+            subject: 'Your Receipt '. $this->data['order_id'],
         );
     }
 
@@ -39,7 +38,7 @@ class Receipt extends Mailable
     public function content(): Content
     {
         return new Content(
-            view: 'view.receipt',
+            view: 'emails.receipt',
         );
     }
 

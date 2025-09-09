@@ -158,6 +158,24 @@ class TransactionImpl implements TransactionsInterface
                 ];
           }
           DB::commit();
+          #send email receipt to user
+          $bank_receiver = GlobalParam::where("code", "=", 'TRANS_BANK')->value("value");
+          $care_number = GlobalParam::where("code", "=", 'TRANS_CARE_NUMBER')->value("value");
+          $company_email = GlobalParam::where("code", "=", 'COMPANY_EMAIL')->value("value");
+          $company_website = GlobalParam::where("code", "=", 'COMPANY_WEBSITE')->value("value");
+          $dataReceipt = [
+                'name' => $data['full_name'],
+                'order_id' => $orders->order_id,
+                'product_name' => $orders->product_name,
+                'total_price' => $orders->total_price,
+                'price' => $data['price'],
+                'bank_receiver' => $bank_receiver,
+                'care_number' => $care_number,
+                'company_email' => $company_email,
+                'company_website' => $company_website,
+                'ordered_at' => $orders->created_at
+          ];
+          Mail::to($data->email)->send(new Receipt($dataReceipt));
         return [
             'status' => true,
               'message' => 'Transaction checkout success',
