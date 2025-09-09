@@ -20,7 +20,7 @@ class ClientMiddleware
     {
         $user = Auth::user();
 
-    
+
         if (!$user) {
             Alert::info('Error', 'You are not logged in');
             return $next($request);
@@ -35,7 +35,7 @@ class ClientMiddleware
 
 
         if (!$hasUserRole) {
-            Alert::error('Error', 'Unauthorized Page=' . $hasUserRole . 'user_detail_id=' . $user->user_detail_id . 'role_name=' . $user->role_name);
+            Alert::error('Error', 'Unauthorized Page=' . $hasUserRole . 'user_detail_id=' . $user->user_detail_id);
             return redirect('/');
         }
         session()->put('currentRole', 'client');

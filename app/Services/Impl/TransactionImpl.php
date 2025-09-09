@@ -3,6 +3,7 @@
 namespace App\Services\Impl;
 
 use App\Models\Users\User;
+use App\Util\EmailUtil;
 use Illuminate\Support\Facades\Log;
 use App\Helpers\Constant;
 use App\Helpers\GenerateId;
@@ -26,9 +27,14 @@ use Throwable;
 class TransactionImpl implements TransactionsInterface
 {
     protected AuthInterface $authService;
-      public function __construct(AuthInterface $authService)
+    protected EmailUtil $emailUtil;
+
+    protected TransactionsInterface $transactionService;
+      public function __construct(AuthInterface $authService, EmailUtil $emailUtil, TransactionsInterface $transactionService)
       {
             $this->authService = $authService;
+            $this->emailUtil = $emailUtil;
+            $this->transactionService = $transactionService;
       }
 
       /**
@@ -79,7 +85,7 @@ class TransactionImpl implements TransactionsInterface
             $data['password'] = GlobalParam::where("code", "=", Constant::DEFAULT_PASS)->value("value");
             $data['skills'] = '';
             $data['tag_line'] = '';
-            $data['username'] = $data['email'];
+            $data['username'] = preg_split('/\s+/', $data['full_name']+ rand(10, 99));
             try {
                   $user_detail_id = '';
                   $userRegisterResponse = $this->authService->register($data, true);
@@ -158,6 +164,17 @@ class TransactionImpl implements TransactionsInterface
                 ];
           }
           DB::commit();
+          #send email receipt to user
+          $dataReceipt = [
+                'full_name' => $data['full_name'],
+                'order_id' => $orders->order_id,
+                'product_name' => $orders->product_name,
+                'total_price' => $orders->total_price,
+                'price' => $data['price'],
+                'ordered_at' => $orders->created_at,
+                'email' => $data['email']
+          ];
+          $this->emailUtil->sendReceipt($dataReceipt);
         return [
             'status' => true,
               'message' => 'Transaction checkout success',

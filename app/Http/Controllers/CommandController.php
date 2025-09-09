@@ -22,14 +22,12 @@ class CommandController extends Controller
 
     public function hasVerifiedEmail($email)
     {
-          try {
-                $response = $this->authService->hasVerifiedEmail($email);
 
-                // Initialize default response
-                $result = [
-                      'status' => false,
-                      'data' => null
-                ];
+          try {
+                $userDetailId = \App\Models\User::where('email', $email)
+                              ->value('user_detail_id');
+                $response = $this->authService->hasVerifiedEmail($userDetailId);
+
 
                 if ($response) {
                       $userData = DB::table('user_detail')

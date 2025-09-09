@@ -42,14 +42,18 @@
                         <input class="form-control form-control-lg form-control-solid" type="text" placeholder="Username" name="username"
                              autocomplete="off" data-kt-translate="sign-in-input-username" />
                 </div>
-                <div class="position-relative mb-3">
-                        <input class="form-control form-control-lg form-control-solid" type="password" placeholder="Password"
-                               name="password" autocomplete="off" data-kt-translate="sign-in-input-password" />
-                        <span class="btn btn-sm btn-icon position-absolute translate-middle top-50 end-0 me-n2"
-                              data-kt-password-meter-control="visibility">
+                <div class="position-relative mb-3" data-kt-password-meter="true">
+                      <!--begin::Input wrapper-->
+                      <div class="position-relative mb-3">
+                            <input class="form-control form-control-lg form-control-solid" type="password" placeholder="Password"
+                                   name="password" autocomplete="off" data-kt-translate="sign-in-input-password" />
+                            <span class="btn btn-sm btn-icon position-absolute translate-middle top-50 end-0 me-n2"
+                                  data-kt-password-meter-control="visibility">
                                           <i class="ki-duotone ki-eye-slash fs-2"></i>
                                           <i class="ki-duotone ki-eye fs-2 d-none"></i>
-                                    </span>
+                            </span>
+                      </div>
+                      <!--end::Input wrapper-->
                 </div>
                 <div class="d-flex flex-stack flex-wrap gap-3 fs-base fw-semibold mb-10">
                         <div></div>

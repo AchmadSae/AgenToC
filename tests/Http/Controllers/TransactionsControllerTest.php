@@ -4,7 +4,7 @@ namespace Tests\Http\Controllers;
 
 use App\Http\Controllers\TransactionsController;
 use App\Models\GlobalParam;
-use App\Services\MethodServiceUtil;
+use App\Util\MethodServiceUtil;
 use App\Services\TransactionsInterface;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;

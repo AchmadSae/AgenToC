@@ -3,9 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Helpers\Constant;
-use App\Models\Users\User;
+use App\Models\User;
 use Illuminate\Auth\Events\Verified;
-use Illuminate\Database\QueryException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
@@ -13,7 +12,6 @@ use Illuminate\Support\Facades\Password;
 use Random\RandomException;
 use RealRashid\SweetAlert\Facades\Alert;
 use App\Services\AuthInterface;
-use Illuminate\Auth\Notifications\ResetPassword;
 use Symfony\Component\CssSelector\Exception\InternalErrorException;
 use TheSeer\Tokenizer\Token;
 
@@ -32,36 +30,35 @@ class AuthController extends Controller
 
     public function login(Request $request)
     {
-        $credentials = $request->validate([
-            'username' => ['sometimes'],
-            'password' => ['required'],
-        ]);
+          $credentials = $request->validate([
+                'username' => ['sometimes'],
+                'password' => ['required'],
+          ]);
 
-        if (Auth::attempt($credentials, $request->boolean('remember'))) {
-            $request->session()->regenerate();
-            try {
-                #call the service
-                $response = $this->authInterface->login($credentials);
-            } catch (\Throwable $e) {
-                return back()->withErrors([
-                    'error' => Constant::MESSAGE_ERROR,
-                ]);
-            }
+          if (Auth::attempt($credentials, $request->boolean('remember'))) {
+                $request->session()->regenerate();
+                try {
+                      #call the service
+                      $response = $this->authInterface->login($credentials);
+                } catch (\Throwable $e) {
+                      Alert::error('error', Constant::MESSAGE_ERROR);
+                      return back();
+                }
 
-            if (!$response) {
-                Alert::warning('warning', 'Ups! you are not allowed to login'); // If the login attempt was unsuccessful, redirect back with an error message
-                return back();
-            }
-            return match ($request->role) {
-                'admin' => redirect()->route('admin_dashboard'),
-                'user' => redirect()->route('client_dashboard'),
-                'worker' => redirect()->route('worker_dashboard'),
-                default => redirect()->route('landing'),
-            };
-        }
+                if (!$response['success']) {
+                      Alert::info('Sorry', 'You are not allowed to login'); // If the login attempt was unsuccessful, redirect back with an error message
+                      return back();
+                }
+                return match ($request->role) {
+                      'admin' => redirect()->route('admin_dashboard'),
+                      'user' => redirect()->route('client_dashboard'),
+                      'worker' => redirect()->route('worker_dashboard'),
+                      default => redirect()->route('landing'),
+                };
+          }
 
-        Alert::error('error', Constant::MESSAGE_ERROR);
-        return back();
+          Alert::warning('warning', Constant::MESSAGE_ERROR);
+          return back();
     }
     public function showRegistrationForm($flag)
     {

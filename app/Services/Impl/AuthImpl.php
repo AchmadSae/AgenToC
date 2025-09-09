@@ -5,8 +5,8 @@ namespace App\Services\Impl;
 use App\Helpers\Constant;
 use App\Notifications\CustomVerifyEmail;
 use App\Services\AuthInterface;
-use App\Models\Users\User;
-use App\Models\Users\UserDetailModel;
+use App\Models\User;
+use App\Models\UserDetailModel;
 use App\Helpers\GenerateId;
 use App\Helpers\LogConsole;
 use Illuminate\Database\QueryException;
@@ -25,38 +25,46 @@ use Symfony\Component\CssSelector\Exception\InternalErrorException;
 class AuthImpl implements AuthInterface
 {
 
-    public function hasVerifiedEmail($email): bool
+    public function hasVerifiedEmail($userDetailId): bool
     {
-          return User::where('email', $email)
+          return User::where('user_detail_id', $userDetailId)
                 ->where('email_verified_at', '!=', null)
                 ->exists();
     }
 
-    public function login($data): bool
+    public function login($data): array
     {
           Log::info('Begin AuthImpl.login() call'. json_encode($data));
           try {
-                $userDetailId = User::where('email', $data->username)
-                      ->orWhere('username', $data->username)
-                      ->value('user_detail_id');
-                if (!$userDetailId) {
-                      return false;
+                $user = User::where('username', $data['username'])->first();
+
+                if (!$user) {
+                      Log::info('User not found');
+                      return ['success' => false, 'message' => 'Invalid credentials'];
                 }
 
-                $hasRole = DB::table('user_detail_roles')
-                      ->join('roles', 'roles.role_id', '=', 'user_detail_roles.role_id')
-                      ->where('user_detail_roles.user_detail_id', $userDetailId)
-                      ->where('roles.role_name', $data->role_name)
-                      ->where('user_detail_roles.is_active', true)
-                      ->exists();
-                $hasVerified = $this->hasVerifiedEmail($data->email);
-                if (!$hasRole && !$hasVerified) {
-                      return false;
+                // Verify password
+                if (!Hash::check($data['password'], $user->password)) {
+                      Log::info('Invalid password');
+                      return ['success' => false, 'message' => 'Invalid credentials'];
                 }
-                return true;
+
+                // Check email verification if required
+                if (!$user->hasVerifiedEmail()) {
+                      Log::info('Email not verified');
+                      return [
+                            'success' => false,
+                            'message' => 'Please verify your email address before logging in',
+                            'needs_verification' => true
+                      ];
+                }
+                return [
+                      'success' => true,
+                      'user' => $user
+                ];
           } catch (QueryException $th) {
                 Log::error('AuthController.login QueryException: ' . $th->getMessage());
-                return false;
+                return ['success' => false, 'message' => 'An error occurred during login'];
           }
     }
 

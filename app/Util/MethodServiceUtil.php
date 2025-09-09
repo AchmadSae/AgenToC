@@ -1,13 +1,13 @@
 <?php
 
-namespace App\Services;
+namespace App\Util;
 
 use App\Events\ChatTaskSent;
 use App\Helpers\Constant;
 use App\Models\OrdersModel;
 use App\Models\ProductsModel;
 use App\Models\Tasks\TaskModel;
-use App\Models\User;
+use App\Models\Users\User;
 use Illuminate\Support\Facades\DB;
 use App\Models\MessageModel;
 
