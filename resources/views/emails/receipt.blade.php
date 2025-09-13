@@ -49,7 +49,7 @@
                                                                         <div style="font-family:Arial,Helvetica,sans-serif">{{ $data['product_name'] }}</div>
                                                                         <!--end:Description-->
                                                                         <!--begin:Total-->
-                                                                        <div style="font-family:Arial,Helvetica,sans-serif">Rp. {{number_format($data->price, 0, ',', '.') }}</div>
+                                                                        <div style="font-family:Arial,Helvetica,sans-serif">Rp. {{number_format($data['price'], 0, ',', '.') }}</div>
                                                                         <!--end:Total-->
                                                                   </div>
                                                                   <!--end:Item-->
@@ -72,7 +72,7 @@
                                                                         <div style="font-family:Arial,Helvetica,sans-serif">Total paid</div>
                                                                         <!--end:Description-->
                                                                         <!--begin:Total-->
-                                                                        <div style="color:#50cd89; font-weight:700; font-family:Arial,Helvetica,sans-serif">Rp. {{number_format($data->total_price, 0, ',', '.') }}</div>
+                                                                        <div style="color:#50cd89; font-weight:700; font-family:Arial,Helvetica,sans-serif">Rp. {{number_format($data['total_price'], 0, ',', '.') }}</div>
                                                                         <!--end:Total-->
                                                                   </div>
                                                                   <!--end:Item-->
@@ -81,7 +81,7 @@
                                                       </div>
                                                       <!--end:Order-->
                                                       <!--begin:Action-->
-                                                      <a href="apps/invoices/view/invoice-1.html" target="_blank" style="background-color:#50cd89; border-radius:6px;display:inline-block; padding:11px 19px; color: #FFFFFF; font-size: 14px; font-weight:500;">Download Invoice</a>
+                                                      <a href="{{ route('receipt', $data['order_id']) }} " target="_blank" style="background-color:#50cd89; border-radius:6px;display:inline-block; padding:11px 19px; color: #FFFFFF; font-size: 14px; font-weight:500;">Download Invoice</a>
                                                       <!--begin:Action-->
                                                 </div>
                                                 <!--end:Email content-->
@@ -90,17 +90,17 @@
                                     <tr>
                                           <td align="center" valign="center" style="font-size: 13px; text-align:center; padding: 0 10px 10px 10px; font-weight: 500; color: #A1A5B7; font-family:Arial,Helvetica,sans-serif">
                                                 <p style="color:#181C32; font-size: 16px; font-weight: 600; margin-bottom:9px">
-                                                      {{ $data->bank_receiver }}</p>
-                                                <p style="margin-bottom:2px">Call our customer care number: {{ $data->care_number }}</p>
+                                                      {{ $data['bank_receiver'] }}</p>
+                                                <p style="margin-bottom:2px">Call our customer care number: {{ $data['care_number'] }}</p>
                                                 <p style="margin-bottom:4px">You may reach us at
-                                                      <a href="https://{{ $data->company_website }}" rel="noopener" target="_blank" style="font-weight: 600">{{ $data->company_website }}</a>.</p>
+                                                      <a href="https://{{ $data['company_website'] }}" rel="noopener" target="_blank" style="font-weight: 600">{{ $data['company_website'] }}</a>.</p>
                                                 <p>We serve Mon-Fri, 9AM-18AM</p>
                                           </td>
                                     </tr>
                                     <tr>
                                           <td align="center" valign="center" style="font-size: 13px; padding:0 15px; text-align:center; font-weight: 500; color: #A1A5B7;font-family:Arial,Helvetica,sans-serif">
                                                 <p>© Copyright DigiCake.
-                                                      <a href="https://{{ $data->company_website }}" rel="noopener" target="_blank" style="font-weight: 600;font-family:Arial,Helvetica,sans-serif">Unsubscribe</a>&nbsp; from newsletter.</p>
+                                                      <a href="https://{{ $data['company_website'] }}" rel="noopener" target="_blank" style="font-weight: 600;font-family:Arial,Helvetica,sans-serif">Unsubscribe</a>&nbsp; from newsletter.</p>
                                           </td>
                                     </tr>
                                     </tbody>

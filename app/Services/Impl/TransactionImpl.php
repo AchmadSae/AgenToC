@@ -79,7 +79,7 @@ class TransactionImpl implements TransactionsInterface
             $data['password'] = GlobalParam::where("code", "=", Constant::DEFAULT_PASS)->value("value");
             $data['skills'] = '';
             $data['tag_line'] = '';
-            $data['username'] = $data['email'];
+            $data['username'] = preg_replace('/\\s+/', '-', $data['email']) . rand(10, 99);
             try {
                   $user_detail_id = '';
                   $userRegisterResponse = $this->authService->register($data, true);
@@ -175,7 +175,7 @@ class TransactionImpl implements TransactionsInterface
                 'company_website' => $company_website,
                 'ordered_at' => $orders->created_at
           ];
-          Mail::to($data->email)->send(new Receipt($dataReceipt));
+          Mail::to($data['email'])->send(new Receipt($dataReceipt));
         return [
             'status' => true,
               'message' => 'Transaction checkout success',
