@@ -2,7 +2,7 @@
 
 namespace Tests\Feature;
 
-use App\Services\MethodServiceUtil;
+use App\Util\MethodServiceUtil;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;

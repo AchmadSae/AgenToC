@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Services;
+namespace App\Util;
 
 use App\Events\ChatTaskSent;
 use App\Helpers\Constant;
@@ -13,7 +13,10 @@ use App\Models\MessageModel;
 
 class MethodServiceUtil
 {
-    public function getRoleNameAndUsername($user): array
+      /**
+       * @throws \Exception
+       */
+      public function getRoleNameAndUsername($user): array
     {
         $name = $user->name ?? '';
         $role_name = '';

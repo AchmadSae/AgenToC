@@ -7,7 +7,8 @@ use App\Notifications\CustomVerifyEmail;
 use App\Notifications\PaymentConfirmation;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Log;
-use App\Services\MethodServiceUtil;
+use App\Util\MethodServiceUtil;
+use App\Util\EmailUtil;
 use App\Services\TransactionsInterface;
 use ErrorException;
 use Illuminate\Support\Facades\Notification;
@@ -19,11 +20,13 @@ class TransactionsController extends Controller
 
       protected TransactionsInterface $transactionService;
       protected MethodServiceUtil $methodService;
+      protected EmailUtil $emailUtil;
 
-      public function __construct(TransactionsInterface $transactionService, MethodServiceUtil $methodService)
+      public function __construct(TransactionsInterface $transactionService, MethodServiceUtil $methodService, EmailUtil $emailUtil)
       {
             $this->transactionService = $transactionService;
             $this->methodService = $methodService;
+            $this->emailUtil = $emailUtil;
       }
 
       public function checkout(Request $request)
@@ -156,12 +159,22 @@ class TransactionsController extends Controller
                         'name' => $data['user']->full_name,
                         'email' => $data['user']->email,
                         'email_verified_at' => $data['user']->email_verified_at,
-                        'order_id' => $data['order']->order_id,
+
                         'status' => $data['order']->status,
                         # add 24 hours expired
                         'expired_at' => $data['order']->created_at->addHours(24),
                   ];
-                  Notification::send($data['user'], new PaymentConfirmation($dataOrders));
+                  #send email receipt to user
+                  $dataReceipt = [
+                        'full_name' => $data['full_name'],
+                        'order_id' => $data['order']->order_id,
+                        'product_name' => $data['product']->product_name,
+                        'total_price' => $data['order']->total_price,
+                        'price' => $data['product'],
+                        'ordered_at' => $orders->created_at,
+                        'email' => $data['email']
+                  ];
+                  $this->emailUtil->sendReceipt($dataReceipt);
                   if ($data == null) {
                         return view('errors.404');
                   }

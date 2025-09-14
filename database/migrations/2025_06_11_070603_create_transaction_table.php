@@ -14,16 +14,25 @@ return new class extends Migration {
             $table->string('order_id')->primary();
             $table->string('order_number')->unique();
             $table->string('invoice_id')->unique();
-            $table->string('task_id')->nullable();
             $table->string('user_detail_id');
-            $table->string('product_code')->nullable();
-            $table->string('product_type')->nullable();
             $table->string('payment_method');
-            $table->integer('quantity')->default(1);
             $table->decimal('total_price', 10, 2);
+            $table->decimal('tax', 10, 2)->nullable();
+            $table->decimal('discount', 10, 2)->nullable();
             $table->string('status')->default('pending');
             $table->timestamps();
-            $table->index(['task_id','user_detail_id','product_code','created_at'], 'transactions_index');
+            $table->index(['user_detail_id','product_code','created_at'], 'transactions_index');
+        });
+
+        Schema::create('order_item', function (Blueprint $table) {
+              $table->string('order_item_id')->primary();
+              $table->string('order_id');
+              $table->string('task_id')->nullable();
+              $table->string('product_code');
+              $table->string('product_type');
+              $table->string('status')->nullable();
+              $table->timestamps();
+              $table->index(['task_id','order_id','task_detail_id','product_code','created_at'], 'order_item_index');
         });
     }
 

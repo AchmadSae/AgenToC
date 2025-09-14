@@ -3,6 +3,7 @@
 namespace App\Services\Impl;
 
 use App\Models\Users\User;
+use App\Util\EmailUtil;
 use Illuminate\Support\Facades\Log;
 use App\Helpers\Constant;
 use App\Helpers\GenerateId;
@@ -26,9 +27,11 @@ use Throwable;
 class TransactionImpl implements TransactionsInterface
 {
     protected AuthInterface $authService;
-      public function __construct(AuthInterface $authService)
+    protected EmailUtil $emailUtil;
+      public function __construct(AuthInterface $authService, EmailUtil $emailUtil)
       {
             $this->authService = $authService;
+            $this->emailUtil = $emailUtil;
       }
 
       /**
@@ -146,7 +149,7 @@ class TransactionImpl implements TransactionsInterface
                   DB::rollBack();
                 DB::rollBack();
                 #delete related user
-                  $this->authService->deleteRelatedUser($user_detail_id);
+                $this->authService->deleteRelatedUser($user_detail_id);
                 throw new InternalErrorException($th->getMessage());
           }
           if (!$status) {
@@ -158,24 +161,6 @@ class TransactionImpl implements TransactionsInterface
                 ];
           }
           DB::commit();
-          #send email receipt to user
-          $bank_receiver = GlobalParam::where("code", "=", 'TRANS_BANK')->value("value");
-          $care_number = GlobalParam::where("code", "=", 'TRANS_CARE_NUMBER')->value("value");
-          $company_email = GlobalParam::where("code", "=", 'COMPANY_EMAIL')->value("value");
-          $company_website = GlobalParam::where("code", "=", 'COMPANY_WEBSITE')->value("value");
-          $dataReceipt = [
-                'name' => $data['full_name'],
-                'order_id' => $orders->order_id,
-                'product_name' => $orders->product_name,
-                'total_price' => $orders->total_price,
-                'price' => $data['price'],
-                'bank_receiver' => $bank_receiver,
-                'care_number' => $care_number,
-                'company_email' => $company_email,
-                'company_website' => $company_website,
-                'ordered_at' => $orders->created_at
-          ];
-          Mail::to($data['email'])->send(new Receipt($dataReceipt));
         return [
             'status' => true,
               'message' => 'Transaction checkout success',
